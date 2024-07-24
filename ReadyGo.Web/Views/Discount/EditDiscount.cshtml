@@ -1,0 +1,374 @@
+﻿@model ReadyGo.Domain.Entities.Discount
+@{
+    var view = ViewBag.View;
+    ViewData["Title"] = view + " Discount";
+    var customerRule = false;
+    var status = Model.IsActive ? 1 : 0;
+    var statusText = Model.IsActive ? "Disable" : "Enable";
+    var maxPrice = ViewBag.Price;
+}
+@section Styles{
+    <link href="~/lib/switchery/switchery.min.css" rel="stylesheet" />
+    <style>
+        div.scroll {
+            margin: 4px, 4px;
+            padding: 4px;
+            height: 200px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            text-align: justify;
+        }
+
+        .dropdown-menu.menu-scroll {
+            max-height: 200px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        label.error {
+            color: #dc3545 !important;
+        }
+    </style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h2><a onclick="history.back()"><i class="fa fa-angle-left font-weight-bold" style="font-size:22px"></i></a> @ViewData["Title"]</h2>
+                    </div>
+                    @if (view == "Edit")
+                    {
+                        <div class="col-md-6 submit-btn" style="padding:0px">
+                            <button class="btn btn-default" style="margin:0px" onclick="UpdateDiscount()">Update Discount</button>
+                        </div>
+                    }
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row card" style="padding:2%;border:1px solid #ddd; border-radius:3px">
+                    <form id="ApplyDiscountForm" style="width:100%" class="form-horizontal">
+                        <input type="hidden" asp-for="Id" />
+                        @if (Model.Customer != null)
+                        {
+                            customerRule = true;
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="row form-group">
+                                        <div class="col-md-10 col-sm-10">
+                                            <label>Location: </label>
+                                            <input type="text" disabled asp-for="Customer.Route.Name" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row form-group">
+                                        <div class="col-md-10 col-sm-10">
+                                            <label>Business Name: </label>                                         
+                                                <input type="text" id="customer" name="customer" disabled value="@Model.Customer.BusinessName" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.Product != null)
+                        {
+                            if (Model.Customer != null)
+                            {
+                                <div class="row">
+                                    <div class="col-md-6">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="col-md-10" style="text-align:right">
+                                            <input type="checkbox" name="hasProduct" id="AddProduct" checked disabled /><span> Add Specific Product</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="row form-group">
+                                        <div class="col-md-10 col-sm-10">
+                                            <label>Product: </label>
+                                            @if (Model.Product.VariantOf != null)
+                                            {
+                                                <input name="product" disabled id="product" value="@Model.Product.VariantOf.Name" class="form-control" />
+                                            }
+                                            else
+                                            {
+                                                <input name="product" disabled id="product" value="@Model.Product.Name" class="form-control" />
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row form-group">
+                                        <div class="col-md-10 col-sm-10">
+                                            <label>Variant: </label>
+                                            @if (Model.Product.VariantOf != null)
+                                            {
+                                                <input disabled id="variant" name="variant" value="@Model.Product.Name" class="form-control" />
+                                            }
+                                            else
+                                            {
+                                                <input disabled id="variant" name="variant" value="---" class="form-control" />
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.Route != null)
+                        {
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="row form-group">
+                                        <div class="col-md-10 col-sm-10">
+                                            <label>Route: </label>
+                                            <input type="text" disabled asp-for="Route.Name" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row form-group">
+                                        <div class="col-md-10 col-sm-10">
+                                            <label>Salesperson: </label>
+                                            <input type="text" id="salesperson" name="salesperson" disabled value="@ViewBag.SalesPerson" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <input type="hidden" value="CustomerRule" name="rule" />
+                        <br />
+                        <div class="clearfix"></div>
+                        <hr style="width:100%" />
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row form-group">
+                                    <div class="col-md-10 col-sm-10">
+                                        <label class="required">Discount: </label>
+                                        @if (view == "Edit")
+                                        {
+                                            if (Model.IsPercentage)
+                                            {
+                                                <span style="float:right">
+                                                    <input type="checkbox" name="percentage" id="IsPercentage" checked /><span> IsPercentage</span>
+                                                </span>
+                                                <input type="number" dir="rtl" required asp-for="DiscountValue" min="0" max="99" class="percentage form-control text-right" />
+                                                <span asp-validation-for="DiscountValue" class="text-danger"></span>
+                                            }
+                                            else
+                                            {
+                                                <span style="float:right">
+                                                    <input type="checkbox" name="percentage" id="IsPercentage" /><span> IsPercentage</span>
+                                                </span>
+                                                <input type="number" dir="rtl" required asp-for="DiscountValue" min="0" class="form-control text-right" />
+                                                <span asp-validation-for="DiscountValue" class="text-danger"></span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (Model.IsPercentage)
+                                            {
+                                                <span style="float:right">
+                                                    <input type="checkbox" name="percentage" id="IsPercentage" checked disabled /><span> IsPercentage</span>
+                                                </span>
+                                                <input type="number" dir="rtl" required name="discount" asp-for="DiscountValue" disabled id="discount" min="0" max="99" class="percentage form-control text-right" />
+                                            }
+                                            else
+                                            {
+                                                <span style="float:right">
+                                                    <input type="checkbox" name="percentage" id="IsPercentage" disabled /><span> IsPercentage</span>
+                                                </span>
+                                                <input type="number" dir="rtl" required name="discount" asp-for="DiscountValue" disabled id="discount" min="0" class="form-control text-right" />
+                                            }
+                                        }
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                @if (view == "Detail")
+                {
+                    <div class="card" style="padding:10px">
+                        <div class="row">
+                            <div class="col-md-6" style="border: 1px solid #e5e5e5;padding:10px">
+                                <div class="col-md-6">
+                                    <h2>Enable/Disable:</h2>
+                                </div>
+                                <div class="col-md-6" style="text-align:right;padding-top:10px">
+                                    <input type="hidden" value="0" name="Status" />
+                                    <input type="checkbox" name="Status" value="@status" onchange="ChangeStatus('@Model.Id', '@statusText')" class="js-switch" checked />
+                                </div>
+                            </div>
+                            <div class="col-md-6" style="border: 1px solid #e5e5e5;padding:10px">
+                                <div class="col-md-6">
+                                    <h2>Actions (Delete & Edit):</h2>
+                                </div>
+                                <div class="col-md-6">
+                                    <a class="btn btn-outline-danger" onclick="DeleteDiscount('@Model.Id')" style="margin-top:5px;float:right"><i class="fa fa-trash"></i></a>
+                                    <a class="btn btn-default" href="/Discount/EditDiscount/@Model.Id" style="margin-top:5px;float:right"><i class="fa fa-edit"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@if (Model.Product != null)
+{
+    <input type="hidden" id="price" value="@maxPrice" />
+}
+@section scripts{
+    <script src="~/js/ValidationScript.min.js"></script>
+    <script src="~/js/DiscountScript.js"></script>
+    <script src="~/lib/switchery/switchery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#IsPercentage").change(function () {
+                if ($("#IsPercentage").is(":checked")) {
+                    $("#DiscountValue").attr("max", "99").addClass("percentage")
+                }
+                else {
+                    if ($("#price").val() != "") {
+                        $("#DiscountValue").attr("max", $("#price").val()).removeClass("percentage")
+                    }
+                    else
+                        $("#DiscountValue").removeAttr("max").removeClass("percentage")
+                }
+                $("#DiscountValue").val("");
+                $("#discount-error").html("");
+            })
+            $('input[type=checkbox]').each(function () {
+                if ($(this).val() == 0)
+                    $(this).click()
+            });
+            $('body').delegate("#DiscountValue", "change keydown", function (e) {
+                if (e.keyCode != 8 && (e.keyCode == 109 || this.value.length > 3 || e.keyCode == 110)) {
+                    e.preventDefault()
+                    if (parseInt(this.value) > 9999)
+                        this.value = 9999;
+                }
+            })
+            UpdateDiscount = () => {
+                if ($("#ApplyDiscountForm").valid()) {
+                    var form = $("#ApplyDiscountForm").serialize();
+                    swal({
+                        text: `Are you sure, you want to update this discount?`,
+                        icon: "warning",
+                        buttons: true,
+                        dangerMode: true,
+                    }).then((Ok) => {
+                        if (Ok) {
+                            $.ajax({
+                                url: '/Discount/EditDiscount',
+                                method: 'POST',
+                                type: 'post',
+                                beforeSend: LoadingSpinner(),
+                                data: form,
+                                success: function (response) {
+                                    swal.close();
+                                    swal({
+                                        title: 'Success',
+                                        text: response.message,
+                                        icon: "success",
+                                        closeOnClickOutside: false
+                                    }).then((ok) => {
+                                        if (ok)
+                                            window.location.href = '/Discount/Overview'
+                                    })
+                                },
+                                error: function (err) {
+                                    ErrorNotification(err.responseJSON.message)
+                                }
+                            })
+                        }
+                    });
+                }
+            }
+            DeleteDiscount = (id) => {
+                swal({
+                    text: "Are you sure, you want to delete this discount setup.",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                }).then((OK) => {
+                    if (OK) {
+                        $.ajax({
+                            url: '/Discount/DeleteDiscount',
+                            type: 'DELETE',
+                            method: 'delete',
+                            beforeSend: LoadingSpinner(),
+                            data: { id: id },
+                            success: function (response) {
+                                swal.close();
+                                swal({
+                                    title: 'Success',
+                                    text: response.message,
+                                    icon: "success",
+                                    closeOnClickOutside: false
+                                }).then((ok) => {
+                                    if (ok)
+                                        window.location.href='/Discount/Overview'
+                                })
+                            },
+                            error: function (err) {
+                                ErrorNotification(err.responseJSON.message)
+                            }
+                        })
+                    }
+                })
+            }
+            ChangeStatus = (id, status) => {
+                let txt = `Are you sure. Do you want to ${status} this discount?`;
+                swal({
+                    text: txt,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                }).then((willDelete) => {
+                    if (willDelete) {
+                        $.ajax({
+                            url: '/Discount/ChangeStatus',
+                            method: 'PUT',
+                            type: 'put',
+                            data: { id: id },
+                            beforeSend: LoadingSpinner(),
+                            success: function (response) {
+                                swal.close();
+                                swal({
+                                    title: 'Success',
+                                    text: response.message,
+                                    icon: "success",
+                                    closeOnClickOutside: false
+                                }).then((ok) => {
+                                    if (ok)
+                                        window.location.reload();
+                                })
+                            },
+                            error: function (err) {
+                                ErrorNotificaton(err.responseJSON.message)
+                            }
+                        })
+                    }
+                    else {
+                        window.location.reload();
+                    }
+                });
+            }
+        })
+    </script>
+}
+
+
+
+

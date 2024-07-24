@@ -1,0 +1,156 @@
+﻿@model ReadyGo.Domain.Entities.ViewModels.CustomerInfoViewModel
+<div class="card-header">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Customer Details</h2>
+        </div>
+    </div>
+</div>
+<div class="card-body">
+    <div class="row">
+        <div class="profile-image">
+            <div class="col-md-10" style="text-align: -webkit-center">
+                <div class="square-box">
+                    <div class="square-content">
+                        <div id="ChangeDP" class="imageContainer img-thumbnail img-circle user-image-details">
+                            @if (Model.Image != null)
+                            {
+                                <img src="data:image;base64,@Convert.ToBase64String(Model.Image.File)" id="ProfilePic" class="inner-img">
+                            }
+                            else
+                            {
+                                <img src="~/resource_files/default_user.jpg" id="ProfilePic" class="inner-img">
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="user-info">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row form-group">
+                        <label class="col-md-12 col-sm-12 col-xs-12 ">
+                            Business Name
+                        </label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="text" disabled class="form-control has-feedback-left" asp-for="BusinessName" />
+                            <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row form-group">
+                        <label class="col-md-12 col-sm-12 col-xs-12 ">
+                            Route
+                        </label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="text" disabled class="form-control has-feedback-left" asp-for="RouteName" />
+                            <i class="fa fa-map-signs form-control-feedback left" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row form-group">
+                        <label class="col-md-12 col-sm-12 col-xs-12 ">
+                            Customer Name
+                        </label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="email" disabled class="form-control has-feedback-left" readonly asp-for="Name" />
+                            <i class="fa fa-envelope form-control-feedback left" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row form-group">
+                        <label class="col-md-12 col-sm-12 col-xs-12 ">
+                            Address Line 1
+                        </label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="text" disabled data-inputmask="'mask': '+\\929999999999'" class="form-control has-feedback-left" asp-for="Address1" />
+                            <i class="fa fa-phone form-control-feedback left" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row form-group">
+                        <label class="col-md-12 col-sm-12 col-xs-12 ">
+                            Email
+                        </label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="text" disabled class="form-control has-feedback-left" asp-for="Email" />
+                            <i class="fa fa-envelope form-control-feedback left" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row form-group">
+                        <label class="col-md-12 col-sm-12 col-xs-12 ">
+                            Address Line 2
+                        </label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="text" disabled class="form-control has-feedback-left" asp-for="Address2" />
+                            <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row form-group">
+                        <label class="col-md-12 col-sm-12 col-xs-12 ">
+                            CNIC
+                        </label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="text" disabled class="form-control has-feedback-left" asp-for="CNIC" />
+                            <i class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row form-group">
+                        <label class="col-md-12 col-sm-12 col-xs-12 ">
+                            City
+                        </label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="text" disabled class="form-control has-feedback-left" asp-for="City" />
+                            <i class="fa fa-globe form-control-feedback left" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row form-group">
+                        <label class="col-md-12 col-sm-12 col-xs-12 ">
+                            Mobile Number
+                        </label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="text" disabled class="form-control has-feedback-left" asp-for="PhoneNumber" />
+                            <i class="fa fa-phone form-control-feedback left" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row form-group">
+                        <label class="col-md-12 col-sm-12 col-xs-12 ">
+                            Province
+                        </label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="text" disabled class="form-control has-feedback-left" asp-for="Province" />
+                            <i class="fa fa-globe form-control-feedback left" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

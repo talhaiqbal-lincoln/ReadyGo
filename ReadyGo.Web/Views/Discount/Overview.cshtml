@@ -1,0 +1,249 @@
+﻿
+@{
+    ViewData["Title"] = " Discount Overview";
+}
+@section Styles{ 
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet"/>
+}
+<div class="clearfix"></div>
+<div class="row importUser">
+    <a class="btn btn-default" asp-action="CustomerRule" asp-controller="Discount">
+        Customer Rule
+    </a>
+    <a class="btn btn-default" asp-action="ProductRule" asp-controller="Discount">
+        Product Rule
+    </a>
+    @*<a class="btn btn-default" asp-action="RouteRule" asp-controller="Discount">
+        Route Rule
+    </a>*@
+</div>
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Discount Setup Information</h2>
+                <div class="nav navbar-right panel_toolbox">
+                    <input class='form-control custom-search' placeholder='Type and press enter to search' type="search" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content table-responsive">
+                <table class="table table-striped table-bordered table-hover " id="discountOverviewTable">
+                    <thead>
+                        <tr>
+                            <th>Customer Locations</th>
+                            <th>Business Name</th>
+                            <th>Product Name</th>
+                            <th>Discount</th>
+                            <th style="max-width:105px">
+                                <div class='dropdown'>
+                                    <a class='dropdown-toggle' data-toggle='dropdown'><span>Active Status</span><i style="float:right;opacity:.5;margin-top:3px" class='fa fa-filter'></i></a>
+                                    <ul class='dropdown-menu'>
+                                        <li class='dropdown-item' onclick="FilterDiscount('All')"><a>All Discounts</a></li>
+                                        <li class='dropdown-item' onclick="FilterDiscount('Active')"><a>Active</a></li>
+                                        <li class='dropdown-item' onclick="FilterDiscount('InActive')"><a>InActive</a></li>
+                                    </ul>
+                                </div>
+                            </th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            window.onpageshow = function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            };
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+                title: '<b>Search by</b><ul><li>Customer location</li><li>Business Name</li><li>Product name</li></ul>',
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            var searchQuery = ''; var status = 'All';
+            var discountDt = $("#discountOverviewTable").DataTable({
+                dom: "frt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                responsive: true,
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No matching results found'
+                },
+                order: [0, "asc"],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '/Discount/GetDiscount',
+                    type: "POST",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.status = status;
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: 'customerLocation'
+                    },
+                    {
+                        data: 'customerName'
+                    },
+                    {
+                        data: {
+                            productName: 'productName', category: 'category'
+                        },
+                        render: function (data) {
+                            if (data.productName != "---")
+                                return `${data.category} - ${data.productName}`;
+                            else
+                                return data.productName;
+                        }
+                    },
+                    //{ data: 'routeName' },
+                    {
+                        data: { discount: 'discount', isPercentage: 'isPercentage' },
+                        render: function (data) {
+                            if (data.isPercentage) {
+                                return data.discount + "%";
+                            }
+                            else {
+                                return "Rs: " + data.discount + "/-";
+                            }
+                        },
+                        className: "text-right",
+                    },
+                    {
+                        data: 'isActive',
+                        sortable: false,
+                        render: function (data) {
+                            return data == true ? `<b class="activeStatus"><i class="fa fa-check-circle"></i></b>` : `<b class="inActiveStatus"><i class="fa fa-times-circle"></b>`
+                        }
+                    },
+                    {
+                        data: {
+                            id: 'id', isActive: 'isActive'
+                        },
+                        sortable: false,
+                        render: function (data) {
+                            let text = "Enable";
+                            if (data.isActive) {
+                                text = "Disable";
+                            }
+                            return `<div class='dropdown'>
+                                            <a class='dropdown-toggle actionBtn' data-toggle='dropdown'>
+                                                <i class='fa fa-ellipsis-v icons' aria-hidden='true'></i>
+                                            </a>
+                                            <ul class='dropdown-menu' id='ActionLink'>
+                                               <li onclick='EditDiscount("${data.id}")' class='dropdown-item'>
+                                                    <a>Edit</a>
+                                                </li>
+                                                <li onclick='DeleteDiscount("${data.id}")' class='dropdown-item'>
+                                                    <a>Delete</a>
+                                                </li>
+                                                <li onclick='ChangeStatus("${data.id}","${text}")' class='dropdown-item'>
+                                                    <a>${text}</a>
+                                                </li>
+                                            </ul>
+                                        </div>`;
+                        }
+                    }
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    row.title = "Click to view details."
+                    $('[data-toggle="tooltip"]', row).tooltip();
+                }
+            });
+            
+            searchQuery = $(".dataTables_filter input").val();
+            $(".custom-search").val(searchQuery);
+
+            $(".custom-search").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    discountDt.search(this.value).draw();
+                }
+            });
+            $('input[type=search]').on('search', function () {
+                discountDt.search("").draw();
+            });
+
+            $('#discountOverviewTable tbody').on('click', 'tr td:not(:last-child)', function () {
+                var data = discountDt.row($(this).parent()).data();
+                window.location.href = `/Discount/DiscountDetail/${data.id}`;
+            });
+            EditDiscount = (id) => window.location.href = '/Discount/EditDiscount?id=' + id;
+            DeleteDiscount = (id) => {
+                swal({
+                    text: "Are you sure, you want to delete this discount setup.",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                }).then((OK) => {
+                    if (OK) {
+                        $.ajax({
+                            url: '/Discount/DeleteDiscount',
+                            type: 'DELETE',
+                            method: 'delete',
+                            data: { id: id },
+                            success: function (response) {
+                                SuccessNotification(response.message);
+                                discountDt.ajax.reload();
+                            },
+                            error: function (err) {
+                                ErrorNotification(err.responseJSON.message)
+                            }
+                        })
+                    }
+                })
+            }
+            ChangeStatus = (id, status) => {
+                let txt = `Are you sure. Do you want to ${status} this discount?`;
+                swal({
+                    text: txt,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                }).then((willDelete) => {
+                    if (willDelete) {
+                        $.ajax({
+                            url: '/Discount/ChangeStatus',
+                            method: 'POST',
+                            type: 'post',
+                            data: { id: id },
+                            success: function (response) {
+                                SuccessNotification(response.message)
+                                discountDt.ajax.reload();
+                            },
+                            error: function (err) {
+                                ErrorNotification(err.responseJSON.message)
+                            }
+                        })
+                    }
+                });
+            }
+            FilterDiscount = (flag) => {
+                status = flag;
+                discountDt.ajax.reload();
+            }
+        });
+    </script>
+}
+

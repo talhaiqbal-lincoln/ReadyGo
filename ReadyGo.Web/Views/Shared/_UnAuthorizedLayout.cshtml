@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LightHouse</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Font Awesome -->
+    <link href="~/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <!-- Custom Theme Style -->
+    <link href="~/css/site.min.css?j=1" rel="stylesheet">
+</head>
+<body>
+    <div>
+        <div class="login_wrapper">
+            @RenderBody()
+        </div>
+        
+    </div>
+    
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/jqueryui/jquery-ui.min.js"></script>
+    <script src="~/lib/sweetalert/sweetalert.min.js"></script>
+    <script src="~/js/site.js"></script>
+    @RenderSection("Validation", required: false)
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
+

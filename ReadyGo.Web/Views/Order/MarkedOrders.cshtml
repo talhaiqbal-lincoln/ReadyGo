@@ -1,0 +1,416 @@
+﻿@{
+    ViewData["Title"] = "Marked Orders Listing";
+}
+
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+}
+<div class="clearfix"></div>
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 dataTable-btn">
+        <button onclick="DeleteInBulk()" class="btn btn-default">
+            <i class="fa fa-trash"></i> Delete All Selected
+        </button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-6 col-md-8 col-sm-12 col-xs-12" style="padding:0px 0px 5px 10px">
+        <div class="col-lg-5 col-md-10 col-sm-8 col-xs-6" style="padding-left: 0px; cursor: pointer;">
+            <input type="text" id="dateFilterMarkOrd" class="form-control customDate" placeholder="dd/mm/yyyy" style="cursor:pointer;">
+            <span class="fa fa-calendar form-control-feedback right" aria-hidden="true" onclick="$('#dateFilterMarkOrd').focus()"></span>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6" id="clearDateFilter" style="display:none;padding-top:8px">
+            <a id="clearDateFilter"><i class="fa fa-close" style="font-size:20px"></i></a>
+        </div>
+    </div>
+    <div class="col-lg-6 col-md-4 col-sm-12 col-xs-12">
+        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+        </div>
+        <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12" style="padding:0px">
+            <select id="spId" asp-items="@(new SelectList(ViewBag.SalesPersons,"Id","Name"))" class="form-control">
+                <option value="" selected>All Salesperson</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>@ViewData["Title"]</h2>
+                <div class="nav navbar-right panel_toolbox">
+                    <input class='form-control custom-search' type="search" placeholder='Type and press enter to search' />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content table-responsive">
+                <table id="OrdersTable" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th><input id="checkAllOrders" type="checkbox" style="vertical-align:sub"> </th>
+                            <th>Order Code</th>
+                            <th>SalesPerson</th>
+                            <th>Business Name</th>
+                            <th>Gross Sale</th>
+                            <th>Inv. Discount</th>
+                            <th>Inv. Discount% </th>
+                            <th>Total Discount</th>
+                            <th>Total Discount%</th>
+                            <th>Return / Waste</th>
+                            <th>Net Sales</th>
+                            <th>Created At</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBdy">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            window.onpageshow = function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            };
+            $('#spId').select2({
+                width:'100%'
+            })
+
+
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+                title: '<b>Search by</b><ul class="tooltip-ul1"><li>Order Code</li><li>Business Name</li><li>Salesperson</li></ul>',
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            $("#dateFilterMarkOrd").datepicker({
+                dateFormat: 'dd/mm/yy',
+                maxDate: 0
+            }).val(new Date().toLocaleDateString("en-GB"));
+            var selectedOrders = false;
+            var searchQuery = ''; var dateFilterMarkOrd = '';
+             var orderTable = $('#OrdersTable').DataTable({
+                dom: "frt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                 },
+                order: [9, "desc"],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '@Url.Action("SPOrders","Order")',
+                    type: "POST",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.isMarked = true;
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: { id: 'id' },
+                        sortable: false,
+                        render: function (data) {
+                            return `<input id="${data.id}" type="checkbox" onchange="CheckSelected('order')" style="vertical-align:sub">`
+                        }
+                    },
+                    {
+                       data: { orderCode: 'orderCode' },
+                        render: function (data) {
+                            if (data.orderCode != null && data.orderCode != '') {
+                                return data.orderCode;
+                            }
+                            return "---";
+                        }
+                    },
+                    {
+                        data: 'salesPersonName'
+                    },
+                    {
+                        data: 'customerName'
+                    },
+                    {
+                          data: { gross :'gross'},
+                        render: function (data) {
+                            return data.gross.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { invoiceDiscount: 'invoiceDiscount' },
+                        render: function (data) {
+                            return data.invoiceDiscount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { invoiceDiscountPercentage: 'invoiceDiscountPercentage'},
+                        render: function (data) {
+                            return  data.invoiceDiscountPercentage;
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { totalDiscount: 'totalDiscount'},
+                        render: function (data) {
+                            return data.totalDiscount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                   
+                    {
+                        data: { totalDiscountPercentage: 'totalDiscountPercentage' },
+                        render: function (data) {
+                            return data.totalDiscountPercentage ;
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { waste : 'waste'},
+                        render: function (data) {
+                            return data.waste.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                         data: { total : 'total'},
+                        render: function (data) {
+                            return data.total.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: 'createdAt',
+                        render: function (data) {
+                            return new Date(data).toLocaleString("en-GB");
+                        },
+                    },
+                    {
+                        data: 'id',
+                        searchable: false,
+                        sortable: false,
+                        render: function (data) {
+                            return `<div class='dropdown'>
+                                        <a class='dropdown-toggle actionBtn' data-toggle='dropdown'>
+                                            <i class='fa fa-ellipsis-v icons' aria-hidden='true'></i>
+                                        </a>
+                                        <ul class='dropdown-menu' id='ActionLink'>
+                                           <li onclick="DeleteSingleOrder('${data}')" class='dropdown-item'>
+                                                <a>Delete</a>
+                                           </li>
+                                           <li onclick="UnMarkOrder('${data}')" class='dropdown-item'>
+                                                <a>Un-mark</a>
+                                           </li>
+                                        </ul>
+                                    </div>`;
+                        }
+                    }
+
+                 ],
+                 createdRow: function (row, data, dataIndex) {
+                     row.title = "Click to view details."
+                     $('[data-toggle="tooltip"]', row).tooltip();
+                 }
+
+            });
+            $('#OrdersTable').css('cursor', 'pointer');
+            searchQuery = $(".dataTables_filter input").val();
+            $(".custom-search").val(searchQuery);
+            dateFilterMarkOrd = orderTable.column(5).search();
+            $("#dateFilterMarkOrd").val(dateFilterMarkOrd);
+            $(".custom-search").val(searchQuery);
+            if (dateFilterMarkOrd != "")
+                $("#clearDateFilter").css("display", "inline");
+            $(".custom-search").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    orderTable.search(this.value).draw();
+                }
+            });
+            $("#dateFilterMarkOrd").change(function () {
+                $("#clearDateFilter").css("display", "inline");
+                orderTable.column(5).search(this.value).draw();
+            });
+
+            $('#OrdersTable tbody').on('click', 'tr td:not(:first-child,:last-child)', function () {
+                var data = orderTable.row($(this).parent()).data();
+
+                window.location.href = '@Url.Action("OrderDetails", "Order" , new {id = "ID"})'.replace("ID", data.id);
+            });
+             DeleteSingleOrder = (id) => {
+                swal({
+                    title: 'Delete Order',
+                    text: `Are you sure, you want to delete this order?`,
+                    buttons: true,
+                    icon: "error",
+                }).then((willDelete) => {
+                    if (willDelete) {
+                        DeleteOrder(id);
+                    }
+                });
+            }
+             DeleteOrder = (id) => {
+                 $.ajax({
+                     url: '@Url.Action("DeleteOrder","Order")',
+                     type: "POST",
+                     method: 'post',
+                     beforeSend: LoadingSpinner(),
+                     data: { id: id },
+                     success: function (response) {
+                         swal.close();
+                         swal({
+                             title: 'Success',
+                             text: response.message,
+                             icon: "success",
+                             closeOnClickOutside: false
+                         }).then((ok) => {
+                             if (ok)
+                                 orderTable.ajax.reload();
+                         })
+                     },
+                     error: function (err) {
+                         swal.close();
+                         ErrorNotification(err.responseJSON.message);
+                     }
+                 });
+            }
+            $("#checkAllOrders").change(function () {
+                $('#orderTableBdy input:checkbox').not(this).prop('checked', this.checked);
+            });
+            $('body').delegate('input[type="checkbox"]', 'change', function () {
+                let count = 0;
+
+                $("#orderTableBdy input:checkbox").each(function () {
+                    if ($(this).is(":checked"))
+                        count++;
+                })
+                if (count > 0)
+                    selectedOrders = true;
+                else
+                    selectedOrders = false;
+            });
+            DeleteInBulk = () => {
+                if (selectedOrders) {
+                    swal({
+                        title: 'Delete Order',
+                        text: `Are you sure, you want to delete all selected orders?`,
+                        buttons: true,
+                        icon: "error",
+                    }).then((willDelete) => {
+                        if (willDelete) {
+                            orderTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
+                                var data = this.data();
+                                if ($(`#${data.id}`).is(":checked")) {
+                                    DeleteOrder(data.id);
+                                    orderTable.ajax.reload();
+                                }
+                            })
+                            selectedOrders = false;
+                        }
+                    });
+                }
+                else {
+                    ErrorNotification("Please select atleast one order.")
+                }
+            }
+            CheckSelected = (module) => {
+                let checkBoxes = $("#orderTableBdy").find('input');
+                let flag = true;
+                for (var i = 0; i < checkBoxes.length; i++) {
+                    if (!checkBoxes[i].checked) {
+                        flag = false;
+                    }
+                }
+                if (flag == true) {
+                    $("#checkAllOrders").prop('checked', true)
+                }
+                else {
+                    $("#checkAllOrders").prop('checked', false)
+                }
+            }
+            UnMarkOrder = (id) => {
+                swal({
+                    title: 'Un-mark Order',
+                    text: `Are you sure, you want to un-mark this order?`,
+                    buttons: true,
+                    icon: "warning",
+                }).then((unMark) => {
+                    if (unMark) {
+                        $.ajax({
+                            url: '@Url.Action("UnMarkOrder","Order")',
+                            type: "POST",
+                            method: 'post',
+                            beforeSend: LoadingSpinner(),
+                            data: { id: id },
+                            success: function (response) {
+                                swal.close();
+                                swal({
+                                    title: 'Success',
+                                    text: response.message,
+                                    icon: "success",
+                                    closeOnClickOutside: false
+                                }).then((ok) => {
+                                    if (ok)
+                                        orderTable.ajax.reload();
+                                })
+                            },
+                            error: function (err) {
+                                swal.close();
+                                ErrorNotification(err.responseJSON.message);
+                            }
+                        });
+                    }
+                });
+            }
+            $("#clearDateFilter").click(function () {
+                $("#dateFilterMarkOrd").val("");
+                $("#clearDateFilter").css("display", "none");
+                orderTable.column(5).search("").draw();
+            })
+            $('input[type=search]').on('search', function () {
+                orderTable.search("").draw();
+            });
+
+            var spFilterJson = localStorage.getItem('SpFilterMarkOrder');
+            if (spFilterJson != null) {
+                $("#spId").val(orderTable.column(1).search())
+                $("#select2-spId-container").html(spFilterJson);
+                $("#select2-spId-container").attr("title", spFilterJson);
+            }
+
+            $('#spId').change(function () {
+                salesPerson = $('#spId').val();
+                localStorage.setItem('SpFilterMarkOrder', $('#spId option:selected').text())
+                orderTable.column(1).search(salesPerson).draw();
+            })
+        })
+    </script>
+}

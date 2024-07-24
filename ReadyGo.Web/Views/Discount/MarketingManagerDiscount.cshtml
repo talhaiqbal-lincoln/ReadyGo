@@ -1,0 +1,568 @@
+﻿@{ ViewData["Title"] = "MarketingManagerDiscount"; }
+
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Order Discount Information</h2>
+                @*<div class="nav navbar-right panel_toolbox">
+                    <input class='form-control custom-search' placeholder='Type and press enter to search'/>
+                </div>*@
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row">
+                    <nav class="col-md-12" style="padding:inherit">
+                        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                            <a class="nav-item nav-link active" id="nav-pending-tab" data-toggle="tab" href="#nav-pending" role="tab" aria-controls="nav-order" aria-selected="true"><h2>Pending</h2></a>
+                            <a class="nav-item nav-link" id="nav-approved-tab" data-toggle="tab" href="#nav-approved" role="tab" aria-controls="nav-payment" aria-selected="false"><h2>Approved</h2></a>
+                            <a class="nav-item nav-link" id="nav-readjust-tab" data-toggle="tab" href="#nav-re-adjust" role="tab" aria-controls="nav-route" aria-selected="false"><h2>Re-Adjusted</h2></a>
+                        </div>
+                    </nav>
+                </div>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active table-responsive" id="nav-pending" role="tabpanel" aria-labelledby="nav-order-tab">
+                        <div class="row">
+                            <div class="col-md-9">
+                            </div>
+                            <div class="col-md-3 submit-btn" style="padding:0px">
+                                <input class='form-control custom-search custom-search-pending' type="search" placeholder='Type and press enter to search' />
+                            </div>
+                        </div>
+                        <table id="PendingTable" class="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order Code</th>
+                                    <th>Salesperson</th>
+                                    <th>Business Name</th>
+                                    <th>Gross Sale</th>
+                                    <th>Inv. Discount</th>
+                                    <th>Inv. Discount%</th>
+                                    <th>Total Discount</th>
+                                    <th>Total Discount%</th>
+                                    <th>Return / Waste</th>
+                                    <th>Net Sales</th>
+                                    <th>Status</th>
+                                    <th>Remaining Balance</th>
+                                    <th>Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade table-responsive" id="nav-approved" role="tabpanel" aria-labelledby="nav-payment-tab">
+                        <div class="row">
+                            <div class="col-md-9">
+                            </div>
+                            <div class="col-md-3 submit-btn" style="padding:0px">
+                                <input class='form-control custom-search custom-search-approved' type="search" placeholder='Type and press enter to search' />
+                            </div>
+                        </div>
+                        <table id="ApprovedTable" class="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order Code</th>
+                                    <th>Salesperson</th>
+                                    <th>Business Name</th>
+                                    <th>Gross Sale</th>
+                                    <th>Inv. Discount</th>
+                                    <th>Inv. Discount %</th>
+                                    <th>Total Discount</th>
+                                    <th>Total Discount %</th>
+                                    <th>Return / Waste</th>
+                                    <th>Net Sales</th>
+                                    <th>Status</th>
+                                    <th>Remaining Balance</th>
+                                    <th>Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade table-responsive" id="nav-re-adjust" role="tabpanel" aria-labelledby="nav-route-tab">
+                        <div class="row">
+                            <div class="col-md-9">
+                            </div>
+                            <div class="col-md-3 submit-btn" style="padding:0px">
+                                <input class='form-control custom-search custom-search-readjust' type="search" placeholder='Type and press enter to search' />
+                            </div>
+                        </div>
+                        <table id="ReAdjustTable" class="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order Code</th>
+                                    <th>Salesperson</th>
+                                    <th>Business Name</th>
+                                    <th>Gross Sale</th>
+                                    <th>Inv. Discount</th>
+                                    <th>Inv. Discount%</th>
+                                    <th>Total Discount</th>
+                                    <th>Total Discount%</th>
+                                    <th>Return / Waste</th>
+                                    <th>Net Sales</th>
+                                    <th>Status</th>
+                                    <th>Remaining Balance</th>
+                                    <th>Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            window.onpageshow = function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            };
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+                title: '<b>Search by</b><ul class="tooltip-ul1"><li>Order Code</li><li>Business Name</li><li>Salesperson</li></ul>',
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                localStorage.setItem('activeTabMm', $(e.target).attr('href'));
+            });
+            var activeTab = localStorage.getItem('activeTabMm');
+            if (activeTab) {
+                $('#nav-tab a[href="' + activeTab + '"]').tab('show');
+            }
+            var searchQuery = '';
+            var PendingTable = $("#PendingTable").DataTable({
+                dom: "frt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                responsive: true,
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No matching results found'
+                },
+                order: [10, "asc"],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '/Discount/GetPending',
+                    type: "POST",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.role = 'MarketingManager';
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                     {
+                        data: { orderCode: 'orderCode' },
+                        render: function (data) {
+                            if (data.orderCode != null && data.orderCode != '') {
+                                return data.orderCode;
+                            }
+                            return "---";
+                        }
+                    },
+                    {
+                        data: 'salesPersonName'
+                    },
+                    {
+                        data: 'customerName'
+                    },
+                    {
+                        data: { gross: 'gross' },
+                        render: function (data) {
+                            return data.gross.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                     {
+                        data: { invoiceDiscount: 'invoiceDiscount' },
+                        render: function (data) {
+                            return data.invoiceDiscount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { invoiceDiscountPercentage: 'invoiceDiscountPercentage'},
+                        render: function (data) {
+                            return  data.invoiceDiscountPercentage;
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { totalDiscount: 'totalDiscount'},
+                        render: function (data) {
+                            return data.totalDiscount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                   
+                    {
+                        data: { totalDiscountPercentage: 'totalDiscountPercentage' },
+                        render: function (data) {
+                            return data.totalDiscountPercentage ;
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                     {
+                        data: { return : 'waste'},
+                        render: function (data) {
+                            return data.waste.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { total: 'total' },
+                        render: function (data) {
+                            return data.total.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: 'status',
+                        sortable: false,
+                        render: function (data) {
+                            return `<span style="color:orange"><b>${data}</b></span>`;
+                        },
+                        className: "text-right" ,
+                    },
+                    {
+                        data: { credit: 'credit' },
+                        render: function (data) {
+                            return data.credit.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: 'createdAt',
+                        render: function (data) {
+                            return new Date(data).toLocaleString();
+                        }
+                    },
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    row.title = "Click to view details."
+                    $('[data-toggle="tooltip"]', row).tooltip();
+                }
+            });
+
+            var ApprovedTable = $("#ApprovedTable").DataTable({
+                dom: "frt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                responsive: true,
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No matching results found'
+                },
+                order: [10, "asc"],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '/Discount/GetApproved',
+                    type: "POST",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.role = 'MarketingManager';
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: { orderCode: 'orderCode' },
+                        render: function (data) {
+                            if (data.orderCode != null && data.orderCode != '') {
+                                return data.orderCode;
+                            }
+                            return "---";
+                        }
+                    },
+                    {
+                        data: 'salesPersonName'
+                    },
+                    {
+                        data: 'customerName'
+                    },
+                    {
+                        data: { gross: 'gross' },
+                        render: function (data) {
+                            return data.gross.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                     {
+                        data: { invoiceDiscount: 'invoiceDiscount' },
+                        render: function (data) {
+                            return data.invoiceDiscount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { invoiceDiscountPercentage: 'invoiceDiscountPercentage'},
+                        render: function (data) {
+                            return  data.invoiceDiscountPercentage;
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { totalDiscount: 'totalDiscount'},
+                        render: function (data) {
+                            return data.totalDiscount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                   
+                    {
+                        data: { totalDiscountPercentage: 'totalDiscountPercentage' },
+                        render: function (data) {
+                            return data.totalDiscountPercentage ;
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                      {
+                        data: { return : 'waste'},
+                        render: function (data) {
+                            return data.waste.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { total: 'total' },
+                        render: function (data) {
+                            return data.total.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: 'status',
+                        sortable: false,
+                        render: function (data) {
+                            return `<span style="color:green"><b>${data}</b></span>`;
+                        },
+                        className: "text-right" ,
+                    },
+                    {
+                        data: { credit: 'credit' },
+                        render: function (data) {
+                            return data.credit.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: 'createdAt',
+                        render: function (data) {
+                            return new Date(data).toLocaleString();
+                        }
+                    },
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    row.title = "Click to view details."
+                    $('[data-toggle="tooltip"]', row).tooltip();
+                }
+            });
+
+            var ReAdjustedTable = $("#ReAdjustTable").DataTable({
+                dom: "frt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                responsive: true,
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No matching results found'
+                },
+                order: [10, "asc"],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '/Discount/GetReAdjusted',
+                    type: "POST",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.role = 'MarketingManager';
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                   {
+                        data: { orderCode: 'orderCode' },
+                        render: function (data) {
+                            if (data.orderCode != null && data.orderCode != '') {
+                                return data.orderCode;
+                            }
+                            return "---";
+                        }
+                    },
+                    {
+                        data: 'salesPersonName'
+                    },
+                    {
+                        data: 'customerName'
+                    },
+                    {
+                        data: { gross: 'gross' },
+                        render: function (data) {
+                            return data.gross.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                      {
+                        data: { invoiceDiscount: 'invoiceDiscount' },
+                        render: function (data) {
+                            return data.invoiceDiscount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { invoiceDiscountPercentage: 'invoiceDiscountPercentage'},
+                        render: function (data) {
+                            return  data.invoiceDiscountPercentage;
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { totalDiscount: 'totalDiscount'},
+                        render: function (data) {
+                            return data.totalDiscount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                   
+                    {
+                        data: { totalDiscountPercentage: 'totalDiscountPercentage' },
+                        render: function (data) {
+                            return data.totalDiscountPercentage ;
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                   {
+                        data: { return : 'waste'},
+                        render: function (data) {
+                            return data.waste.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: { total: 'total' },
+                        render: function (data) {
+                            return data.total.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: 'status',
+                        sortable: false,
+                        render: function (data) {
+                            return `<span style="color:red"><b>${data}</b></span>`;
+                        },
+                        className: "text-right" ,
+                    },
+                    {
+                        data: { credit: 'credit' },
+                        render: function (data) {
+                            return data.credit.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        },
+                        searchable: false,
+                        className: "text-right",
+                    },
+                    {
+                        data: 'createdAt',
+                        render: function (data) {
+                            return new Date(data).toLocaleString();
+                        }
+                    },
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    row.title = "Click to view details."
+                    $('[data-toggle="tooltip"]', row).tooltip();
+                }
+            });
+
+            $(".custom-search-pending").val(PendingTable.search());
+            $(".custom-search-approved").val(ApprovedTable.search());
+            $(".custom-search-readjust").val(ReAdjustedTable.search());
+
+            $(".custom-search-pending").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    searchQuery = $(".custom-search-pending").val();
+                    PendingTable.search(searchQuery).draw();
+                }
+            });
+            $(".custom-search-approved").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    searchQuery = $(".custom-search-approved").val();
+                    ApprovedTable.search(searchQuery).draw();
+                }
+            });
+            $(".custom-search-readjust").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    searchQuery = $(".custom-search-readjust").val();
+                    ReAdjustedTable.search(searchQuery).draw();
+                }
+            });
+
+            $('#ReAdjustTable tbody').on('click', 'tr td', function () {
+                var data = ReAdjustedTable.row($(this).parent()).data();
+                window.location.href = '/Discount/OrderDetails/' + data.id;
+            });
+            $('#PendingTable tbody').on('click', 'tr td', function () {
+                var data = PendingTable.row($(this).parent()).data();
+                window.location.href = '/Discount/OrderDetails/' + data.id;
+            });
+            $('#ApprovedTable tbody').on('click', 'tr td', function () {
+                var data = ApprovedTable.row($(this).parent()).data();
+                window.location.href = '/Discount/OrderDetails/' + data.id;
+            });
+        });
+    </script>
+}

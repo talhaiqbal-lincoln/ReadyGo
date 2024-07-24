@@ -1,0 +1,1051 @@
+﻿@model ReadyGo.Domain.Entities.ViewModels.CustomerViewModel
+@{
+    var routes = ViewBag.Routes;
+    var view = ViewBag.flag;
+}
+<!-- Smart Wizard -->
+@section Styles{
+    <link rel="stylesheet" href="~/lib/croppie/croppie.min.css" />
+    <style>
+        .imageContainer h2 {
+            margin: 0px !important;
+        }
+    </style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2><a onclick="history.back()"><i class="fa fa-angle-left font-weight-bold" style="font-size:22px"></i></a> @ViewData["Title"]</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div id="wizard" class="form_wizard wizard_horizontal">
+                    <ul class="wizard_steps">
+                        <li>
+                            <a href="#step-1" id="step1">
+                                <span class="step_no">1</span>
+                                <span class="step_descr">
+                                    Step 1<br />
+                                    <small>Customer Information</small>
+                                </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#step-2">
+                                <span class="step_no">2</span>
+                                <span class="step_descr">
+                                    Step 2<br />
+                                    <small>Assign Salesperson</small>
+                                </span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#step-3">
+                                <span class="step_no">3</span>
+                                <span class="step_descr">
+                                    Step 3<br />
+                                    <small>Submit</small>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                    <form id="Customerform" method="post" asp-action="@ViewBag.Action" asp-controller="Customer" enctype="multipart/form-data" class="form-horizontal form-label-left">
+                        <input type="hidden" asp-for="Id" id="id" />
+
+                        <div id="step-1">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="ax-code">
+                                            AxCode
+                                        </label>
+                                        @if (string.IsNullOrEmpty(Model.AxCode))
+                                        {
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <input asp-for="AxCode" type="text" id="ax-code" class="form-control has-feedback-left">
+                                                <i class="fa fa-qrcode form-control-feedback left" aria-hidden="true"></i>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <input asp-for="AxCode" type="text" id="ax-code" readonly="readonly" class="form-control has-feedback-left">
+                                                <i class="fa fa-qrcode form-control-feedback left" aria-hidden="true"></i>
+                                            </div>
+                                        }
+                                        <div class="col-md-12">
+                                            <div class="col-md-3 col-sm-3 col-xs-12"></div>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <span asp-validation-for="AxCode" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label asp-for="BusinessName" class="control-label col-md-3 col-sm-3 col-xs-12 required" for="business-name">
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input asp-for="BusinessName" type="text" id="business-name" required="required" class="form-control has-feedback-left">
+                                            <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="col-md-3 col-sm-3 col-xs-12"></div>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <span asp-validation-for="BusinessName" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label asp-for="FirstName" class="control-label col-md-3 col-sm-3 col-xs-12">
+                                            First Name
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input asp-for="FirstName" type="text" id="first-name" class="form-control has-feedback-left">
+                                            <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="col-md-3 col-sm-3 col-xs-12"></div>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label asp-for="LastName" class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input asp-for="LastName" type="text" id="last-name" class="form-control has-feedback-left">
+                                            <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="col-md-3 col-sm-3 col-xs-12"></div>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <span asp-validation-for="LastName" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <label asp-for="Email" class="control-label col-md-3 col-sm-3 col-xs-12" for="email">
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input asp-for="Email" type="email" id="email" class="form-control has-feedback-left">
+                                            <i class="fa fa-envelope form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="col-md-3 col-sm-3 col-xs-12"></div>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <span asp-validation-for="Email" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 required">
+                                            Mobile Number
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="phonenumber" data-inputmask="'mask': '+\\929999999999'" asp-for="PhoneNumber" class="form-control has-feedback-left" onkeyup="ValidatePhone(this)" />
+                                            <i class="fa fa-phone form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="col-md-3 col-sm-3 col-xs-12"></div>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <span id="phoneNumber-error" asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 required">
+                                            CNIC
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="cnic" data-inputmask="'mask': '99999-9999999-9'" asp-for="CNIC" class="form-control has-feedback-left" onkeyup="ValidatePhone(this)" />
+                                            <i class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="col-md-3 col-sm-3 col-xs-12"></div>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <span id="cnic-error" asp-validation-for="CNIC" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <label asp-for="Address1" class="control-label col-md-3 col-sm-3 col-xs-12 required" for="address1">
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input asp-for="Address1" type="text" id="address1" required="required" class="form-control has-feedback-left">
+                                            <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="col-md-3 col-sm-3 col-xs-12"></div>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <span asp-validation-for="Address1" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label asp-for="Address2" class="control-label col-md-3 col-sm-3 col-xs-12" for="address2">
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input asp-for="Address2" type="text" id="address2" class="form-control has-feedback-left">
+                                            <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="col-md-3 col-sm-3 col-xs-12"></div>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <span asp-validation-for="Address2" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label asp-for="City" class="control-label col-md-3 col-sm-3 col-xs-12" for="city">
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input asp-for="City" type="text" id="city" class="form-control has-feedback-left">
+                                            <i class="fa fa-globe form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label asp-for="Province" class="control-label col-md-3 col-sm-3 col-xs-12" for="province">
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input asp-for="Province" type="text" id="province" class="form-control has-feedback-left">
+                                            <i class="fa fa-globe form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="col-md-3 col-sm-3 col-xs-12"></div>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <span asp-validation-for="Province" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">
+                                            Longitude/Latitude
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <div class="col-md-6" style="padding:0px">
+                                                <div class="col-md-12 col-sm-12 col-xs-12" style="padding-left:0px">
+                                                    <input asp-for="Longitude" type="number" id="longitude" placeholder="Longitute" class="form-control has-feedback-left">
+                                                    <i class="fa fa-map-marker form-control-feedback left" style="left:3px" aria-hidden="true"></i>
+                                                </div>
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <span asp-validation-for="Longitude" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6" style="padding:0px">
+                                                <div class="col-md-12 col-sm-12 col-xs-12" style="padding-right:0px">
+                                                    <input asp-for="Latitude" type="number" id="latitude" placeholder="Latitude" class="form-control has-feedback-left">
+                                                    <i class="fa fa-map-marker form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <span asp-validation-for="Latitude" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-3 col-sm-3 col-xs-12"></div>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <div class="col-md-6">
+                                                <span asp-validation-for="City" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <span asp-validation-for="City" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row formGroup profileImageContainer">
+                                        <div class="profile-image">
+                                            <div class="col-md-12" style="text-align: -webkit-center">
+                                                <div class="square-box">
+                                                    <div class="square-content">
+                                                        <div id="ChangeDP" class="imageContainer img-thumbnail img-circle user-image-details">
+                                                            @if (Model.ProfilePicture != null)
+                                                            {
+                                                                <img src="data:image;base64,@Convert.ToBase64String(Model.ProfilePicture.File)" id="ProfilePic" class="image inner-img">
+                                                            }
+                                                            else
+                                                            {
+                                                                <img src="~/resource_files/default_user.jpg" id="ProfilePic" class="image inner-img">
+                                                            }
+                                                            <div class="middle">
+                                                                <div><i class="fa fa-camera profileUpdate"></i></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div id="map" style="width: 100%; height: 372px;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="step-2">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showAxCode1">
+                                            AxCode
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showAxCode1" name="showAxCode1" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-qrcode form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showBusinessName1">
+                                            Business Name
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showBusinessName1" name="showBusinessName1" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="showFirstName1">
+                                            First Name
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showFirstName1" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showLastName1">
+                                            Last Name
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showLastName1" name="showLastName1" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showEmail1">
+                                            Email
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="email" id="showEmail1" name="showEmail1" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-envelope form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showPhonenumber1">
+                                            Mobile Number
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" class="form-control has-feedback-left" readonly name="showPhonenumber1" id="showPhonenumber1" required="" />
+                                            <i class="fa fa-phone form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showCnic1">
+                                            CNIC
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" class="form-control has-feedback-left" readonly name="showCnic" id="showCnic1" required="" />
+                                            <i class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showAddress1">
+                                            Address Line 1
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showAddress1" name="showAddress1" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showAddress2">
+                                            Address Line 2
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showAddress2" name="showAddress2" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="city1">
+                                            City
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="city1" name="city1" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-globe form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="province1">
+                                            Province
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="province1" name="province1" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-globe form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="longitude1">
+                                            Longitude/Latitude
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <div class="col-md-6" style="padding:0px">
+                                                <div class="col-md-12 col-sm-12 col-xs-12" style="padding-left:0px">
+                                                    <input type="text" id="longitude1" name="longitude1" readonly placeholder="Longitute" class="form-control has-feedback-left">
+                                                    <i class="fa fa-map-marker form-control-feedback left" style="left:3px" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6" style="padding:0px">
+                                                <div class="col-md-12 col-sm-12 col-xs-12" style="padding-right:0px">
+                                                    <input type="text" id="latitude1" name="latitude1" readonly placeholder="Latitude" class="form-control has-feedback-left">
+                                                    <i class="fa fa-map-marker form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row formGroup profileImageContainer">
+                                        <div class="profile-image">
+                                            <div class="col-md-12" style="text-align: -webkit-center">
+                                                <div class="square-box">
+                                                    <div class="square-content">
+                                                        <div class="imageContainer img-thumbnail img-circle user-image-details">
+                                                            <img src="~/resource_files/default_user.jpg" id="ProfilePic1" class="inner-img">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h2 class="text-center font-weight-bold" id="fullname"></h2>
+                                        </div>
+                                    </div>
+                                    <div class="ln_solid"></div>
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h2 class="col-md-12 text-center">Select Route</h2>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 required" for="route">
+                                                    Route
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <select asp-for="RouteId" id="route" asp-items="@(new SelectList(ViewBag.Routes,"Id","Name"))" class="form-control has-feedback-left">
+                                                        <option value="" disabled hidden selected>Select Route</option>
+                                                    </select>
+                                                    <i class="fa fa-map-signs form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="col-md-3 col-sm-3 col-xs-12"></div>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <span asp-validation-for="RouteId" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="sp">
+                                                    Salesperson
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input type="text" id="sp" value="@ViewBag.SPName" readonly placeholder="Salesperson" class="form-control has-feedback-left">
+                                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="step-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showAxCode">
+                                            AxCode
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showAxCode" name="showAxCode" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-qrcode form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showBusinessName">
+                                            Business Name
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showBusinessName" name="showBusinessName" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="showFirstName">
+                                            First Name
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showFirstName" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showLastName">
+                                            Last Name
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showLastName" name="showLastName" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showEmail">
+                                            Email
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="email" id="showEmail" name="showEmail" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-envelope form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showPhonenumber">
+                                            Mobile Number
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" class="form-control has-feedback-left" readonly name="showPhonenumber" id="showPhonenumber" required="" />
+                                            <i class="fa fa-phone form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showCnic">
+                                            CNIC
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" class="form-control has-feedback-left" readonly name="showCnic" id="showCnic" required="" />
+                                            <i class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showAddress">
+                                            Address Line 1
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showAddress" name="showAddress" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showAddressFin2">
+                                            Address Line 2
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showAddressFin2" name="showAddressFin2" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showCity">
+                                            City
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showCity" name="showCity" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-globe form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showProvince">
+                                            Province
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <input type="text" id="showProvince" name="showProvince" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-globe form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="showlongitude">
+                                            Longitude/Latitude
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <div class="col-md-6" style="padding:0px">
+                                                <div class="col-md-12 col-sm-12 col-xs-12" style="padding-left:0px">
+                                                    <input type="text" id="showlongitude" name="showlongitude" readonly placeholder="Longitute" class="form-control has-feedback-left">
+                                                    <i class="fa fa-map-marker form-control-feedback left" style="left:3px" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6" style="padding:0px">
+                                                <div class="col-md-12 col-sm-12 col-xs-12" style="padding-right:0px">
+                                                    <input type="text" id="showlatitude" name="showlatitude" readonly placeholder="Latitude" class="form-control has-feedback-left">
+                                                    <i class="fa fa-map-marker form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row formGroup profileImageContainer">
+                                        <div class="profile-image">
+                                            <div class="col-md-12" style="text-align: -webkit-center">
+                                                <div class="square-box">
+                                                    <div class="square-content">
+                                                        <div class="imageContainer img-thumbnail img-circle user-image-details">
+                                                            <img src="~/resource_files/default_user.jpg" id="ShowProfilePic" class="inner-img">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h2 class="text-center font-weight-bold" id="showfullname"></h2>
+                                        </div>
+                                    </div>
+                                    <div class="ln_solid"></div>
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h2 class="col-md-12 text-center">Selected Route</h2>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showRoute">
+                                                    Route
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input type="text" id="showRoute" name="showRoute" readonly class="form-control has-feedback-left">
+                                                    <i class="fa fa-map-signs form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showSP">
+                                                    Salesperson
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input type="text" id="showSP" name="showSP" readonly class="form-control has-feedback-left">
+                                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="file" name="file" accept=".jpg,.png,.jpeg" style="visibility:hidden" id="import" onchange="ChangePic(this)" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade bs-example-modal-sm" id="profileImageModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel2">Upload Image</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:2%">
+                <div class="row">
+                    <div id="CropContainer" class="col-md-12">
+                        <img class="my-image" id="my-image" src="~/images/theme/img.jpg" />
+                    </div>
+                    <div class="col-md-12 text-center">
+                        <button class="btn btn-default" onclick="$('#import').click()"><i class="fa fa-upload"></i> Select image</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" id="CancelChanges">Cancel</button>
+                <button type="button" id="saveCropImage" class="btn btn-default">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- End SmartWizard Content -->
+
+@section Scripts{
+    <script src="~/js/ValidationScript.min.js"></script>
+    <script src="~/lib/croppie/croppie.js"></script>
+    <script src="~/lib/jQuery-Smart-Wizard/js/jquery.smartWizard.js"></script>
+    <script src="~/lib/jquery.inputmask/inputmask.min.js"></script>
+    <script src="~/lib/jquery.inputmask/jquery.inputmask.min.js"></script>
+    <script src="~/lib/jquery.inputmask/bindings/inputmask.binding.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIB3IfoXSHA50wo_WQvLpn-CvGjafm5Cg&callback=initMap&libraries=&v=weekly"
+            async></script>
+    <script>
+        let map;
+        let lat;
+        let long;
+        let marker;
+        function initMap() {
+            if (document.getElementById("longitude").value != 0 && document.getElementById("latitude").value != 0) {
+                lat = parseFloat(document.getElementById('latitude').value, 15);
+                long = parseFloat(document.getElementById('longitude').value, 15);
+            }
+            else {
+                lat = 31.52;
+                long = 74.35;
+            }
+            uluru = { lat: lat, lng: long }
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: lat, lng: long },
+                zoom: 8,
+                streetViewControlOptions: {
+                    position: google.maps.ControlPosition.LEFT_CENTER,
+                },
+            });
+            if ((document.getElementById("longitude").value != 0 || document.getElementById("longitude").value != "")
+                && (document.getElementById("latitude").value != 0 || document.getElementById("latitude").value != "")) {
+                // The marker, positioned at Uluru
+                marker = new google.maps.Marker({
+                    position: uluru,
+                    map: map,
+                });
+            }
+            else {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                        map.setCenter(initialLocation);
+                    });
+                    marker = new google.maps.Marker({
+                        map: map,
+                    });
+                }
+            }
+
+            const locationButton = document.createElement("button");
+            locationButton.type = 'button';
+            locationButton.innerHTML = '<i class ="fa fa-map-marker" style="font-size:30px !important"></i>'
+            //locationButton.textContent = "Go to Current Location";
+            locationButton.classList.add("custom-map-control-button");
+            map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(locationButton);
+            locationButton.addEventListener("click", () => {
+                // Try HTML5 geolocation.
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const pos = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude,
+                            };
+                             map.setCenter(pos);
+                        },
+                        () => {
+                            handleLocationError(true);
+                        }
+                    );
+                } else {
+                    // Browser doesn't support Geolocation
+                    handleLocationError(false);
+                }
+            });
+
+            function handleLocationError(browserHasGeolocation) {
+
+                ErrorNotification(browserHasGeolocation
+                    ? "Please allow location access"
+                    : "Your browser doesn't support geolocation.");
+
+            }
+            google.maps.event.addListener(map, "click", function (e) {
+                lat = e.latLng.lat();
+                long = e.latLng.lng();
+                document.getElementById("latitude").value = lat;
+                document.getElementById("longitude").value = long;
+                myLatlng = new google.maps.LatLng(lat, long);
+                marker.setPosition(myLatlng);
+            });
+        }
+        $(document).ready(function () {
+             SetMarker = () => {
+                if (document.getElementById('latitude').value != null && document.getElementById('longitude').value != null) {
+                    lat = parseInt(document.getElementById('latitude').value, 10);
+                    long = parseInt(document.getElementById('longitude').value, 10);
+                    myLatlng = new google.maps.LatLng(lat, long);
+                    marker.setPosition(myLatlng);
+                    map.setCenter(myLatlng);
+                }
+                else {
+                    myLatlng = new google.maps.LatLng(lat, long);
+                    marker.setPosition(myLatlng);
+                    map.setCenter(myLatlng);
+                }
+            }
+            $('body').delegate('#longitude', 'change', function (event) {
+                SetMarker();
+            })
+            $('body').delegate('#latitude', 'change', function (event) {
+                SetMarker();
+            })
+            $("#phonenumber").keyup(function () {
+                let str = $(this).val();
+                if (parseInt(str[3]) != 3 || parseInt(str[4]) > 4) {
+                    $('#phonenumber').val("");
+                }
+            })
+            var purpose = "@view";
+            var axcode = "@Model.AxCode";
+            $('#wizard').smartWizard();
+
+            $('#wizard_verticle').smartWizard({
+                transitionEffect: 'slide'
+            });
+
+            $('.buttonNext').removeClass('btn-success').addClass('btn btn-default');
+            $('.buttonNext').type = "button";
+            $('.buttonPrevious').removeClass('btn-primary').addClass('btn btn-default');
+            $('.buttonPrevious').type = "button"
+            $('.buttonFinish').addClass('btn btn-default');
+            $('.buttonFinish').type = "submit";
+            $('.buttonFinish').css("display", "none");
+            $('.buttonFinish').html('Save');
+            $('.buttonPrevious').css("display", "none");
+
+
+            $('.buttonNext').click(function () {
+                StepCheck();
+            })
+            $('.buttonPrevious').click(function () {
+                StepCheck();
+            })
+            $('.wizard_steps a').click(function () {
+                StepCheck();
+            })
+            function StepCheck() {
+                var step = $('#wizard').smartWizard('currentStep')
+                if (step == 1 || step == 0) {
+                    $('.buttonNext').css("display", "inline")
+                    $('.buttonPrevious').css("display", "none");
+                    $('.buttonFinish').css("display", "none")
+                }
+                if (step == 2) {
+                    $('.buttonPrevious').css("display", "inline");
+                    $('.buttonNext').css("display", "inline")
+                    $('.buttonFinish').css("display", "none")
+                }
+                if (step == 3) {
+                    $('.buttonPrevious').css("display", "inline");
+                    $('.buttonNext').css("display", "none")
+                    $('.buttonFinish').css("display", "inline");
+                }
+            }
+            $('.buttonFinish').click(function () {
+                var phonenumber = $("#phonenumber").val().split('_')[0];
+                if ($('#Customerform').valid() && purpose != "View") {
+                    var fd = new FormData();
+                    files = $('#import')[0].files;
+                    fd.append("FirstName", $('#first-name').val());
+                    fd.append("LastName", $('#last-name').val());
+                    fd.append("BusinessName", $('#business-name').val());
+                    fd.append("Email", $('#email').val());
+                    fd.append("PhoneNumber", phonenumber);
+                    fd.append("RouteId", $("#route option:selected").val());
+                    fd.append("City", $('#city').val());
+                    fd.append("Province", $('#province').val());
+                    fd.append("Address1", $('#address1').val());
+                    fd.append("Address2", $('#address2').val());
+                    fd.append("Longitude", $('#longitude').val());
+                    fd.append("Latitude", $('#latitude').val());
+                    if (axcode == "")
+                        fd.append("AxCode", $('#ax-code').val());
+                    fd.append("CNIC", $('#cnic').val());
+                    if ($('#id').val() != null) {
+                        fd.append("Id", $('#id').val());
+                    }
+                    fd.append('File', files[0]);
+                    $.ajax({
+                        url: purpose == "Edit" ? "@Url.Action("EditCustomer", "Customer")" : "@Url.Action("AddCustomers","Customer")",
+                        type: "POST",
+                        method: "post",
+                        processData: false,
+                        contentType: false,
+                        beforeSend: LoadingSpinner(),
+                        data: fd,
+                        success: function (response) {
+                            swal({
+                                title: 'Success',
+                                text: response.message,
+                                icon: "success",
+                                closeOnClickOutside: false
+                            }).then((ok) => {
+                                if (ok) {
+                                    window.location.href = '@Url.Action("Index","Customer")';
+                                }
+                            })
+
+                        },
+                        error: function (err) {
+                            swal.close();
+                            if (err.responseJSON.message != null) {
+                                ErrorNotification(err.responseJSON.message)
+                            }
+                            else {
+                                var array = JSON.parse("[" + err.responseText + "]");
+                                var message = array[0][0];
+                                ErrorNotification(message);
+                            }
+                        }
+                    })
+                }
+
+            })
+            $('#route').change(function () {
+                $.ajax({
+                    url: '@Url.Action("SalesPersonName","Customer")',
+                    type: "GET",
+                    method: 'get',
+                    data: { routeId: $('#route option:selected').val() },
+                    success: function (response) {
+                        $('#sp').val(response.spName)
+                    },
+                    error: function (err) {
+                        ErrorNotification(err.responseJSON.message)
+                    }
+
+                })
+            })
+
+            $(".buttonNext")[0].onclick = null;
+            $(".buttonNext").click(function () {
+                if (!$.trim($('#emailError').html()).length) {
+                    document.getElementById('showFirstName').value = document.getElementById('first-name').value;
+                    document.getElementById('showLastName').value = document.getElementById('last-name').value;
+                    document.getElementById('showBusinessName').value = document.getElementById('business-name').value;
+                    document.getElementById('showEmail').value = document.getElementById('email').value;
+                    document.getElementById('showPhonenumber').value = document.getElementById('phonenumber').value;
+                    document.getElementById('showAddress').value = document.getElementById('address1').value;
+                    document.getElementById('showAddressFin2').value = document.getElementById('address2').value;
+                    document.getElementById('showCity').value = document.getElementById('city').value;
+                    document.getElementById('showProvince').value = document.getElementById('province').value;
+                    document.getElementById('showfullname').innerHTML = document.getElementById('first-name').value + " " + document.getElementById('last-name').value;
+                    document.getElementById('ShowProfilePic').src = document.getElementById('ProfilePic').src;
+                    document.getElementById('showSP').value = $("#sp").val();
+                    document.getElementById('showRoute').value = $("#route option:selected").text();
+                    document.getElementById('showFirstName1').value = document.getElementById('first-name').value;
+                    document.getElementById('showLastName1').value = document.getElementById('last-name').value;
+                    document.getElementById('showBusinessName1').value = document.getElementById('business-name').value;
+                    document.getElementById('showEmail1').value = document.getElementById('email').value;
+                    document.getElementById('showPhonenumber1').value = document.getElementById('phonenumber').value;
+                    document.getElementById('showAddress1').value = document.getElementById('address1').value;
+                    document.getElementById('showAddress2').value = document.getElementById('address2').value;
+                    document.getElementById('city1').value = document.getElementById('city').value;
+                    document.getElementById('province1').value = document.getElementById('province').value;
+                    document.getElementById('longitude1').value = document.getElementById('longitude').value;
+                    document.getElementById('latitude1').value = document.getElementById('latitude').value;
+                    document.getElementById('showlongitude').value = document.getElementById('longitude').value;
+                    document.getElementById('showlatitude').value = document.getElementById('latitude').value;
+                    document.getElementById('fullname').innerHTML = document.getElementById('first-name').value + " " + document.getElementById('last-name').value;
+                    document.getElementById('ProfilePic1').src = document.getElementById('ProfilePic').src;
+                    document.getElementById('showCnic1').value = document.getElementById('cnic').value;
+                    document.getElementById('showCnic').value = document.getElementById('cnic').value;
+                    if ($('#ax-code').length) {
+                        document.getElementById('showAxCode1').value = document.getElementById('ax-code').value;
+                        document.getElementById('showAxCode').value = document.getElementById('ax-code').value;
+                    }
+
+                }
+                return false;
+            });
+            $('.stepContainer').remove();
+
+            $('body').delegate('#ChangeDP', 'click', function (event) {
+                let dp = $('.imageContainer img').attr('src');
+                $('#my-image').attr('src', dp);
+                uploadCrop.croppie('bind', {
+                    url: $('#my-image').attr('src'),
+                });
+                $('#profileImageModal').modal('show');
+            })
+            $('body').delegate('#CancelChanges', 'click', function (event) {
+                $('#import').val("");
+                uploadCrop.croppie('bind', {
+                    url: $('#my-image').attr('src'),
+                });
+                $('#profileImageModal').modal('hide');
+            })
+            ChangePic = (input) => {
+                if (input.value != "") {
+                    var url = input.value;
+                    var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+                    if (input.files && input.files[0] && (ext == "png" || ext == "jpg")) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            var image = new Image();
+                            //Set the Base64 string return from FileReader as source.
+                            image.src = e.target.result;
+                            image.onload = function () {
+                                uploadCrop.croppie('bind', {
+                                    url: e.target.result
+                                });
+                                return true;
+                            };
+                        }
+                        reader.readAsDataURL(input.files[0]);
+                    }
+                    else {
+                        ErrorNotification("Please select jpg and png format pictures.");
+                        $('#img').attr('src', '~/images/default_user.jpg');
+                    }
+                }
+            }
+            var uploadCrop = $('.my-image').croppie({
+                enableExif: true,
+                viewport: {
+                    width: 300,
+                    height: 300,
+                    type: 'circle'
+                },
+                boundary: {
+                    width: 300,
+                    height: 300
+                },
+                showZoomer: false
+            });
+            $('body').delegate('.buttonCancel', 'click', function (event) {
+                window.history.back();
+            });
+            $('body').delegate('#saveCropImage', 'click', function (event) {
+                uploadCrop.croppie('result', {
+                    type: 'blob',
+                    size: {
+                        width: 300,
+                        height: 300
+                    },
+                    quality: 1
+                }).then(function (blob) {
+                    fileInputElement = document.getElementById('import')
+                    let base64Image = URL.createObjectURL(blob);
+
+                    $("#ProfilePic").attr('src', base64Image)
+
+                    let file = new File([blob], "img.png", { type: "image/png", lastModified: new Date().getTime() });
+                    let container = new DataTransfer();
+                    container.items.add(file);
+                    fileInputElement.files = container.files;
+                    $('#profileImageModal').modal('hide');
+                })
+            })
+        });
+    </script>
+}
+

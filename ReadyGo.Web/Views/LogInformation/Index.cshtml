@@ -1,0 +1,186 @@
+﻿@{
+    ViewData["Title"] = "Logs Information";
+}
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+}
+
+<div class="row">
+    <div class="col-12 dataTable-btn">
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>User Logs Information</h2>
+                <div class="nav navbar-right panel_toolbox">
+                    <input class='form-control custom-search' placeholder='Type and press enter to search' />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content table-responsive">
+                <table class="table data-table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Changed By</th>
+                            <th>Role</th>
+                            <th>Action Source</th>
+                            <th>Action</th>
+                            <th>IP Address</th>
+                            <th>CreatedAt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+                title: '<b>Search by</b><ul class="tooltip-ul1"><li>Changed by</li><li>Action Source</li><li>IP Address</li></ul>',
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            // Customize Export All Logs
+            function exportAllLogs(e, dt, button, config) {
+                swal({
+                    text: "Are you sure you want to export user logs?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                }).then((Ok) => {
+                    if (Ok) {
+                        var self = this;
+                        var oldStart = dt.settings()[0]._iDisplayStart;
+                        dt.one('preXhr', function (e, s, data) {
+                            // Just this once, load all data from the server...
+                            data.start = 0;
+                            data.length = 2147483647;
+                            dt.one('preDraw', function (e, settings) {
+                                // Call the original action function
+                                if (button[0].className.indexOf('buttons-copy') >= 0) {
+                                    $.fn.dataTable.ext.buttons.copyHtml5.action.call(self, e, dt, button, config);
+                                } else if (button[0].className.indexOf('buttons-excel') >= 0) {
+                                    $.fn.dataTable.ext.buttons.excelHtml5.available(dt, config) ?
+                                        $.fn.dataTable.ext.buttons.excelHtml5.action.call(self, e, dt, button, config) :
+                                        $.fn.dataTable.ext.buttons.excelFlash.action.call(self, e, dt, button, config);
+                                } else if (button[0].className.indexOf('buttons-csv') >= 0) {
+                                    $.fn.dataTable.ext.buttons.csvHtml5.available(dt, config) ?
+                                        $.fn.dataTable.ext.buttons.csvHtml5.action.call(self, e, dt, button, config) :
+                                        $.fn.dataTable.ext.buttons.csvFlash.action.call(self, e, dt, button, config);
+                                } else if (button[0].className.indexOf('buttons-pdf') >= 0) {
+                                    $.fn.dataTable.ext.buttons.pdfHtml5.available(dt, config) ?
+                                        $.fn.dataTable.ext.buttons.pdfHtml5.action.call(self, e, dt, button, config) :
+                                        $.fn.dataTable.ext.buttons.pdfFlash.action.call(self, e, dt, button, config);
+                                } else if (button[0].className.indexOf('buttons-print') >= 0) {
+                                    $.fn.dataTable.ext.buttons.print.action(e, dt, button, config);
+                                }
+                                dt.one('preXhr', function (e, s, data) {
+                                    // DataTables thinks the first item displayed is index 0, but we're not drawing that.
+                                    // Set the property to what it was before exporting.
+                                    settings._iDisplayStart = oldStart;
+                                    data.start = oldStart;
+                                });
+                                // Reload the grid with the original page. Otherwise, API functions like table.cell(this) don't work properly.
+                                setTimeout(dt.ajax.reload, 0);
+                                // Prevent rendering of the full data to the DOM
+                                return false;
+                            });
+                        });
+                        // Requery the server with the new one-time export settings
+                        dt.ajax.reload();
+                    }
+                });
+            }
+
+            var searchQuery = '';
+            var LogsDataTable = $('.data-table').DataTable({
+                dom: "Brt<'row'<'col-md-6 col-xs-12'i><'col-md-2 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                buttons: [
+                    {
+                        extend: "csv",
+                        className: "btn btn-default usr-btn",
+                        text: '<i class="fa fa-share-square-o"></i> Export Logs',
+                        titleAttr: 'Excel',
+                        "action": exportAllLogs
+                    }
+                ],
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No matching results found'
+                },
+                order: [5, "desc"],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '../LogInformation/GetLogs',
+                    type: "POST",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.search = searchQuery;
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: 'changedBy',
+                        sortable: true
+                    },
+                    {
+                        data: 'roleName',
+                        sortable: false
+                    },
+                    {
+                        data: 'actionSource',
+                        sortable: false
+                    },
+                    {
+                        data: 'action',
+                        sortable: false
+                    },
+                    {
+                        data: 'ipAddress',
+                        sortable: false
+                    },
+                    {
+                        data: 'createdAt',
+                        render: function (data) {
+                           return new Date(data).toLocaleString("en-GB");
+                        }
+                    },
+                ]
+
+            });
+
+            $(".dt-buttons").appendTo('.dataTable-btn');
+
+            $(".custom-search").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    searchQuery = $(".custom-search").val();
+                    LogsDataTable.ajax.reload();
+                }
+            });
+        })
+    </script>
+}

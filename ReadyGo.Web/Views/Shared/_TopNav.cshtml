@@ -1,0 +1,150 @@
+﻿@model ReadyGo.Domain.Entities.Identity.ApplicationUser
+@using ReadyGo.Service.Interfaces
+@using Microsoft.AspNetCore.Identity
+@using ReadyGo.Domain.Entities.Identity
+@inject INotificationService _notficationService;
+@inject UserManager<ApplicationUser> userManager
+@{
+    var notifications = _notficationService.UserNotifications(Model.Id);
+    var count = notifications.Where(x => x.IsRead == false).ToList().Count;
+    notifications = notifications.Take(3).ToList();
+    var FullName = Model.FirstName + " " + Model.LastName;
+    //if (FullName.Length > 10)
+    //{
+    //    FullName = FullName.Substring(0, 10) + "...";
+    //}
+}
+<div class="nav_menu">
+    <div class="nav toggle">
+        <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+    </div>
+    <nav class="nav navbar-nav">
+        <ul class=" navbar-right">
+            <li class="nav-item dropdown open" style="padding-left: 15px;">
+                <a href="javascript:;" class="user-profile dropdown-toggle" aria-haspopup="true" id="navbarDropdown" data-toggle="dropdown" aria-expanded="false">
+                    @if (Model.ProfileImage != null)
+                    {
+                        <img src="data:image;base64,@Convert.ToBase64String(Model.ProfileImage.File)" alt=""><span class="truncate">@FullName</span>
+                    }
+                    else
+                    {
+                        <img src="~/resource_files/default_user.jpg" alt="..."><span class="truncate">@FullName</span>
+                    }
+                </a>
+                <div class="dropdown-menu dropdown-usermenu pull-right" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" asp-controller="Account" asp-action="ManageProfile"> Profile</a>
+                    <a class="dropdown-item" href="javascript:;">
+                        <span class="badge bg-red pull-right">50%</span>
+                        <span>Settings</span>
+                    </a>
+                    <a class="dropdown-item" href="javascript:;">Help</a>
+                    <a class="dropdown-item logOffBtn" asp-controller="Account" asp-action="LogOff"><i class="fa fa-sign-out pull-right" style="margin-top:0px"></i> Log Out</a>
+                </div>
+            </li>
+
+            <li role="presentation" class="nav-item dropdown open">
+                <a href="javascript:;" class="dropdown-toggle info-number" id="navbarDropdown1" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-bell-o"></i>
+                    @if (count > 9)
+                    {
+                        <span class="badge bg-green" id="nCount">9+</span>
+                    }
+                    else if (count > 0 && count <= 9)
+                    {
+                        <span class="badge bg-green" id="nCount">@count</span>
+                    }
+                </a>
+                <ul class="dropdown-menu list-unstyled msg_list" role="menu" aria-labelledby="navbarDropdown1">
+                    <li class="text-right">
+                        <a onclick="MarkAll()"><i class="fa fa-check"></i> Mark all as read</a>
+                    </li>
+                    @if (notifications.Count > 0)
+                    {
+                        foreach (var notification in notifications)
+                        {
+                            var senderName = notification.Notification.CreatedBy.FirstName + " " + notification.Notification.CreatedBy.LastName;
+                            var url = notification.Notification.RedirectUrl;
+                            url = url == null ? "/Home/Index" : url;
+                            var img = notification.Notification.CreatedBy.ProfileImage != null ? "data:image;base64," + Convert.ToBase64String(notification.Notification.CreatedBy.ProfileImage.File) : "../../resource_files/default_user.jpg";
+                            var style = !notification.IsRead ? "dropdown-item notification-item" : "dropdown-item";
+                            var sName = "";
+                            if (senderName.Length > 15)
+                            {
+                                sName = senderName.Substring(0, 15) + "...";
+                            }
+                            else
+                            {
+                                sName = senderName;
+                            }
+                            <li class="nav-item" onclick="ChangeReadStatus('@notification.Id', '@notification.IsRead','@url')">
+                                <a class="@style" id="@notification.Id">
+                                    <span><img src="@img" class="img-circle" style="width:30px" /></span>
+                                    <span>
+                                        <span style="font-weight:bold;">@sName</span>
+                                        <span class="time">@_notficationService.GetTimeSpan(notification.Notification.CreatedAt)</span>
+                                    </span>
+                                    <span style="overflow-wrap: anywhere;" class="message">
+                                        @notification.Notification.Content
+                                    </span>
+                                </a>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <span class="text-center col-md-12">
+                                No notification available
+                            </span>
+                        </li>
+                    }
+                    <li class="nav-item">
+                        <div class="text-center">
+                            <a asp-action="Index" asp-controller="Notification">
+                                <strong>See All Alerts</strong>
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</div>
+<script>
+    ChangeReadStatus = (n_Id, flag, url) => {
+        if (flag == 'False') {
+            $.ajax({
+                url: "../Notification/ChangeReadStatus",
+                method: "post",
+                data: { id: n_Id },
+                success: function (response) {
+                    $(`#${n_Id}`).removeClass('notification-item');
+                    var count = parseInt($('#nCount').html());
+                    count == 1 ? $('#nCount').html("") : $('#nCount').html(count - 1);
+                    window.location.href = url;
+                    //console.log(response.message)
+                },
+                error: function (err) {
+                    //console.log(err.responseJSON.message)
+                }
+            })
+        }
+        else
+            window.location.href = url;
+    }
+    MarkAll = () => {
+        $.ajax({
+            url: "../Notification/MarkAll",
+            method: "post",
+            success: function (response) {
+                $('.msg_list a').removeClass('notification-item');
+                $('#nCount').html("");
+                console.log(response.message)
+            },
+            error: function (err) {
+                console.log(err.responseJSON.message)
+            }
+        })
+    }
+</script>

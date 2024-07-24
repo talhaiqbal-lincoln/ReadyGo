@@ -1,0 +1,199 @@
+﻿@{
+    ViewData["Title"] = "Payments Listing";
+}
+
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+}
+<div id="exportCsv">
+</div>
+
+<div class="clearfix"></div>
+<div class="row">
+    <div class="col-lg-6 col-md-8 col-sm-12 col-xs-12" style="padding:0px 0px 5px 10px">
+        <div class="col-lg-5 col-md-10 col-sm-8 col-xs-6" style="padding-left: 0px; cursor: pointer;">
+            <input type="text" id="dateFilterPayment" class="form-control customDate" placeholder="dd/mm/yyyy" style="cursor:pointer;">
+            <span class="fa fa-calendar form-control-feedback right" aria-hidden="true" onclick="$('#dateFilterPayment').focus()"></span>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6" id="clearDateFilter" style="display:none;padding-top:8px">
+            <a id="clearDateFilter"><i class="fa fa-close" style="font-size:20px"></i></a>
+        </div>
+    </div>
+    <div class="col-lg-6 col-md-8 col-sm-12 col-xs-12" style="padding:0px 0px 5px 10px">
+        <div class="col-lg-5 col-md-2 col-sm-0 col-xs-0">
+        </div>
+        <div class="col-lg-7 col-md-10 col-sm-8 col-xs-6" style="padding-left: 0px; cursor: pointer">
+            <select id="spId" asp-items="@(new SelectList(ViewBag.SalesPersons,"Id","Name"))" class="form-control">
+                <option value="" selected>All Salesperson</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>@ViewData["Title"]</h2>
+                <div class="nav navbar-right panel_toolbox">
+                    <input class='form-control custom-search' placeholder='Type and press enter to search' type="search" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content table-responsive">
+                <table id="PaymentTable" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Payment Code</th>
+                            <th>Business Name</th>
+                            <th>Salesperson</th>
+                            <th>Current Balance</th>
+                            <th>Payment Received</th>
+                            <th>Remaining Balance</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            window.onpageshow = function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            };
+            $('#spId').select2({
+                width: '100%'
+            });
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+                title: '<b>Search by</b><ul class="tooltip-ul1"><li>Payment code</li><li>Business name</li><li>Salesperson name</li></ul>',
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            $("#dateFilterPayment").datepicker({
+                dateFormat: 'dd/mm/yy',
+                maxDate: 0
+            }).val(new Date().toLocaleDateString("en-GB"));
+           var paymentTable = $("#PaymentTable").DataTable({
+                dom: "frt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                },
+                order: [6, 'desc'],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '@Url.Action("Payments","Payment")',
+                    type: "POST",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.id = '';
+                        d.isMarked = false;
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+               columns: [
+                    { data: 'code'},
+                   { data: 'customerName' },
+                   { data: 'salesPersonName' },
+                   {
+                       data: { currentBalance : 'currentBalance'},
+                         render: function (data) {
+                            return data.currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        },
+                        className: "text-right",
+                    },
+                    {
+                        data: { paymentReceived: 'paymentReceived' },
+                        render: function (data) {
+                            return data.paymentReceived.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        },
+                        className: "text-right",
+                    },
+                    {
+                        data: { newBalance : 'newBalance'},
+                         render: function (data) {
+                            return data.newBalance.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        },
+                        className: "text-right",
+                   },
+                   {
+                       data: 'createdAt',
+                       render: function (data) {
+                           return new Date(data).toLocaleString("en-GB");
+                       }
+                   }
+               ],
+               createdRow: function (row, data, dataIndex) {
+                   row.title = "Click to view details."
+                   $('[data-toggle="tooltip"]', row).tooltip();
+               }
+            })
+
+            $('#PaymentTable').css('cursor', 'pointer');
+            searchQuery = $(".dataTables_filter input").val();
+            $(".custom-search").val(searchQuery);
+            dateFilterPayment = paymentTable.column(5).search();
+            $("#dateFilterPayment").val(dateFilterPayment);
+            $(".custom-search").val(searchQuery);
+            if (dateFilterPayment != "")
+                $("#clearDateFilter").css("display", "inline");
+            $(".custom-search").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    paymentTable.search(this.value).draw();
+                }
+            });
+            $("#dateFilterPayment").change(function () {
+                $("#clearDateFilter").css("display", "inline");
+                paymentTable.column(5).search(this.value).draw();
+            });
+
+            $('#PaymentTable tbody').on('click', 'tr td:not(:last-child)', function () {
+                var data = paymentTable.row($(this).parent()).data();
+                 window.location.href = '@Url.Action("PaymentDetails", "Payment" , new {id = "ID", flag = "readonly"})'.replace("ID", data.id);
+            });
+
+            $("#clearDateFilter").click(function () {
+                $("#dateFilterPayment").val("");
+                $("#clearDateFilter").css("display", "none");
+                paymentTable.column(5).search("").draw();
+            })
+            $('input[type=search]').on('search', function () {
+                paymentTable.search("").draw();
+            });
+            var spFilterJson = localStorage.getItem('SpFilterPayment');
+            if (spFilterJson != null) {
+                $("#spId").val(paymentTable.column(1).search())
+                $("#select2-spId-container").html(spFilterJson);
+                $("#select2-spId-container").attr("title", spFilterJson);
+            }
+
+            $('#spId').change(function () {
+                salesPerson = $('#spId').val();
+                localStorage.setItem('SpFilterPayment', $('#spId option:selected').text())
+                paymentTable.column(1).search(salesPerson).draw();
+            })
+        })
+    </script>
+}

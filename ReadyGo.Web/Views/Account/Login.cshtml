@@ -1,0 +1,74 @@
+﻿@using ReadyGo.Domain.Entities.ViewModels;
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_UnAuthorizedLayout.cshtml";
+}
+<div class="animate form login_form">
+    <section class="login_content">
+        <partial name="PartialViews/_TopLogo.cshtml" />
+        <form asp-action="Login" method="post" asp-route-returnurl="@ViewBag.ReturnUrl">
+            <h1>Login Form</h1>
+            <div>
+                <input type="text" class="form-control" placeholder="Email" required="" asp-for="Email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div>
+                <div>
+                    <input type="password" id="password" class="form-control has-feedback-right" placeholder="Password" required="" asp-for="Password" />
+                    <i toggle="#password" class="fa fa-fw fa-eye form-control-feedback pass-toggle" id="toggle-password"></i>
+                </div>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            @if (ViewBag.Message != null)
+            {
+                <div>
+                    <span class="text-danger">@ViewBag.Message</span>
+                </div>
+
+            }
+
+            <div class="login-btn">
+                <input type="submit" value="Log in" class="btn btn-dark" />
+                <a id="link" class="reset_pass custom-link" asp-controller="Account" asp-action="ForgotPassword">Forgot password?</a>
+            </div>
+           
+            <div class="clearfix"></div>
+            <div class="separator">
+                <div class="clearfix"></div>
+                <br />
+                <div>
+                    <p>Copyright © @DateTime.Now.Year All Rights Reserved. LightHouse! Privacy and Terms</p>
+                </div>
+                
+            </div>
+        </form>
+        <div class="separator">
+            <div class="clearfix"></div>
+            <strong>
+                <a id="link" class=" custom-link" asp-controller="Account" asp-action="TermsPage">Terms & Conditions</a>
+            </strong>
+            <strong>
+                <a id="link" class="custom-link" asp-controller="Account" asp-action="ContactPage">Contact Us</a>
+            </strong>
+        </div>
+    </section>
+</div>
+@section Validation{
+    <script src="~/js/ValidationScript.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#toggle-password").click(function () {
+
+                $(this).toggleClass("fa-eye fa-eye-slash");
+                var input = $($(this).attr("toggle"));
+                if (input.attr("type") == "password") {
+                    input.attr("type", "text");
+                } else {
+                    input.attr("type", "password");
+                }
+            });
+        });
+    </script>
+}

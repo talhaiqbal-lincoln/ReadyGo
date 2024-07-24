@@ -1,0 +1,119 @@
+﻿@using ReadyGo.Domain.Entities
+@model IEnumerable<Configuration>
+@{ ViewData["Title"] = "DiscountConfig"; }
+<div class="clearfix"></div>
+@section Styles{
+    <style>
+        .error {
+            color: red;
+        }
+    </style>
+}
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Discount Approval Config</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="col-md-6">
+                            <h2>Discount Config</h2>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-default" id="EditDiscount" style="float:right">Edit</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row">
+                            <form id="DiscountConfig" style="width:100%" class="form-horizontal">
+                                <div class="col-md-6">
+                                    <div class="row form-group">
+                                        <div class="col-md-10">
+                                            <label class="required">Sales Manager: </label>
+                                            <input type="number" dir="rtl" id="sm-discount" required name="sm-discount" value="@Model.Where(x=>x.ConfigKey== "SalesManager_DiscountThrashHold").FirstOrDefault().Value" disabled="disabled" min="0" max="99" class="percentage form-control text-right" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row form-group">
+                                        <div class="col-md-10">
+                                            <label class="required">Marketing Manager: </label>
+                                            <input type="number" dir="rtl" id="mm-discount" required name="mm-discount" value="@Model.Where(x=>x.ConfigKey== "MarketingManager_DiscountThrashHold").FirstOrDefault().Value" disabled="disabled" min="0" max="99" class="percentage form-control text-right" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="ln_solid"></div>
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 submit-btn">
+                        <button id="SaveConfig" style="display:none" class="btn btn-default"><i class="fa fa-send"></i> Set Discount</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/js/ValidationScript.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#EditDiscount").click(function () {
+                $(".percentage").removeAttr("disabled");
+                $("#SaveConfig").css("display", "inline");
+            })
+            $("#SaveConfig").click(function () {
+                if ($("#DiscountConfig").valid()) {
+                    let smDiscount = parseInt($("#sm-discount").val());
+                    let mmDiscount = parseInt($("#mm-discount").val());
+                    if (smDiscount < mmDiscount) {
+                        swal({
+                            text: `Are you sure, you want to update the discount approval configuration.`,
+                            icon: "warning",
+                            buttons: true,
+                            dangerMode: true,
+                        }).then((willDelete) => {
+                            if (willDelete) {
+                                $(this).val(status);
+                                $.ajax({
+                                    url: '/Discount/SaveDiscountConfig',
+                                    type: "POST",
+                                    method: 'post',
+                                    data: $("#DiscountConfig").serialize(),
+                                    beforeSend: LoadingSpinner(),
+                                    success: function (response) {
+                                        swal.close();
+                                        swal({
+                                            title: 'Success',
+                                            text: response.message,
+                                            icon: "success",
+                                            closeOnClickOutside: false,
+                                        }).then((Ok) => {
+                                            window.location.reload();
+                                        })
+                                    },
+                                    error: function (err) {
+                                        swal.close();
+                                        ErrorNotification(err.responseJSON.message)
+                                    }
+
+                                })
+                            }
+                            else
+                                window.location.reload();
+                        });
+                    }
+                    else {
+                        ErrorNotification("Sales Manager discount config should be less than Marketing Manager.");
+                    }
+                }
+            })
+        })
+    </script>
+}

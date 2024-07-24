@@ -1,0 +1,608 @@
+﻿@{
+    ViewData["Title"] = "Stock Assignment";
+}
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+    <link href="~/lib/switchery/switchery.min.css" rel="stylesheet" />
+    <style>
+        .my-custom-scrollbar {
+            position: relative;
+            height: 140px;
+            overflow: auto;
+        }
+
+        .table-wrapper-scroll-y {
+            display: block;
+        }
+        
+    </style>
+}
+
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-lg-6 col-md-8 col-sm-12 col-xs-12" style="padding:0px 0px 5px 10px">
+        <div class="col-lg-5 col-md-10 col-sm-8 col-xs-6" style="padding-left:0px;cursor:pointer">
+            <input type="text" id="dateFilterStock" class="form-control customDate" placeholder="dd/mm/yyyy" style="cursor:pointer;"  >
+            <span class="fa fa-calendar form-control-feedback right" aria-hidden="true" onclick="$('#dateFilterStock').focus()"></span>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6" id="clearDateFilter" style="display:none;padding-top:8px">
+            <a id="clearDateFilter"><i class="fa fa-close" style="font-size:20px"></i></a>
+        </div>
+    </div>
+    <div class="col-6 dataTable-btn">
+        <button onclick="ImportFile()" class="btn btn-default">
+            <i class="fa fa-cloud-upload"></i> Import Stocks
+        </button>
+        <button onclick="location.href='@Url.Action("AssignStock", "Stock")'" class="btn btn-default">
+            <i class="fa fa-cubes"></i> Assign Stocks
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>@ViewData["Title"]</h2>
+                <div class="nav navbar-right panel_toolbox">
+                    <input class='form-control custom-search' id='searchFilter' placeholder='Type and press enter to search' type="search" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content table-responsive">
+                <table id="StockTable" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Route</th>
+                            <th>Salesperson</th>
+                            <th>AssignedBy</th>
+                            <th>Assigned Date</th>
+                            <th>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <span>Active Status</span>
+                                    </div>
+                                    <div class='dropdown col-md-4'>
+                                        <a class='dropdown-toggle' data-toggle='dropdown'><i style="float:right;opacity:.5;margin-top:3px" class='fa fa-filter'></i></a>
+                                        <ul class='dropdown-menu'>
+                                            <li class='dropdown-item' onclick="FilterStock('All')"><a>All Assigned</a></li>
+                                            <li class='dropdown-item' onclick="FilterStock('Active')"><a>Active</a></li>
+                                            <li class='dropdown-item' onclick="FilterStock('InActive')"><a>InActive</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Import User Modal-->
+<div class="modal fade bs-example-modal-sm" id="importStockModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel2">Import Stocks</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:2%">
+                <div class="row" style="display:flex;">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p><span style="font-size:17px">Import File</span><br />Add csv file assign stocks to salesperson.</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a class="btn btn-success" onclick="$('#import_Stocks').click()"><i class="fa fa-upload" style="color:inherit;margin-left:3px;"></i> Upload file</a>
+                                <span id="filename"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div>
+                            <span style="font-size:17px">Instruction</span>
+                            <br />
+                            <ul>
+                                <li>
+                                    Required Field
+                                    <ul>
+                                        <li>Route Name)</li>
+                                        <li>Product Sku Code</li>
+                                        <li>Vehicle Number</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    Non Required Field/Optional
+                                    <ul>
+                                        <li>Driver Name</li>
+                                    </ul>
+                                </li>
+                                <li>Total records should not be more than 1000.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <label>Download Sample File: </label>
+                            <a class="btn btn-outline-dark" href="~/resource_files/AssignStockSample.csv"><i class="fa fa-cloud-download"></i> AssignStockSample.csv</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" onclick="UploadUserInBulk(1)" class="btn btn-primary">Assign Stocks</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/Import User  Modal-->
+<!--User Detail Modal-->
+<div class="modal fade bs-example-modal-xl" id="stockDetailModal" tabindex="-1" data-backdrop="static" data-keyboard="false" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="user_ModalLabel">Stock Detail</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="usersDetailModalBody">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th colspan="6" style="text-align:center;font-size:15px" id="stockDetailTitle">Users Details</th>
+                        </tr>
+                        <tr>
+                            <th class="required">Route Name</th>
+                            <th class="required">Product Sku Code</th>
+                            <th>Quantity</th>
+                            <th class="required">Vehicle Number</th>
+                            <th>Driver Name</th>
+                            <th>Error Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockDetailBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" onclick="UploadUserInBulk(2)">
+                    <i class="fa fa-spinner fa-spin fa-fw" style="display:none"></i>Proceed
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/User Detail Modal-->
+<!--Route Modal-->
+<div class="modal fade bs-example-modal-lg" id="stock_Modal" tabindex="-1" data-backdrop="static" data-keyboard="false" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="stock_ModalLabel"></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="stockModalBody" style="padding:4%">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" id="submitButton" onclick="submitForm()">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Route Modal-->
+<input type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="visibility:hidden" id="import_Stocks" onchange="ChangeSrc(this)" />
+
+@section Validation{
+    <script src="~/js/ValidationScript.min.js"></script>
+
+}
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script src="~/lib/switchery/switchery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            window.onpageshow = function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            };
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+                title: '<b>Search by</b><ul class="tooltip-ul1"><li>Salesperson</li><li>Route</li></ul>',
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            $("#dateFilterStock").datepicker({
+                dateFormat: "dd/mm/yy",
+                maxDate: 0
+            }).val(new Date().toLocaleDateString("en-GB"));
+            var status = "All Users"; var date = new Date().toISOString().split("T")[0];
+            var activeStatus = 'All'
+            var stockTable = $('#StockTable').DataTable({
+                dom: "frt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No matching results found'
+                },
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '../Stock/AssignedStock',
+                    type: "POST",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.status = status;
+                        d.activeStatus = activeStatus;
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                bSort: false,
+                columns: [
+                    {
+                        data: 'routeName',
+                    },
+                    {
+                        data: 'spName',
+                    },
+                    {
+                        data: 'assignedBy',
+                    },
+                    {
+                        data: 'createdAt',
+                        render: function (data) {
+                            return data.split(' ')[0];
+                        }
+                    },
+                    {
+                        data: 'status',
+                        sortable: false,
+                        render: function (data) {
+                            return data == true ? `<b class="activeStatus"><i class="fa fa-check-circle"></i></b>` : `<b class="inActiveStatus"><i class="fa fa-times-circle"></b>`
+                        }
+                    },
+                    {
+                        data: {
+                            id: 'id',
+                            status: 'status'
+                        },
+                        searchable: false,
+                        render: function (data) {
+                            let txt = data.status == true ? "Disable" : "Enable";
+                            return `<div class='dropdown'>
+                                            <a class='dropdown-toggle actionBtn' data-toggle='dropdown'>
+                                                <i class='fa fa-ellipsis-v icons' aria-hidden='true' style='font-size:20px'></i>
+                                            </a>
+                                            <ul class='dropdown-menu' id='ActionLink'>
+                                                <li onclick='EditStock("${data.id}")' class='dropdown-item'>
+                                                    <a>Edit</a>
+                                                </li>
+                                                <li onclick='ChangeStatus("${data.id}","${txt}")' class='dropdown-item'>
+                                                    <a>${txt}</a>
+                                                </li>
+                                            </ul>
+                                        </div>`;
+                        }
+                    }
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    row.title = "Click to view details."
+                    $('[data-toggle="tooltip"]', row).tooltip();
+                }
+
+            });
+
+            $('#StockTable tbody').on('click', 'tr td:not(:last-child)', function () {
+                var data = stockTable.row($(this).parent()).data();
+                window.location.href = "../Stock/StockDetail/" + data.id;
+            });
+            $('#StockTable').css('cursor', 'pointer');
+            searchQuery = $(".dataTables_filter input").val();
+            $(".custom-search").val(searchQuery);
+            dateFilterStock = stockTable.column(3).search() == "" ? new Date().toLocaleDateString("en-GB") : stockTable.column(3).search();
+            $("#dateFilterStock").val(dateFilterStock);
+            $(".custom-search").val(searchQuery);
+            if (dateFilterStock != new Date().toLocaleDateString("en-GB"))
+                $("#clearDateFilter").css("display", "inline");
+            $(".custom-search").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    stockTable.search(this.value).draw();
+                }
+            });
+            $("#dateFilterStock").change(function () {
+                $("#clearDateFilter").css("display", "inline");
+                stockTable.column(3).search(this.value).draw();
+            });
+
+            FilterUser = (option) => {
+                status = option;
+                $('#status').html(status)
+                stockTable.ajax.reload();
+            }
+            EditRoute = (param,flag) => {
+                $.ajax({
+                    url: '../SalesPerson/EditSpRoute',
+                    type: "Get",
+                    method: 'get',
+                    data: { id: param },
+                    success: function (response) {
+                        $('#stock_Modal').html(response);
+                        var elem = document.querySelector('.js-switch');
+                        var init = new Switchery(elem);
+
+                        if (flag == 'readonly') {
+                            $('#RouteForm').find('input,select').attr('disabled', 'disabled')
+                            $('#RouteForm label').removeClass('required')
+                            $('#submitButton').css('display', 'none')
+                            $('#stock_ModalLabel').html("Route Details");
+                            init.disable();
+                        }
+                        else {
+                            $('#stock_ModalLabel').html("Edit Route");
+                            $('#submitButton').css('display', 'inline');
+                            init.enable();
+                        }
+                    },
+                    error: function (err) {
+                        console.log(err);
+                        ErrorNotification(err.responseJSON.message)
+                    }
+
+                })
+                $('#stock_Modal').modal("show");
+            }
+
+            ChangeStatus = (param, status) => {
+                swal({
+                    text: `Are you sure you want to ${status.toLowerCase()} this assigned stock?`,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                    .then((willDelete) => {
+                        if (willDelete) {
+                            $.ajax({
+                                url: '../Stock/ChangeStatus',
+                                type: "POST",
+                                method: 'post',
+                                data: { id: param },
+                                beforeSend: LoadingSpinner(),
+                                success: function (response) {
+                                    swal.close();
+                                    SuccessNotification(response.message);
+                                    stockTable.ajax.reload();
+                                },
+                                error: function (err) {
+                                    swal.close();
+                                    console.log(err)
+                                    ErrorNotification(err.responseJSON.message)
+                                }
+
+                            })
+                        }
+                        else {
+                            swal.close();
+                            stockTable.ajax.reload();
+                        }
+                    });
+            }
+            submitRouteForm = () => {
+                if ($("#RouteForm").valid()) {
+                    let href = "@Url.Action("EditRoute","SalesPerson")";
+
+                    var fd = new FormData();
+
+                    fd.append("Id", $('#Id').val());
+                    fd.append("Name", $('#Name').val());
+                    fd.append("SalesPersonId", $('#SalesPersonId').val());
+                    fd.append("isActive", $('#isActive').is(':checked'));
+
+                    $.ajax({
+                        url: href,
+                        type: "POST",
+                        method: "post",
+                        processData: false,
+                        contentType: false,
+                        beforeSend: LoadingSpinner(),
+                        data: fd,
+                        success: function (response) {
+                            swal.close();
+                            SuccessNotification(response.message)
+                            HideModal();
+                            stockTable.ajax.reload();
+                        },
+                        error: function (err) {
+                            swal.close();
+                                if (err.responseJSON.message != null) {
+                                    ErrorNotification(err.responseJSON.message)
+                                }
+                                else {
+                                    var array = JSON.parse("[" + err.responseText + "]");
+                                    var message = array[0][0];
+                                    ErrorNotification(message)
+                                }
+                                HideModal();
+                        }
+                    })
+
+                }
+                else {
+                    return false;
+                }
+            }
+            HideModal = () => {
+                $('#stock_Modal').modal('hide');
+            }
+            $('#SPTable tbody').on('click', 'tr td:not(:last-child)', function () {
+                var data = stockTable.row($(this).parent()).data();
+                EditRoute(data.id, 'readonly');
+            });
+            $('#UpdateSPTable tbody').on('click', 'tr td:not(:last-child)', function () {
+                var data = stockTable.row($(this).parent()).data();
+                EditRoute(data.id, 'readonly');
+            });
+
+            EditStock = (id) => {
+                window.location.href = "../Stock/EditStock/" + id;
+            }
+
+            FilterRecord = () => {
+                date = $('#dateFilterStock').val();
+                if (date == "") {
+                    date = new Date().toISOString().split("T")[0];
+                    $('#dateFilterStock').val(date);
+                }
+                stockTable.ajax.reload();
+            }
+            ChangeSrc = (obj) => {
+                let file = obj.value;
+                let fileName = file.split("\\");
+                let span = document.getElementById("filename");
+                let fileTitle = fileName[fileName.length - 1];
+                let fileExtension = fileTitle.replace(/^.*\./, '');
+                if (fileExtension != 'csv') {
+                    swal({
+                        title: "Wrong file selection",
+                        text: 'Please Select the csv file',
+                        icon: "error",
+                        dangerMode: true,
+                    })
+                    span.innerHTML = '';
+                }
+                else {
+                    span.innerHTML = fileTitle;
+                }
+            }
+            ImportFile = () => {
+                $("body").css({ 'overflow': 'hidden' });
+                $('#filename').html('');
+                $('#import_Stocks').val('');
+                $("#importStockModal").modal("show");
+            }
+
+            UploadUserInBulk = (flag) => {
+                var files;
+                var fd = new FormData();
+                $("body").css({ 'overflow': 'hidden' });
+
+                let fileName = document.getElementById("filename");
+                if (fileName.innerHTML && fileName.innerHTML != '' && flag == 1) {
+                    files = $('#import_Stocks')[0].files;
+                }
+                else if (flag == 2) {
+                    files = $('#import_Stocks')[0].files;
+                }
+
+                // Check file selected or not
+                if (files && files.length > 0) {
+
+                    fd.append('File', files[0]);
+                    fd.append('flag', flag);
+                    $.ajax({
+                        url: '@Url.Action("BulkImport", "Stock")',
+                        type: 'post',
+                        data: fd,
+                        contentType: false,
+                        processData: false,
+                        beforeSend: LoadingSpinner(),
+                        success: function (response) {
+                            swal.close();
+                            $("#importStockModal").modal("hide");
+                            $("#stockDetailModal").modal("show");
+                            $('#stockDetailTitle').html(`<div class="row">
+                                                            <div class="col-md-4" style="text-align:center">
+                                                                <span>Total Record: ${response.invaliduser + response.validUsers}</span>
+                                                            </div>
+                                                            <div class="col-md-4" style="text-align:center;color:green">
+                                                                <span>Valid Records: ${response.validUsers}</span>
+                                                            </div>
+                                                            <div class="col-md-4" style="text-align:center;color:red">
+                                                                <span>Invalid Records: ${response.invaliduser}</span>
+                                                            </div>
+                                                        </div>`);
+                            if (response.message == "Submitted") {
+                                $('#import_Stocks').val('');
+                                $("#filename").html("");
+                                $("#stockDetailModal").modal("hide");
+                                response.flag ? SuccessNotification("All valid stocks assigned to salesperson rest of them are invalid") : SuccessNotification("All stocks assigned to salesperson successfully");
+                                $("body").css({ 'overflow': 'auto' });
+                                stockTable.ajax.reload();
+                            }
+                            else {
+                                $('#stockDetailBody').empty()
+                                for (let i = 0; i < response.data.length; i++) {
+                                    let error = response.data[i].errorStatus;
+                                    let errorMsg = GetErrorMsg(error);
+                                    let color = error == "" ? "#d4edda" : error == "Deleted" ? "#fcf8e3" : "#f8d7da";
+                                    $('#stockDetailBody').append(`<tr style="background-color:${color}">
+                                                                <td>${response.data[i].routeName}</td>
+                                                                <td>${response.data[i].productSkuCode}</td>
+                                                                <td>${response.data[i].quantity}</td>
+                                                                <td>${response.data[i].vehicleNumber}</td>
+                                                                <td>${response.data[i].driverName}</td>
+                                                                <td class="errorMessageTooltip" style="cursor: pointer;" title="${errorMsg}">${error == "" ? "---" : error.length > 10 ? error.substring(0, 10) + "..." : error}</td>
+                                                               </tr>`)
+                                }
+                                $(".errorMessageTooltip").tooltip({
+                                    placement: 'right',
+                                    html: true,
+                                    template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+                                });
+                            }
+                        },
+                        error: function (err) {
+                            swal.close();
+                            $('#import_Users').val('');
+                            $("#filename").html("");
+                            $("#usersDetailModal").modal("hide");
+                            ErrorNotification(err.responseJSON.message);
+                            $("body").css({ 'overflow': 'auto' });
+                        }
+                    });
+                } else {
+                    ErrorNotification("Please select a file.");
+                }
+            }
+            FilterStock = (flag) => {
+                activeStatus = flag;
+                stockTable.ajax.reload();
+            }
+            $("#clearDateFilter").click(function () {
+                $("#dateFilterStock").val(new Date().toLocaleDateString("en-GB"));
+                $("#clearDateFilter").css("display", "none");
+                stockTable.column(3).search($("#dateFilterStock").val()).draw();
+            })
+            $('input[type=search]').on('search', function () {
+                stockTable.search("").draw();
+            });
+        })
+    </script>
+
+}

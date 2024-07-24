@@ -1,0 +1,408 @@
+﻿@{
+    ViewData["Title"] = "Salesperson Routes";
+}
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+    <link href="~/lib/jqueryui/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/lib/switchery/switchery.min.css" rel="stylesheet" />
+
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .my-custom-scrollbar {
+            position: relative;
+            height: 140px;
+            overflow: auto;
+        }
+
+        .table-wrapper-scroll-y {
+            display: block;
+        }
+        .hide_column {
+            display: none;
+        }
+
+        .select2-container--below {
+            width: 250px !important;
+        }
+        .select2-container {
+            width: 250px !important;
+        }
+    
+    </style>
+}
+<div id="exportCsv">
+</div>
+
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Salesperson Routes</h2>
+                <div class="nav navbar-right panel_toolbox">
+                    <input class='form-control custom-search' placeholder='Type and press enter to search' type="search" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content table-responsive">
+                <table id="SPTable" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Total Customers</th>
+                            <th>Route</th>
+                            <th>Temporary Route</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Route Modal-->
+<div class="modal fade bs-example-modal-lg" id="route_Modal" data-backdrop="static" data-keyboard="false" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content" style="width:915px;height:350px">
+            <div class="modal-header">
+                <h4 class="modal-title" id="route_ModalLabel"></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="routeModalBody" style="padding:4%;overflow:hidden">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" id="submitButton" onclick="submitRouteForm()">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Route Modal-->
+@section Validation{
+    <script src="~/js/ValidationScript.min.js"></script>
+}
+@section Scripts{
+    @*<script src="~/lib/jqueryui/jquery-ui.min.js"></script>*@
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+                title: '<b>Search with</b><ul class="tooltip-ul1"><li>Salesperson Name</li><li>Route</li><li>Temp Route</li></ul>',
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            var searchQuery = ''; var status = "All Users";
+            var userDataTable = $('#SPTable').DataTable({
+                dom: "frt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No matching results found'
+                },
+                order: [0, "asc"],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '../SalesPerson/SPRoutes',
+                    type: "POST",
+                    datatype: "json",
+                    method: 'post',
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: 'salesPersonName'
+                    },
+                    {
+                        data: 'customersCount',
+                        searchable: false,
+                        className: 'text-right',
+                    },
+                    {
+                        data: { routeName: 'routeName', routeTempSp:'routeTempSp'},
+                        render: function (data) {
+                            if (data.routeName != null) {
+                                var output = data.routeName;
+                                if (data.routeTempSp != null) {
+                                    output = output + " " + "(Temp. assigned to " + data.routeTempSp + ")";
+                                }
+                                return output
+                            }
+                            return "";
+                        }
+                    },
+                    {
+                        data: { tempRouteName: 'tempRouteName', tempRouteTime : 'tempRouteTime'},
+                        render: function (data) {
+                            if (data.tempRouteName != null) {
+                                var today = new Date();
+                                var date = new Date(Date.parse(data.tempRouteTime));
+                                var diff = Math.floor((date - today) / 86400000);
+                                diff += 1;
+                                var daysLeft = "";
+                                if (diff == 0) {
+                                    daysLeft = "For today";
+                                }
+                                else if (diff == 1) {
+                                    daysLeft = "For " + diff + " day";
+                                }
+                                else {
+                                    daysLeft = "For " + diff + " days";
+                                }
+                                return data.tempRouteName +" (" + daysLeft + ")";
+                            }
+                            return "";
+                        }
+                    },
+                    {
+                        data: 'isActiveRoute',
+                        sortable: false,
+                        render: function (data) {
+                            return data == true ? `<b class="activeStatus"><i class="fa fa-check-circle"></i></b>` : `<b class="inActiveStatus"><i class="fa fa-times-circle"></b>`
+                        }
+                    },
+                    {
+                        data: { salesPersonId: 'salesPersonId', isActiveRoute: 'isActiveRoute' },
+                        sortable: false,
+                        searchable: false,
+                        render: function (data) {
+                            if (data.isActive != null) {
+                                console.log(data.isActiveRoute)
+                                var statusText = "Disable"
+                                if (data.isActiveRoute == false) {
+                                    statusText = "Enable"
+                                }
+                                return `<div class='dropdown'>
+                                            <a class='dropdown-toggle actionBtn' data-toggle='dropdown'>
+                                                <i class='fa fa-ellipsis-v icons' aria-hidden='true'></i>
+                                            </a>
+                                            <ul class='dropdown-menu' id='ActionLink'>
+                                                <li onclick='EditRoute("${data.salesPersonId}","edit")' class='dropdown-item'>
+                                                    <a>Assign</a>
+                                                </li>
+                                                <li onclick='ChangeStatus("${data.salesPersonId}","${statusText}")' class='dropdown-item'>
+                                                    <a>${statusText}</a>
+                                                </li>
+                                            </ul>
+                                        </div>`;
+                            }
+                            return `<div class='dropdown'>
+                                            <a class='dropdown-toggle actionBtn' data-toggle='dropdown'>
+                                                <i class='fa fa-ellipsis-v icons' aria-hidden='true'></i>
+                                            </a>
+                                            <ul class='dropdown-menu' id='ActionLink'>
+                                                <li onclick='EditRoute("${data.salesPersonId}","edit")' class='dropdown-item'>
+                                                    <a>Assign</a>
+                                                </li>
+                                            </ul>
+                                        </div>`;
+                        }
+                    }
+                ]
+
+            });
+
+            searchQuery = $(".dataTables_filter input").val();
+            $(".custom-search").val(searchQuery);
+
+            $(".custom-search").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    userDataTable.search(this.value).draw();
+                }
+            });
+            $('input[type=search]').on('search', function () {
+                userDataTable.search("").draw();
+            });
+
+            FilterUser = (option) => {
+                status = option;
+                $('#status').html(status)
+                userDataTable.ajax.reload();
+            }
+
+            EditRoute = (param,flag) => {
+                $.ajax({
+                    url: '../SalesPerson/EditSpRoute',
+                    type: "Get",
+                    method: 'get',
+                    data: { id: param },
+                    success: function (response) {
+                        $('#routeModalBody').html(response);
+                        //var elem = document.querySelector('.js-switch');
+                        //var init = new Switchery(elem);
+
+                        if (flag == 'readonly') {
+                            $('#RouteForm').find('input,select').attr('disabled', 'disabled')
+                            $('#RouteForm label').removeClass('required')
+                            $('#submitButton').css('display', 'none')
+                            $('#route_ModalLabel').html("Salesperson Route Details");
+                          /*  init.disable();*/
+                        }
+                        else {
+                            $('#route_ModalLabel').html("Assign Route");
+                            $('#submitButton').css('display', 'inline');
+                            $("#date").css("background", "white");
+                            $('#date').datepicker({
+                                minDate: 0,
+                                dateFormat: 'mm/dd/yy',
+                                onSelect: function (value) {
+                                    $('#TempError').hide();
+                                    var assignDate = new Date(value);
+                                    console.log(assignDate);
+                                    $('#TempDate').val(assignDate);
+                                    
+                                    var dob = assignDate.getDate() + '/' + (assignDate.getMonth() + 1) + '/' + assignDate.getFullYear();
+                                    $('#date').val(dob);
+                                },
+                                closeText: 'Clear', // Text to show for "close" button
+                                onClose: function () {
+                                    var event = arguments.callee.caller.caller.arguments[0];
+                                    // If "Clear" gets clicked, then really clear it
+                                    if ($(event.delegateTarget).hasClass('ui-datepicker-close')) {
+                                        $(this).val('');
+                                    }
+                                }
+                                //onSelect: function (dateText) {
+                                //    $('#TempError').hide();
+                                //}
+                            });
+                            /*  init.enable();*/
+
+                        }
+                        $('#route_Modal').modal("show");
+                    },
+                    error: function (err) {
+                        ErrorNotification(err.responseJSON.message)
+                    }
+
+                })
+
+            }
+
+            ChangeStatus = (param, status) => {
+                swal({
+                    text: `Are you sure you want to ${status} this route?`,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                    .then((willDelete) => {
+                        if (willDelete) {
+                            $.ajax({
+                                url: '../SalesPerson/ChangeStatus',
+                                type: "POST",
+                                method: 'post',
+                                data: { id: param },
+                                success: function (response) {
+                                    SuccessNotification(response.message);
+                                    userDataTable.ajax.reload();
+                                },
+                                error: function (err) {
+                                    ErrorNotification(err.responseJSON.message)
+                                }
+
+                            })
+                        }
+                    });
+            }
+            function convertDate(oldDate) {
+                var date = new Date(oldDate);
+                var day = date.getDate();
+                day = day < 10 ? "0" + day : day;
+                var month = date.getMonth() + 1;
+                month = month < 10 ? "0" + month : month;
+                var year = date.getFullYear();
+                return year + "-" + month + "-" + day;
+            }
+            submitRouteForm = () => {
+                var form = $('#RouteForm');
+                //form.removedata("validator").removedata("unobtrusivevalidation");
+                //$.validator.unobtrusive.parse(form);
+                form.validate();
+                if (form.valid()) {
+                    let href = "@Url.Action("EditSpRoute","SalesPerson")";
+
+                    var fd = new FormData();
+
+                    fd.append("SalesPersonId", $('#SalesPersonId').val());
+                    fd.append("RouteId", $('#RouteId').val());
+                    fd.append("TempRouteId", $('#TempRouteId').val());
+                    if ($('#date').val()) {
+                        console.log($('#TempDate').val())
+                        fd.append("TemporaryAssignedTill", convertDate($('#TempDate').val()));
+                    }
+
+                    var validity = true;
+                    if ($('#TempRouteId').val()) {
+                        if (!$('#date').val()) {
+                            $('#TempError').show();
+                            validity = false;
+                        }
+                    }
+                    if (validity) {
+
+                        $.ajax({
+                            url: href,
+                            type: "POST",
+                            method: "post",
+                            processData: false,
+                            contentType: false,
+                            beforeSend: LoadingSpinner(),
+                            data: fd,
+                            success: function (response) {
+                                swal.close();
+                                SuccessNotification(response.message)
+                                HideModal();
+                                userDataTable.ajax.reload();
+                            },
+                            error: function (err) {
+                                swal.close();
+                                if (err.responseJSON.message != null) {
+                                    ErrorNotification(err.responseJSON.message)
+                                }
+                                else {
+                                    var array = JSON.parse("[" + err.responseText + "]");
+                                    var message = array[0][0];
+                                    ErrorNotification(message)
+                                }
+                                HideModal();
+                            }
+                        })
+
+                    }
+                }
+                else {
+                    $('#TempError').show()
+                    return false;
+                }
+            }
+            HideModal = () => {
+                $('#route_Modal').modal('hide');
+            }
+            $('#SPTable tbody').on('click', 'tr td:not(:last-child)', function () {
+                var data = userDataTable.row($(this).parent()).data();
+                EditRoute(data.salesPersonId, 'readonly');
+            });
+
+        })
+    </script>
+
+}

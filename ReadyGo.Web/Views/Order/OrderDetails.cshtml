@@ -1,0 +1,477 @@
+﻿@model ReadyGo.Domain.Entities.ViewModels.OrderDetailsViewModel;
+@{
+    ViewData["Title"] = "Order Details";
+
+    var Gross = Model.Gross;
+    var returnAmount = Model.Return;
+    var waste = Model.Waste + Model.Return;
+    var discount = Model.TotalDiscount;
+    var total = Gross + waste;
+    double invoiceDiscountPercentage = Model.InvoiceDiscountPercentage;
+    double invoiceDiscount = Model.InvoiceDiscount;
+    double totalDiscountPercentage = Model.TotalDiscountPercentage;
+    var finalamount = Model.Total;
+    var custBusiness = Model.BusinessName;
+}
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+    <style>
+        .card {
+            margin-top: 8px;
+        }
+
+        #editIcon {
+            font-size: 25px;
+            float: right;
+        }
+
+        .userAxStatus {
+            background-color: darkblue !important;
+            font-size: 15px
+        }
+
+        .form-group {
+            padding-top: 10px;
+        }
+
+        .profileImageContainer {
+            margin-bottom: unset !important;
+        }
+
+        #OrderDetails_wrapper {
+            overflow: auto;
+        }
+
+        .custom-link {
+            color: #1000ffeb;
+            float: right;
+        }
+
+    </style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <button id="downloadInvoice" style="display:none"></button>
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+
+                <h2><a onclick="history.back()"><i class="fa fa-angle-left font-weight-bold" style="font-size:22px"></i></a> @ViewData["Title"]</h2>
+
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row formGroup">
+                    <div class="col-md-4">
+                        <span class="userAxStatus">Order: @Model.OrderCode</span>
+                    </div>
+                    <div class="col-md-7"></div>
+                    <div class="col-md-1">
+                        @if (!Model.IsMarked)
+                        {
+                            <i id="editIcon" style="cursor:pointer" onclick='location.href="@Url.Action("EditOrder", "Order" , new {id = Model.Id})"' class="fa fa-edit"></i>
+                        }
+                    </div>
+                </div>
+                <div class="card" id="custInfo">
+                    <div class="col-md-12" style="background-color:#f7f7f7">
+                        <div style="text-align:center">
+                            <h2>Loading...</h2>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding-top:10px">
+                    <div class="col-md-7">
+                        <div class="row">
+                            <div class="col-md-12 table-responsive">
+                                <table id="OrderDetails" class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="8" class="text-center">
+                                                Product Details
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th colspan="8" class="text-center">
+                                                Sale Items
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th>Product Code</th>
+                                            <th>Product Name</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Price</th>
+                                            <th>Discount</th>
+                                            <th>Promo Deal</th>
+                                            <th>Gross Sale</th>
+                                            <th>Tax Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.Details != null && Model.Details.Count > 0)
+                                        {
+                                            @foreach (var data in Model.Details.Where(x => x.Waste == 0 && !x.IsWaste))
+                                            {
+                                                <tr>
+                                                    <td>@data.ProductCode</td>
+                                                    <td>@data.ProductName</td>
+                                                    <td class="text-right">@data.Quantity.ToString("N2")</td>
+                                                    <td class="text-right">@data.UnitPrice.ToString("N2")</td>
+                                                    <td class="text-right">@Math.Round(data.Discount, 2).ToString("N2")</td>
+                                                    <td>@data.Promos</td>
+                                                    <td class="text-right">@Math.Round(data.Gross - (data.Discount * data.Quantity), 2).ToString("N2")</td>
+                                                    <td class="text-right">@Math.Round(data.Tax, 2).ToString("N2")</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-12 table-responsive">
+                                <table id="Returns" class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="8" class="text-center">
+                                                Return Items
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th>Product Code</th>
+                                            <th>Product Name</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Price</th>
+                                            <th>Discount</th>
+                                            <th>Return</th>
+                                            <th>Tax Amount</th>
+                                            <th>Reason</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.Details != null && Model.Details.Count > 0)
+                                        {
+                                            @foreach (var data in Model.Details.Where(x => x.Waste != 0 && !x.IsWaste))
+                                            {
+                                                <tr>
+                                                    <td>@data.ProductCode</td>
+                                                    <td>@data.ProductName</td>
+                                                    <td class="text-right">@data.Quantity.ToString("N2")</td>
+                                                    <td class="text-right">@data.UnitPrice.ToString("N2")</td>
+                                                    <td class="text-right">@Math.Round(data.Discount, 2).ToString("N2")</td>
+                                                    <td class="text-right">@data.Waste.ToString("N2")</td>
+                                                    <td class="text-right">@Math.Round(data.Tax, 2).ToString("N2")</td>
+                                                    <td class="text-right">@data.Reason</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-12 table-responsive">
+                                <table id="Waste" class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="8" class="text-center">
+                                                Waste Items
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th>Product Code</th>
+                                            <th>Product Name</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Price</th>
+                                            <th>Discount</th>
+                                            <th>Waste</th>
+                                            <th>Tax Amount</th>
+                                            <th>Reason</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.Details != null && Model.Details.Count > 0)
+                                        {
+                                            @foreach (var data in Model.Details.Where(x => x.Waste != 0 && x.IsWaste))
+                                            {
+                                                <tr>
+                                                    <td>@data.ProductCode</td>
+                                                    <td>@data.ProductName</td>
+                                                    <td class="text-right">@data.Quantity.ToString("N2")</td>
+                                                    <td class="text-right">@data.UnitPrice.ToString("N2")</td>
+                                                    <td class="text-right">@Math.Round(data.Discount, 2).ToString("N2")</td>
+                                                    <td class="text-right">@data.Waste.ToString("N2")</td>
+                                                    <td class="text-right">@Math.Round(data.Tax, 2).ToString("N2")</td>
+                                                    <td class="text-right">@data.Reason</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card col-md-12">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h2>Shipment Information</h2>
+                                </div>
+                                @*<div class="col-md-6" id="no-print-this2">
+                                        <h2 id="getDirections"><a class="custom-link">Get Directions <i class="fa fa-map-marker"></i></a></h2>
+                                    </div>*@
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12" style="padding: unset" id="no-print-this">
+                                    <div class="row form-group col-md-6">
+                                        <label class="control-label-left col-md-3 col-sm-3 col-xs-3 ">
+                                            Driver Name
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-9">
+                                            <input value="@Model.DriverName" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group col-md-6">
+                                        <label class="control-label-left col-md-3 col-sm-3 col-xs-3 ">
+                                            Vehicle Number
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-9">
+                                            <input value="@Model.VehicleNo" readonly class="form-control has-feedback-left">
+                                            <i class="fa fa-truck form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="card">
+                            <div class="row form-group">
+                                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                    Gross Sales
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-9">
+                                    <input value="@Math.Round(Model.Gross).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                    <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group ">
+                                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                    Invoice Discount
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-9">
+                                    <input value="@Math.Round(invoiceDiscount,2).ToString("N2") (@Math.Round(invoiceDiscountPercentage,2).ToString("N2")%)" style=" color: darkred" readonly class="form-control has-feedback-left text-right">
+                                    <i class="fa fa-percent form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                    Total Discount
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-9">
+                                    <input value="@Math.Round(discount,2).ToString("N2") (@Math.Round(totalDiscountPercentage,2).ToString("N2")%)" style="        color: darkred
+" readonly class="form-control has-feedback-left text-right">
+                                    <i class="fa fa-tags form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                    Return / Wastage
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-9">
+                                    <input value="@Math.Round(waste).ToString("N2")" style="color:darkred" readonly class="form-control has-feedback-left text-right">
+                                    <i class="fa fa-trash form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label-left col-md-3 col-sm-3 col-xs-3 " for="showSP">
+                                    Net Sales
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-9">
+                                    <input value="@Math.Round(finalamount).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                    <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                    Total Tax
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-9">
+                                    <input value="@Math.Round(Model.TotalTax,2).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                    <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="row form-group">
+                                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                    Net Cash Amount
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-9">
+                                    <input value="@Math.Round(Model.Payment,2).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                    <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                    Remaining Balance
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-9">
+                                    <input value="@Math.Round(finalamount - Model.Payment).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                    <i class="fa fa-bank form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 submit-btn">
+                        <button id="DeleteOrder" class="btn btn-outline-danger"><i class="fa fa-trash"></i> Delete Order</button>
+                        @if (!Model.IsMarked)
+                        {
+                            <button id="PrintOrder" class="btn btn-default"><i class="fa fa-print"></i> Print Invoice</button>
+                        }
+                        else
+                        {
+                            <button id="unmark" class="btn btn-default"><i class="fa fa-check-square"></i> Un-mark Order</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script>
+       $(document).ready(function () {
+            $('#OrderDetails').DataTable({
+                dom: "rt<'row'<'col-md-6 col-xs-12'i><'col-md-2 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: false,
+                paging: false,
+                processing: false,
+                info: false,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                },
+                "order": [2, 'asc']
+            });
+
+             $.ajax({
+                url: '@Url.Action("CustomerInfo","Customer")',
+                type: "Get",
+                method: 'get',
+                data: { id: "@Model.CustomerId"},
+                success: function (response) {
+                    $('#custInfo').html(response);
+                },
+                error: function (err) {
+                    ErrorNotification(err.responseJSON.message);
+                }
+             });
+
+            $('#Returns').DataTable({
+                dom: "rt<'row'<'col-md-6 col-xs-12'i><'col-md-2 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: false,
+                paging: false,
+                processing: false,
+                info: false,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                },
+                "order": [2, 'asc']
+            });
+
+            $('#Waste').DataTable({
+                dom: "rt<'row'<'col-md-6 col-xs-12'i><'col-md-2 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: false,
+                paging: false,
+                processing: false,
+                info: false,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                },
+                "order": [2, 'asc']
+            });
+            $('#PrintOrder').click(function () {
+
+                     window.open('@Url.Action("OrderInvoice", "Order", new { id=Model.Id})', '_blank');
+            });
+
+            $('#unmark').click(function () {
+                swal({
+                    title: 'Un-mark Order',
+                    text: `Are you sure, you want to un-mark this order?`,
+                    buttons: true,
+                    icon: "warning",
+                }).then((unMark) => {
+                    if (unMark) {
+                        $.ajax({
+                            url: '@Url.Action("UnMarkOrder","Order")',
+                            type: "POST",
+                            method: 'post',
+                            beforeSend: LoadingSpinner(),
+                            data: { id :'@Model.Id'},
+                            success: function (response) {
+                                swal.close();
+                                swal({
+                                    title: 'Success',
+                                    text: response.message,
+                                    icon: "success",
+                                    closeOnClickOutside: false
+                                }).then((ok) => {
+                                    if (ok)
+                                        history.go(-1);
+                                })
+                            },
+                            error: function (err) {
+                                swal.close();
+                                ErrorNotification(err.responseJSON.message);
+                            }
+                        });
+                    }
+                });
+            });
+              $('#DeleteOrder').click(function () {
+                swal({
+                    title: 'Delete Order',
+                    text: `Are you sure, you want to delete this Order?`,
+                    buttons: true,
+                     icon: "error",
+                }).then((willDelete) => {
+                    if (willDelete) {
+                        $.ajax({
+                            url: '@Url.Action("DeleteOrder","Order")',
+                            type: "POST",
+                            method: 'post',
+                            beforeSend: LoadingSpinner(),
+                            data: { id :'@Model.Id'},
+                            success: function (response) {
+                                swal.close();
+                                swal({
+                                    title: 'Success',
+                                    text: response.message,
+                                    icon: "success",
+                                    closeOnClickOutside: false
+                                }).then((ok) => {
+                                    if (ok) {
+                                        let url = document.referrer;
+                                        window.location.href = url;
+                                    }
+                                })
+                            },
+                            error: function (err) {
+                                swal.close();
+                                ErrorNotification(err.responseJSON.message);
+                            }
+                        });
+                    }
+                });
+              })
+        });
+
+    </script>
+}
+

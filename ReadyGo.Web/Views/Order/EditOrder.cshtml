@@ -1,0 +1,1847 @@
+﻿@using ReadyGo.Domain.Enum
+@model ReadyGo.Domain.Entities.Order;
+@{
+    ViewData["Title"] = "Edit Order";
+    var discount = 0.0;
+    float discountPercent = 0;
+    double TotalTablediscount = 0;
+    double total = 0;
+    //ViewBag.Total = ViewBag.Total > 0 ? ViewBag.Total - ViewBag.ProductDiscount : ViewBag.Total + ViewBag.ProductDiscount;
+    if (ViewBag.CustomerDiscount)
+    {
+        if (ViewBag.Percentage)
+        {
+            discountPercent = Model.Discount;
+            discount = (float)(discountPercent / 100) * ViewBag.TotalWithoutDiscount > ViewBag.Total ? 0 : (float)Math.Round((discountPercent / 100) * ViewBag.TotalWithoutDiscount, 2);
+            if (discount > 0)
+            {
+                if (ViewBag.Total > 0)
+                {
+                    total = ViewBag.Total;
+                    TotalTablediscount = discount;
+                }
+                else if (ViewBag.Total < -0)
+                {
+                    total = ViewBag.Total;
+                    TotalTablediscount = discount;
+                }
+                else
+                {
+                    total = ViewBag.Total;
+                    TotalTablediscount = 0;
+                }
+            }
+            else
+            {
+                total = ViewBag.Total;
+                TotalTablediscount = 0;
+            }
+        }
+        else
+        {
+            discount = Model.Discount;
+            discountPercent = ViewBag.Total < discount ? 0 : (float)((100 * discount) / ViewBag.TotalWithoutDiscount);
+            if (discountPercent > 0)
+            {
+                if (ViewBag.Total > 0)
+                {
+                    total = ViewBag.Total;
+                    TotalTablediscount = discount;
+                }
+                else if (ViewBag.Total < 0)
+                {
+                    total = ViewBag.Total;
+                    TotalTablediscount = discount;
+                }
+                else
+                {
+                    total = ViewBag.Total;
+                    TotalTablediscount = 0;
+                }
+            }
+            else
+            {
+                TotalTablediscount = 0;
+                total = ViewBag.Total;
+            }
+        }
+    }
+    else
+    {
+        discount = Model.Discount;
+        if (ViewBag.Total > 0)
+        {
+            total = ViewBag.Total;
+            TotalTablediscount = discount;
+            discountPercent = (float)((100 * discount) / ViewBag.TotalWithoutDiscount);
+        }
+        else if (ViewBag.Total < 0)
+        {
+            total = ViewBag.Total;
+            TotalTablediscount = discount;
+            discountPercent = (float)((100 * discount) / ViewBag.TotalWithoutDiscount);
+            discountPercent = -discountPercent;
+        }
+        else
+        {
+            total = ViewBag.Total;
+            TotalTablediscount = 0;
+            discountPercent = 0;
+        }
+    }
+    TotalTablediscount += ViewBag.ProductDiscount;
+
+}
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .stepContainer {
+            min-height: 500px !important;
+        }
+
+        .ProductTable {
+            overflow-y: auto;
+            height: 410px;
+            display: block;
+            padding: unset !important;
+        }
+
+        .wizard_steps {
+            padding-left: 300px !important;
+        }
+
+        .hide_column {
+            display: none;
+        }
+    </style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2><a onclick='history.go(-2);'><i class="fa fa-angle-left font-weight-bold" style="font-size:22px"></i></a> @ViewData["Title"]</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div id="wizard" class="form_wizard wizard_horizontal">
+                    <ul class="wizard_steps">
+                        <li>
+                            <a href="#step-1">
+                                <span class="step_no">1</span>
+                                <span class="step_descr">
+                                    Step 1<br />
+                                    <small>Info</small>
+                                </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#step-2">
+                                <span class="step_no">2</span>
+                                <span class="step_descr">
+                                    Step 2<br />
+                                    <small>Return</small>
+                                </span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#step-3">
+                                <span class="step_no">3</span>
+                                <span class="step_descr">
+                                    Step 3<br />
+                                    <small>Waste</small>
+                                </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#step-4">
+                                <span class="step_no">4</span>
+                                <span class="step_descr">
+                                    Step 4<br />
+                                    <small>Discount</small>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+
+
+                    <div id="step-1">
+                        <form id="OrderForm" method="post" class="form-horizontal form-label-left">
+                            <input type="hidden" asp-for="Id" id="id" />
+                            <div class="card">
+                                <div class="card-body">
+                                    <h2 style="margin-left: 10px; margin-top: 10px">Order Information</h2>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                                    Product
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <select onchange='GetItems("1")' name="orderCategory" id="category1" asp-items="@(new SelectList(ViewBag.Products,"Id","Name"))" class="form-control">
+                                                        <option value="" disabled hidden selected>Select Product</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                                    Promo Deals
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <select placeholder="Select Promo" name="orderPromo" id="orderPromo" class="form-control" multiple="multiple">
+                                                    </select>
+
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col-md-3 col-sm-3 col-xs-12 ">
+                                                </div>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <span class="field-validation-valid text-danger" data-valmsg-for="orderPromo" data-valmsg-replace="true"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row form-group" id="productVariant1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="col-md-12 ProductTable table-responsive">
+                            <table id="OrdersTable" class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th class="no-sort">Promos</th>
+                                        <th class="no-sort">Quantity</th>
+                                        <th>Price</th>
+                                        <th>Discount</th>
+                                        <th class="no-sort">Action</th>
+                                        <th class="no-sort" hidden>ProductId</th>
+                                        <th class="no-sort" hidden>BaseProductId</th>
+                                        <th class="no-sort" hidden>PromoId</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Orders != null && Model.Orders.Count > 0)
+                                    {
+                                        @foreach (var data in Model.Orders)
+                                        {
+                                            <tr>
+                                                @if (data.Product.ProductId != null)
+                                                {
+                                                    <td>@data.Product.Category.Name - @data.Product.VariantOf.Name - @data.Product.Name</td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@data.Product.Category.Name - @data.Product.Name</td>
+                                                }
+                                                <td>@data.Promotion?.Title</td>
+                                                @if (data.PromotionId == null)
+                                                {
+                                                    <td><input class="prodQuan text-right" dir="rtl" type="number" min="1" max="9999" value="@data.Quantity"></td>
+                                                }
+                                                else
+                                                {
+                                                    <td><input disabled class="prodQuan text-right" dir="rtl" type="number" min="1" max="9999" value="@data.Quantity"></td>
+                                                }
+                                                <td class="text-right">@data.Price</td>
+                                                <td class="text-right">@Math.Round(data.Discount, 2)</td>
+                                                <td>
+                                                    <a class="delete"><i class="fa fa-trash" style="color:#c30e0e;font-size:20px"></i></a>
+                                                </td>
+                                                <td hidden>@data.ProductId</td>
+                                                <td hidden>@data.Promotion?.BaseProductId</td>
+                                                <td hidden>@data.Promotion?.Id</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="step-2">
+                        <form id="ReturnForm" method="post" class="form-horizontal form-label-left">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h2 style="margin-left:10px;margin-top:10px">Return Orders</h2>
+                                    <div class="row form-group">
+                                        <div class="col-md-6">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                                    Product
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <select onchange='GetItems("2")' name="orderCategory2" id="category2" asp-items="@(new SelectList(ViewBag.Products,"Id","Name"))" class="form-control">
+                                                        <option value="" disabled hidden selected>Select Product</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row form-group" id="productVariant2">
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col-md-3 col-sm-3 col-xs-12 ">
+                                                </div>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <span class="field-validation-valid text-danger" data-valmsg-for="retReason" data-valmsg-replace="true"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-6">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                                    Return Reason
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <select id="retReason" name="retReason" asp-items="Html.GetEnumSelectList<ReturnOrderReasonEnum>()" class="form-control">
+                                                        <option disabled selected hidden value="">Select Reason</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                                </div>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <span class="text-danger" id="ReturnError">Reason field is required</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row form-group" id="retReasonDiv">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                                    Reason
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input id="otherRetReason" class="form-control" style="margin-left:9px">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="col-md-12 ProductTable table-responsive">
+                            <table id="ReturnTable" class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th class="no-sort">Return Reason</th>
+                                        <th class="no-sort">Quantity</th>
+                                        <th>Price</th>
+                                        <th>Discount</th>
+                                        <th class="no-sort">Action</th>
+                                        <th class="no-sort" hidden>ProductId</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.ReturnOrders != null && Model.ReturnOrders.Count > 0)
+                                    {
+                                        @foreach (var data in Model.ReturnOrders)
+                                        {
+                                            <tr>
+                                                @if (data.Product.ProductId != null)
+                                                {
+                                                    <td>@data.Product.Category.Name - @data.Product.VariantOf.Name - @data.Product.Name </td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@data.Product.Category.Name - @data.Product.Name</td>
+                                                }
+                                                <td>@data.ReturnReason</td>
+                                                <td><input class="prodQuan text-right" dir="rtl" type="number" min="0" max="9999" value="@data.Quantity"></td>
+                                                <td class="text-right">@data.Price</td>
+                                                <td class="text-right">@Math.Round(data.Discount, 2)</td>
+                                                <td>
+                                                    <a class="delete"><i class="fa fa-trash" style="color:#c30e0e;font-size:20px"></i></a>
+                                                </td>
+                                                <td hidden>@data.ProductId</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="step-3">
+                        <form id="WasteForm" method="post" class="form-horizontal form-label-left">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h2 style="margin-left:10px;margin-top:10px">Waste Orders</h2>
+                                    <div class="row form-group">
+                                        <div class="col-md-6">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                                    Product
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <select onchange='GetItems("3")' name="orderCategory3" id="category3" asp-items="@(new SelectList(ViewBag.Products,"Id","Name"))" class="form-control">
+                                                        <option value="" disabled hidden selected>Select Product</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row form-group" id="productVariant3">
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col-md-3 col-sm-3 col-xs-12 ">
+                                                </div>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-6">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                                    Waste Reason
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <select id="wasteReason" name="wasteReason" asp-items="Html.GetEnumSelectList<ReturnOrderReasonEnum>()" class="form-control">
+                                                        <option disabled selected hidden value="">Select Reason</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                                </div>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <span class="text-danger" id="wasteError">Reason field is required</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row form-group" id="wasteReasonDiv">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                                    Reason
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input id="otherWasteReason" name="otherWasteReason" class="form-control" style="margin-left:9px">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="col-md-12 ProductTable table-responsive">
+                            <table id="WasteTable" class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th class="no-sort">Waste Reason</th>
+                                        <th class="no-sort">Quantity</th>
+                                        <th>Price</th>
+                                        <th>Discount</th>
+                                        <th class="no-sort">Action</th>
+                                        <th class="no-sort" hidden>ProductId</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.WasteOrders != null && Model.WasteOrders.Count > 0)
+                                    {
+                                        @foreach (var data in Model.WasteOrders)
+                                        {
+                                            <tr>
+                                                @if (data.Product.ProductId != null)
+                                                {
+                                                    <td>@data.Product.Category.Name - @data.Product.VariantOf.Name - @data.Product.Name </td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@data.Product.Category.Name - @data.Product.Name</td>
+                                                }
+                                                <td>@data.WasteReason</td>
+                                                <td><input class="prodQuan text-right" dir="rtl" type="number" min="0" max="9999" value="@data.Quantity"></td>
+                                                <td class="text-right">@data.Price</td>
+                                                <td class="text-right">@Math.Round(data.Discount, 2)</td>
+                                                <td>
+                                                    <a class="delete"><i class="fa fa-trash" style="color:#c30e0e;font-size:20px"></i></a>
+                                                </td>
+                                                <td hidden>@data.ProductId</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="step-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h2 style="margin-left: 10px; margin-top: 10px">Invoice Discount</h2>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="row form-group">
+                                            <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                                Discount Percentage
+                                            </label>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <input type="number" dir="rtl" value="@Math.Round(discountPercent,2)" min="0" name="discountPer" id="discountPer" onchange="ApplyDiscount(2)" onkeyup="ApplyDiscount(2)" class="form-control text-right" />
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-3 col-sm-3 col-xs-12 ">
+                                            </div>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <span class="field-validation-valid text-danger" data-valmsg-for="discountPer" data-valmsg-replace="true"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row form-group">
+                                            <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                                Discount Amount
+                                            </label>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <input type="number" dir="rtl" value="@Math.Round(discount,2).ToString()" name="discountAmt" id="discountAmt" onchange="ApplyDiscount(1)" onkeyup="ApplyDiscount(1)" class="form-control text-right" />
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-3 col-sm-3 col-xs-12 ">
+                                            </div>
+                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                                <span class="field-validation-valid text-danger" data-valmsg-for="discountAmt" data-valmsg-replace="true"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End SmartWizard Content -->
+                <div class="row table-responsive">
+                    <table id="TotalsTable" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Gross Sales</th>
+                                <th>Return</th>
+                                <th>Discount</th>
+                                <th>Net Sales</th>
+                                <th>Total</th>
+                                <th>Net Cash</th>
+                                <th>Customer Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-right">@Math.Round(ViewBag.Gross, 2).ToString("N2")</td>
+                                <td class="text-right">@Math.Round(ViewBag.Return, 2).ToString("N2")</td>
+                                <td class="text-right">@Math.Round(TotalTablediscount, 2).ToString("N2")</td>
+                                <td class="text-right">@Math.Round((double)total, 2).ToString("N2")</td>
+                                <td class="text-right">@Math.Round((double)total, 2).ToString("N2")</td>
+                                <td class="text-right">@Math.Round((double)ViewBag.Payment, 2).ToString("N2")</td>
+                                <td class="text-right">@Math.Round((double)ViewBag.Credit, 2).ToString("N2")</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Validation{
+    <script src="~/js/ValidationScript.min.js"></script>
+}
+
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script src="~/lib/jQuery-Smart-Wizard/js/jquery.smartWizard.js"></script>
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#wasteError").hide();
+            $("#ReturnError").hide();
+            $("#wasteReasonDiv").hide();
+            $("#wasteReason").on("change", function () {
+                $("#wasteError").hide();
+                if (this.value == "5") {
+                    $("#wasteReasonDiv").show();
+                }
+                else {
+                    $("#wasteReasonDiv").hide();
+                }
+
+            });
+            $("#otherWasteReason").on("change", function () {
+                 $("#wasteError").hide();
+            });
+
+            $("#otherRetReason").on("change", function () {
+                $("#ReturnError").hide();
+            });
+            $("#retReasonDiv").hide();
+            $("#retReason").on("change", function () {
+                $("#ReturnError").hide();
+                if (this.value == "5") {
+                    $("#retReasonDiv").show();
+                }
+                else {
+                    $("#retReasonDiv").hide();
+                }
+            });
+
+            $("#category1").select2({
+                width: '100%'
+            });
+            $("#category2").select2({
+                width: '100%'
+            });
+            $("#category3").select2({
+                width: '100%'
+            });
+            $("#orderPromo").select2({
+                width: '100%'
+            });
+            $("#category2").siblings()[0].style.width = 'inherit';
+            $("#category3").siblings()[0].style.width = 'inherit';
+            var stepId = 1;
+            var NetTotal = 0;
+            var totalTable = document.getElementById("TotalsTable").rows;
+
+            table = $('#OrdersTable').DataTable({
+                dom: "rt<'row'<'col-md-6 col-xs-12'i><'col-md-2 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: false,
+                paging: false,
+                processing: false,
+                info: false,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                },
+                "ordering": true,
+                "columnDefs": [
+                    {
+                        className: "hide_column", "targets": [6,7,8],
+                    },
+                    {
+                        className: "text-right", "targets": [2,3,4],
+                    },
+                    {
+                        orderable: false,
+                        targets: "no-sort"
+                    }
+                 ],
+
+                "order": [0, 'asc']
+            });
+
+
+            disableProduct = (productId) => {
+                let orderTable = document.getElementById("OrdersTable").rows;
+                var quantity = 0
+                if (orderTable[1].innerText != "No data available") {
+                    for (let i = 1; i < orderTable.length; i++) {
+                        if (orderTable[i].cells[6].innerHTML == productId) {
+                            quantity = orderTable[i].querySelectorAll('input')[0].value;
+                            orderTable[i].cells[2].innerHTML = `<input class="prodQuan text-right" dir="rtl" disabled type="number" min="1" max="9999" value="${quantity}">`;
+                        }
+                    }
+                }
+            }
+
+            CheckPromotions = () => {
+                let orderTable = document.getElementById("OrdersTable").rows;
+                if (orderTable[1].innerText != "No data available") {
+                    for (let i = 1; i < orderTable.length; i++) {
+                        if (orderTable[i].cells[7].innerHTML != '') {
+                            disableProduct(orderTable[i].cells[7].innerHTML);
+                        }
+                        //else {
+                        //    quantity = orderTable[i].querySelectorAll('input')[0].value;
+                        //    orderTable[i].cells[2].innerHTML = `<input class="prodQuan" type="number" min="1" value="${quantity}">`;
+
+                        //}
+                    }
+                }
+            }
+
+
+            CheckPromotions();
+            $('#OrdersTable tbody').on('click', '.delete', function () {
+                var rowIndex =$(this).parent().parent().index()
+                let orderTableDetails = document.getElementById('OrdersTable').rows[rowIndex+1];
+                var productId = orderTableDetails.cells[6].innerHTML;
+                deletePromoProducts(productId);
+                //var price = parseFloat(orderTableDetails.cells[4].innerHTML);
+                //var quantity = parseFloat(orderTableDetails.querySelectorAll('input')[0].value);
+                //var total = price * quantity;
+
+
+                //let totalTable = document.getElementById("TotalsTable").rows;
+                //totalTable[1].cells[0].innerHTML = parseFloat(totalTable[1].cells[0].innerHTML) - parseFloat(total);
+                //totalTable[1].cells[3].innerHTML = parseFloat(totalTable[1].cells[3].innerHTML) - parseFloat(total);
+                //totalTable[1].cells[4].innerHTML = parseFloat(totalTable[1].cells[4].innerHTML) - parseFloat(total);
+
+                //if (parseFloat(totalTable[1].cells[4].innerHTML) < 0) {
+                //    totalTable[1].cells[4].innerHTML = parseFloat(totalTable[1].cells[4].innerHTML) + parseFloat(totalTable[1].cells[2].innerHTML);
+                //    totalTable[1].cells[2].innerHTML = 0;
+                //    if (parseFloat(totalTable[1].cells[4].innerHTML) < 0) {
+                //        totalTable[1].cells[4].innerHTML = parseFloat(totalTable[1].cells[4].innerHTML) * -1;
+                //    }
+                //}
+                //else {
+                //    totalTable[1].cells[4].innerHTML = 0;
+                //}
+                 //                totalTable[1].cells[3].innerHTML = parseFloat(totalTable[1].cells[4].innerHTML)
+                 //NetTotal = parseFloat(totalTable[1].cells[4].innerHTML);
+                table
+                    .row($(this).parents('tr'))
+                    .remove()
+                    .draw();
+                ChangeTotalTable();
+            });
+            deletePromoProducts = (productId) => {
+                let orderTable = document.getElementById("OrdersTable").rows;
+                if (orderTable[1].innerText != "No data available") {
+                    for (let i = 1; i < orderTable.length; i++) {
+                        if (orderTable[i].cells[7].innerHTML == productId) {
+                            table
+                                .row(orderTable[i])
+                                .remove()
+                                .draw();
+                        }
+                    }
+                }
+            }
+
+            retTable = $('#ReturnTable').DataTable({
+                dom: "rt<'row'<'col-md-6 col-xs-12'i><'col-md-2 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: false,
+                paging: false,
+                processing: false,
+                info: false,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                },
+                "columnDefs": [
+                    {
+                        className: "hide_column", "targets": [6]
+                    },
+                    {
+                        className: "text-right", "targets": [2,3,4],
+                    },
+                    {
+                        orderable: false,
+                        targets: "no-sort"
+                    },
+
+                ],
+
+                "order": [0, 'asc']
+            });
+
+            wasteTable = $('#WasteTable').DataTable({
+                dom: "rt<'row'<'col-md-6 col-xs-12'i><'col-md-2 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: false,
+                paging: false,
+                processing: false,
+                info: false,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                },
+                "columnDefs": [
+                    {
+                        className: "hide_column", "targets": [6]
+                    },
+                    {
+                        className: "text-right", "targets": [2,3,4],
+                    },
+                    {
+                        orderable: false,
+                        targets: "no-sort"
+                    },
+
+                ],
+                "order": [0, 'asc']
+            });
+
+            $('#ReturnTable tbody').on('click', '.delete', function () {
+                //var rowIndex1 = retTable.row($(this).parents('tr')).index();
+                //let returnTableDetails = document.getElementById('ReturnTable').rows[rowIndex1+1];
+                //var price = parseFloat(returnTableDetails.cells[4].innerHTML);
+                //var quantity = parseFloat(returnTableDetails.querySelectorAll('input')[0].value);
+                //var total = price * quantity;
+
+                // let totalTable = document.getElementById("TotalsTable").rows;
+                // totalTable[1].cells[1].innerHTML = parseFloat(totalTable[1].cells[1].innerHTML) + parseFloat(total);
+                // totalTable[1].cells[3].innerHTML = parseFloat(totalTable[1].cells[3].innerHTML) + parseFloat(total);
+                //totalTable[1].cells[4].innerHTML = parseFloat(totalTable[1].cells[4].innerHTML) + parseFloat(total);
+                //NetTotal = parseFloat(totalTable[1].cells[4].innerHTML);
+                //if (parseFloat(totalTable[1].cells[4].innerHTML) < 0) {
+                //    totalTable[1].cells[4].innerHTML = parseFloat(totalTable[1].cells[4].innerHTML) + parseFloat(totalTable[1].cells[2].innerHTML);
+                //    totalTable[1].cells[2].innerHTML = 0;
+                //    if (parseFloat(totalTable[1].cells[4].innerHTML) < 0) {
+                //        totalTable[1].cells[4].innerHTML = parseFloat(totalTable[1].cells[4].innerHTML) * -1;
+                //    }
+                //}
+                //else {
+                //    totalTable[1].cells[4].innerHTML = 0;
+                //}
+                //NetTotal = parseFloat(totalTable[1].cells[4].innerHTML);
+                // totalTable[1].cells[3].innerHTML = parseFloat(totalTable[1].cells[4].innerHTML)
+                retTable
+                    .row($(this).parents('tr'))
+                    .remove()
+                    .draw();
+                ChangeTotalTable();
+            });
+             $('#WasteTable tbody').on('click', '.delete', function () {
+
+                wasteTable
+                    .row($(this).parents('tr'))
+                    .remove()
+                    .draw();
+                ChangeTotalTable();
+             });
+
+            var action = `<a class="delete"><i class="fa fa-trash" style="color:#c30e0e;font-size:20px"></i></a>`;
+            ApplyChanges = (rowId, prodRange, price, discount) => {
+                var formId = '';
+                var check = true;
+                var reason = '';
+                 switch (stepId) {
+                    case 1:
+                        formId = "#OrderForm";
+                        break;
+                    case 2:
+                         formId = "#ReturnForm";
+                         if ($("#retReason :selected").text() == "Select Reason" ||
+                             ($("#retReason :selected").val() == "5" && $("#otherRetReason").val() == "")) {
+                             check = false;
+                             $("#ReturnError").show();
+                         }
+                         else {
+                             reason = $("#retReason :selected").val() == "5" ? $("#otherRetReason").val()
+                                 : $("#retReason :selected").text();
+                         }
+                        break;
+                    case 3:
+                         formId = "#WasteForm";
+                         if ($("#wasteReason :selected").text() == "Select Reason" ||
+                             ($("#wasteReason :selected").val() == "5" && $("#otherWasteReason").val() == "")) {
+                             check = false;
+                             $("#wasteError").show();
+                         }
+                         else {
+                             reason = $("#wasteReason :selected").val() == "5" ? $("#otherWasteReason").val()
+                                 : $("#wasteReason :selected").text();
+                         }
+                        break;
+                    default:
+                        break;
+                }
+                if (check) {
+                    $("#wasteError").hide();
+                    $("#ReturnError").hide();
+                    discount = parseFloat(discount).toFixed(2);
+                    var promos = $("#orderPromo").val();
+                    event.preventDefault();
+                    if (prodRange != null) {
+                        let rowValue = [];
+                        let products = [];
+                        for (let i = 1; i < prodRange; i++) {
+                            if ($(`#item${stepId}input${i}`).val() != "" && $(`#item${stepId}input${i}`).val() != "0") {
+                                products.push({
+                                    id: $(`#item${stepId}checkbox${i}`).val(),
+                                    quantity: $(`#item${stepId}input${i}`).val()
+                                });
+                                rowValue.push({
+                                    prodName: $(`#item${stepId}Text${i}`).html(),
+                                    prodId: $(`#item${stepId}checkbox${i}`).val(),
+                                    quantity: $(`#item${stepId}input${i}`).val(),
+                                    ind: GetRow($(`#item${stepId}checkbox${i}`).val()),
+                                    price: $(`#item${stepId}price${i}`).val(),
+                                    discount: $(`#item${stepId}discount${i}`).val(),
+                                    check: false
+                                });
+                            }
+                        }
+                        if (promos != '') {
+                            $.ajax({
+                                url: "@Url.Action("CheckPromos","Order")",
+                                method: "post",
+                                type: "post",
+                                data: {
+                                    products: products,
+                                    promos: promos
+                                },
+                                success: function (response) {
+                                    response.promoProducts.forEach(data => {
+                                        let ind = GetRow(data.promoProductId);
+                                        //if (ind == -1) {
+                                        table.row.add([
+                                            data.promoProduct,
+                                            data.title,
+                                            `<input disabled class="prodQuan text-right" dir="rtl" type="number" min="0" value="${data.quantity}">`,
+                                            0,
+                                            0,
+                                            action,
+                                            data.promoProductId,
+                                            data.baseProductId,
+                                            data.id
+                                        ]).draw(false);
+                                        //}
+                                        //else {
+                                        //    let ordertablePromos = document.getElementById("OrdersTable").rows[ind];
+                                        //    //ordertablePromos.querySelectorAll('input')[0].value = parseFloat(data.quantity);
+                                        //    ordertablePromos[ind].cells[2].innerHTML = '';
+                                        //    ordertablePromos[ind].cells[2].innerHTML = `<input class="prodQuan text-right" type="number" min="1" value="${data.quantity}">`;
+                                        //}
+                                    });
+                                    rowValue.forEach(data => {
+                                        UpdateTable(data.prodName, data.prodId, data.quantity, data.ind, data.price, data.discount, data.check);
+                                    });
+                                },
+                                error: function (err) {
+                                    ErrorNotification(err.responseJSON.message)
+                                }
+                            });
+                        }
+                        else {
+                            switch (stepId) {
+                                case 1:
+                                    TableId = "OrdersTable";
+                                    break;
+                                case 2:
+                                    TableId = "ReturnTable";
+                                    break;
+                                case 3:
+                                    TableId = "WasteTable";
+                                    break;
+                                default:
+                                    break;
+                            }
+                            let table = document.getElementById(TableId).rows;
+                            let ind = 0;
+                            rowValue.forEach(data => {
+                                ind = GetRow(data.prodId);
+                                if (ind == -1) {
+                                    UpdateTable(data.prodName, data.prodId, data.quantity, data.ind, data.price, data.discount, data.check);
+                                }
+                                else {
+                                    if (stepId == 2 || stepId == 3) {
+                                        table[ind].cells[1].innerHTML = reason;
+                                    }
+                                    table[ind].cells[2].innerHTML = '';
+                                    table[ind].cells[2].innerHTML = `<input class="prodQuan text-right" dir="rtl" type="number" min="0" max="9999" value="${data.quantity}">`;
+                                }
+                            });
+                        }
+
+                    }
+                    else {
+                        let products = [];
+                        if ($(`#prodQuantity`).val() != "" && $(`#prodQuantity`).val() != "0") {
+                            products.push({
+                                id: $(`#category${stepId}`).val(),
+                                quantity: $(`#prodQuantity`).val()
+                            })
+                            let prodName = $(`#category${stepId} option:selected`).text();
+                            let prodId = $(`#category${stepId} option:selected`).val();
+                            let ind = GetRow(prodId);
+                            if (promos != '') {
+                                if (promos.length > 1) {
+                                    ErrorNotification('A product can only be assigned one promotion');
+                                }
+                                else {
+                                    $.ajax({
+                                        url: "@Url.Action("CheckPromos","Order")",
+                                        method: "post",
+                                        type: "post",
+                                        data: {
+                                            products: products,
+                                            promos: promos
+                                        },
+                                        success: function (response) {
+                                            response.promoProducts.forEach(data => {
+                                                deletePromoProducts(data.baseProductId);
+                                                let ind = GetRow(data.promoProductId);
+                                                //if (ind == -1) {
+                                                table.row.add([
+                                                    data.promoProduct,
+                                                    data.title,
+                                                    `<input disabled class="prodQuan text-right" dir="rtl" type="number" min="0" max="9999" value="${data.quantity}">`,
+                                                    0,
+                                                    0,
+                                                    action,
+                                                    data.promoProductId,
+                                                    data.baseProductId,
+                                                    data.id
+                                                ]).draw(false);
+                                                //}
+                                                //else {
+                                                //    let ordertablePromos = document.getElementById("OrdersTable").rows;
+                                                //    ordertablePromos[ind].cells[2].innerHTML = '';
+                                                //    ordertablePromos[ind].cells[2].innerHTML = `<input class="prodQuan text-right" type="number" min="1" value="${data.quantity}">`;
+                                                //    //ordertablePromos.querySelectorAll('input')[0].value = parseFloat(data.quantity);
+                                                //}
+                                            });
+                                            UpdateTable(prodName, prodId, $("#prodQuantity").val(), ind, price, discount, true);
+                                        },
+                                        error: function (err) {
+                                            ErrorNotification(err.responseJSON.message)
+                                        }
+                                    });
+                                }
+                            }
+                            else {
+                                let ind = GetRow(prodId);
+                                if (ind == -1) {
+                                    UpdateTable(prodName, prodId, $("#prodQuantity").val(), ind, price, discount, false);
+                                }
+                                else {
+                                    var quantity = $("#prodQuantity").val();
+                                    switch (stepId) {
+                                        case 1:
+                                            TableId = "OrdersTable";
+                                            break;
+                                        case 2:
+                                            TableId = "ReturnTable";
+                                            break;
+                                        case 3:
+                                            TableId = "WasteTable";
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                    let table = document.getElementById(TableId).rows;
+                                    if (stepId == 2 || stepId == 3) {
+                                        table[ind].cells[1].innerHTML = reason;
+                                    }
+                                    table[ind].cells[2].innerHTML = '';
+                                    table[ind].cells[2].innerHTML = `<input class="prodQuan text-right" dir="rtl" type="number" min="0" max="9999" value="${quantity}">`;
+                                }
+                            }
+                        }
+                    }
+                    ChangeTotalTable();
+                    CheckPromotions();
+                }
+                $("#item1Button").click();
+            }
+            $('#ReturnTable tbody').on('keyup', '.prodQuan', function () {
+                if (this.value != "") {
+                    ChangeTotalTable();
+                }
+                else {
+                    this.value = 0;
+                    ChangeTotalTable();
+                    this.value = "";
+                }
+            });
+            $('#ReturnTable tbody').on('click', '.prodQuan', function () {
+                if (this.value != "") {
+                    ChangeTotalTable();
+                }
+                else {
+                    this.value = 0;
+                    ChangeTotalTable();
+                    this.value = "";
+                }
+            });
+             $('#WasteTable tbody').on('keyup', '.prodQuan', function () {
+                if (this.value != "") {
+                    ChangeTotalTable();
+                }
+                else {
+                    this.value = 0;
+                    ChangeTotalTable();
+                    this.value = "";
+                }
+            });
+            $('#WasteTable tbody').on('click', '.prodQuan', function () {
+                if (this.value != "") {
+                    ChangeTotalTable();
+                }
+                else {
+                    this.value = 0;
+                    ChangeTotalTable();
+                    this.value = "";
+                }
+            });
+            $('#OrdersTable tbody').on('keyup', '.prodQuan', function () {
+                if (this.value != "") {
+                    ChangeTotalTable();
+                }
+                else {
+                    this.value = 0;
+                    ChangeTotalTable();
+                    this.value = "";
+                }
+            });
+            $('#OrdersTable tbody').on('click', '.prodQuan', function () {
+                if (this.value != "") {
+                    ChangeTotalTable();
+                }
+                else {
+                    this.value = 0;
+                    ChangeTotalTable();
+                    this.value = "";
+                }
+            });
+            UpdateTable = (prod, prodId, quant, ind, price, discount, promo) => {
+
+                let promotion = "";
+                if (discount != null) {
+                    discount = parseFloat(discount).toFixed(2);
+                }
+                switch (stepId) {
+                    case 1:
+                        TableId = "OrdersTable";
+                        break;
+                    case 2:
+                        TableId = "ReturnTable";
+                        promotion = $("#retReason").val() == "5" ? $("#otherRetReason").val() : $("#retReason :selected").text();
+                        break;
+                    case 3:
+                        TableId = "WasteTable";
+                        promotion = $("#wasteReason").val() == "5" ? $("#otherWasteReason").val() :  $("#wasteReason :selected").text();
+                        break;
+                    default:
+                        break;
+                }
+
+
+                if (ind != -1) {
+                    let table = document.getElementById(TableId).rows;
+                    let totQuant = parseInt(table[ind].querySelectorAll('input')[0].value) + parseInt(quant);
+                    //table[ind].querySelectorAll('input')[0].value = parseInt(quant);
+                    table[ind].cells[2].innerHTML = '';
+                    table[ind].cells[2].innerHTML = `<input class="prodQuan text-right" dir="rtl" type="number" min="0" max="9999" value="${quant}">`;
+
+                    UpdateInvoice(price * quant);
+                    CheckPromotions();
+                }
+                else {
+                    let disabled = promo ? "disabled" : "";
+                    if (TableId == "OrdersTable") {
+                        table.row.add([
+                            prod,
+                            promotion,
+                            `<input class="prodQuan text-right" ${disabled} dir="rtl" type="number" min="0" max="9999" value="${quant}">`,
+                            price,
+                            discount,
+                            action,
+                            prodId,
+                            "", ""
+                        ]).draw(false);
+                        CheckPromotions();
+                        UpdateInvoice(price * quant);
+                    }
+                    else if (TableId == "ReturnTable") {
+                        retTable.row.add([
+                            prod,
+                            promotion,
+                            `<input class="prodQuan text-right" ${disabled} dir="rtl" type="number" min="0" max="9999" value="${quant}">`,
+                            price,
+                            discount,
+                            action,
+                            prodId
+                        ]).draw(false);
+                        UpdateInvoice((price-discount)  * quant);
+                    }
+                    else {
+                        wasteTable.row.add([
+                            prod,
+                            promotion,
+                            `<input class="prodQuan text-right" ${disabled} dir="rtl" type="number" min="0" max="9999" value="${quant}">`,
+                            price,
+                            discount,
+                            action,
+                            prodId
+                        ]).draw(false);
+
+                        UpdateInvoice((price-discount) * quant);
+                    }
+                }
+            }
+             GetItems = (id) => {
+                var URL =  "@Url.Action("GetProduct","Order")";
+                 $.ajax({
+                     url: URL,
+                     method: "GET",
+                     type: "json",
+                     data: {
+                         cat_id: $(`#category${id}`).val(),
+                         orderId: '@Model.Id'
+                     },
+                     success: function (data) {
+
+                         $(`#item${id}`).empty();
+                         if (data.flag == "Product") {
+                             $(`#productVariant${stepId}`).html(`
+                             <label class="control-label col-md-3 col-sm-3 col-xs-12" style="margin-top:unset !important">
+                                Quantity
+                             </label>
+                             <div class="col-md-9 col-sm-9 col-xs-12">
+                                <div class="col-md-10">
+                                    <div class="row">
+                                        <div class="col-md-4" style="padding-left:0px"><input id="prodQuantity" min="0" max="9999" dir="rtl" type="number" class="form-control prodQuan text-right" /></div>
+                                        <div class="submit-btn col-md-2"><button type='button' class="btn btn-default" id="AddOrder" onclick="ApplyChanges('${data.id}',null,'${data.price}','${data.discount}')">Apply</button></div>
+                                    </div>
+                                </div>
+                            </div>`);
+                            $("#orderPromo").html('');
+                            // $("#orderPromo").multiselect("enable");
+                             var s = '';
+                             //var s = '<option value="" selected>No Promo</option>';
+                             for (var i = 0; i < data.promotions.length; i++) {
+                                 s += '<option value="' + data.promotions[i].id + '">' + data.promotions[i].title + '</option>';
+                             }
+                             $("#orderPromo").html(s);
+
+                         }
+                         else {
+                             let innerHtml = "";
+                             let optionId = 1;
+                             data.products.forEach(element => {
+                                 innerHtml += `<li class="row col-md-12"><input id="item${id}checkbox${optionId}" value="${element.id}" type="hidden" style="margin-top:12px;"><input id="item${id}price${optionId}" value="${element.price}" type="hidden" style="margin-top:12px;"><input id="item${id}discount${optionId}" value="${element.discount}" type="hidden" style="margin-top:12px;"><p class="col-md-9 col-xs-9" id="item${id}Text${optionId}" style="margin-top:10px;font-size:13px">${element.name}</p> <input dir="rtl" type="number" min="0" max="9999" id="item${id}input${optionId}" value="0" style="margin-top:3px;border:1px solid #ddd" class="col-md-3 col-xs-3 form-control prodQuan text-right" type="text"></li>`;
+                                 optionId++;
+                             })
+                             innerHtml += `<li style="padding-top:3px" class="col-md-12 fixed"><button type='button' class="btn btn-default alignright" onclick="ApplyChanges('${id}','${optionId}',null)">Apply</button></li>`;
+
+                             $(`#productVariant${stepId}`).html(`
+                             <label class="control-label col-md-3 col-sm-3 col-xs-12" style="margin-top:unset !important">
+                                Variant & Quantity
+                             </label>
+                             <div class="col-md-9 col-sm-9 col-xs-12">
+                                <div class="col-md-10">
+                                        <div class="dropdown">
+                                            <button id="item1Button" class="btn btn-default form-control dropdown-toggle" type="button" data-toggle="dropdown">
+                                                <span id="item1ButtonTitle">Select Quantity </span>
+                                                <span class="caret"></span>
+                                            </button>
+
+                                            <ul class="dropdown-menu menu-scroll" id="item1" style="padding-top:2%;width:100%;position:inherit!important">
+                                                ${innerHtml}
+                                            </ul>
+
+                                            <input type="text" hidden id="item1Value" />
+                                        </div>
+                                    </div>
+                            </div>`);
+                             $("#orderPromo").html('');
+
+                           //  $("#orderPromo").multiselect("disable");
+                              var s = '';
+                             //var s = '<option value="" selected>No Promo</option>';
+                             for (var i = 0; i < data.promotions.length; i++) {
+                                 s += '<option value="' + data.promotions[i].id + '">' + data.promotions[i].title + '</option>';
+                             }
+                             $("#orderPromo").html(s);
+
+                         }
+                         //$(`#item${id}Button`).click();
+                     },
+                     error: function (err) {
+                     }
+                 });
+                 NetTotal = parseFloat(totalTable[1].cells[4].innerHTML.replace(/,/g, ''));
+            };
+
+            GetRow = (prodId) => {
+                var index = -1;
+                var col = 0;
+                switch (stepId) {
+                    case 1:
+                        TableId = "OrdersTable";
+                        col = 6;
+                        break;
+                    case 2:
+                        TableId = "ReturnTable";
+                        col = 6;
+                        break;
+                    case 3:
+                        TableId = "WasteTable";
+                        col = 5;
+                        break;
+                    default:
+                        break;
+                }
+                var x = document.getElementById(TableId).rows;
+                if (x[1].innerText == "No data available") {
+                    //$(`#${TableId} tbody`).empty();
+                    return index;
+                }
+                else {
+                    for (var i = 0; i < x.length; i++) {
+                        if (x[i].cells[col].innerHTML == prodId)
+                            if (stepId == 1) {
+                                if (x[i].cells[7].innerHTML == '')
+                                {
+                                    index = i;
+                                    deletePromoProducts(prodId);
+                                }
+                            }
+                            else {
+                                index = i;
+                            }
+                    }
+                    return index;
+                }
+            }
+            UpdateInvoice = (totalPrice) => {
+                var totalTable = document.getElementById("TotalsTable").rows;
+                if (stepId == 1) {
+                    var totalgross = parseFloat(totalTable[1].cells[0].innerHTML.replace(/,/g, '')) + parseFloat(totalPrice)
+                    totalTable[1].cells[0].innerHTML = totalgross.toLocaleString('en-US', {minimumFractionDigits: 2});
+                    totalTable[1].cells[3].innerHTML = totalgross.toLocaleString('en-US', {minimumFractionDigits: 2});
+                    var total = parseFloat(totalTable[1].cells[4].innerHTML.replace(/,/g, '')) + parseFloat(totalPrice);
+                    totalTable[1].cells[4].innerHTML = total.toLocaleString('en-US', {minimumFractionDigits: 2});
+                    if (parseFloat(totalTable[1].cells[4].innerHTML) < 0) {
+                        totalTable[1].cells[4].innerHTML = parseFloat(totalTable[1].cells[4].innerHTML.replace(/,/g, '')) + parseFloat(totalTable[1].cells[2].innerHTML.replace(/,/g, ''));
+                        totalTable[1].cells[2].innerHTML = 0;
+                    }
+                }
+                else {
+                    var totalReturn = parseFloat(totalTable[1].cells[1].innerHTML.replace(/,/g, '')) - parseFloat(totalPrice);
+                    totalTable[1].cells[1].innerHTML = totalReturn.toLocaleString('en-US', {minimumFractionDigits: 2});
+                    totalTable[1].cells[3].innerHTML = totalReturn.toLocaleString('en-US', {minimumFractionDigits: 2});
+                    var total = parseFloat(totalTable[1].cells[4].innerHTML.replace(/,/g, '')) - parseFloat(totalPrice);
+                    totalTable[1].cells[4].innerHTML = total.toLocaleString('en-US', {minimumFractionDigits: 2});
+
+                }
+                NetTotal = parseFloat(totalTable[1].cells[4].innerHTML.replace(/,/g, '')).toFixed(2);
+
+            }
+            ChangeTotalTable = () => {
+                let Totalgross = 0.0;
+                let total = 0.0;
+                let TotalReturn = 0.0;
+                let orderTable = document.getElementById("OrdersTable").rows;
+                let returnTable = document.getElementById("ReturnTable").rows;
+                let wasteTable = document.getElementById("WasteTable").rows;
+                let totalTable = document.getElementById("TotalsTable").rows;
+                if (orderTable[1].innerText != "No data available") {
+                    if (orderTable.length > 1) {
+                        for (let i = 1; i < orderTable.length; i++) {
+                            Totalgross += parseFloat(orderTable[i].querySelectorAll('input')[0].value) * (parseFloat(orderTable[i].cells[3].innerHTML));
+                        }
+                    }
+                }
+                total = Totalgross;
+
+                if (returnTable[1].innerText != "No data available") {
+                    if (returnTable.length > 1) {
+                        for (let i = 1; i < returnTable.length; i++) {
+                            TotalReturn += parseFloat(returnTable[i].querySelectorAll('input')[0].value) * ((parseFloat(returnTable[i].cells[3].innerHTML.replace(/,/g, '')) - parseFloat(returnTable[i].cells[4].innerHTML.replace(/,/g, '')) ));
+                        }
+                    }
+                }
+                if (wasteTable[1].innerText != "No data available") {
+                    if (wasteTable.length > 1) {
+                        for (let i = 1; i < wasteTable.length; i++) {
+                            TotalReturn += parseFloat(wasteTable[i].querySelectorAll('input')[0].value) * (parseFloat(wasteTable[i].cells[3].innerHTML.replace(/,/g, ''))- parseFloat(wasteTable[i].cells[4].innerHTML.replace(/,/g, '')));
+                        }
+                    }
+                }
+                total = total - TotalReturn;
+                TotalReturn = -TotalReturn;
+                totalTable[1].cells[1].innerHTML = TotalReturn.toLocaleString('en-US', {minimumFractionDigits: 2});
+                totalTable[1].cells[0].innerHTML = Totalgross.toLocaleString('en-US', {minimumFractionDigits: 2});
+                if (total == 0) {
+                    NetTotal = total;
+                    //NetTotal += parseFloat(totalTable[1].cells[2].innerHTML.replace(/,/g, ''));
+                    totalTable[1].cells[2].innerHTML = 0;
+                    $("#discountPer").val(0);
+                    totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                    totalTable[1].cells[3].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                }
+                else if (total < 0) {
+                    NetTotal = total;
+                    NetTotal += parseFloat(totalTable[1].cells[2].innerHTML.replace(/,/g, ''));
+                    if (NetTotal < 0) {
+                        totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        totalTable[1].cells[3].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                    }
+                    else {
+                        totalTable[1].cells[4].innerHTML = total.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        totalTable[1].cells[3].innerHTML = total.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        totalTable[1].cells[2].innerHTML = 0.0;
+                    }
+                }
+                else {
+                    NetTotal = total - parseFloat(totalTable[1].cells[2].innerHTML.replace(/,/g, ''));
+                    if (NetTotal > 0) {
+                        totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        totalTable[1].cells[3].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                    }
+                    else {
+                        totalTable[1].cells[4].innerHTML = total.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        totalTable[1].cells[3].innerHTML = total.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        totalTable[1].cells[2].innerHTML = 0.0;
+                    }
+                }
+                ApplyDiscount(3);
+                CheckPromotions();
+            }
+
+
+            $('#wizard').smartWizard();
+
+            $('#wizard_verticle').smartWizard({
+                transitionEffect: 'slide'
+            });
+
+            $('.buttonNext').removeClass("btn-success").addClass('btn btn-default');
+            $('.buttonNext').type = "button";
+            $('.buttonPrevious').removeClass("btn-primary").addClass('btn btn-default');
+            $('.buttonPrevious').type = "button";
+            $('.buttonFinish').addClass('btn btn-default');
+            $('.buttonFinish').type = "submit";
+            $('.buttonFinish').css("display", "none");
+            $('.buttonFinish').html('Save');
+            $('.buttonPrevious').css("display", "none");
+            $('.btn-danger').removeClass("btn-danger").addClass("btn-outline-danger");
+
+            $('.buttonCancel').click(function (event) {
+                history.go(-2);
+            });
+
+            $('.buttonNext').click(function () {
+                stepId += 1;
+                if (stepId == 2) {
+                    $("#productVariant1").html("");
+                }
+                StepCheck();
+            })
+            $('.buttonPrevious').click(function () {
+                stepId -= 1;
+                if (stepId == 2) {
+                    $("#productVariant1").html("");
+                }
+                StepCheck();
+            })
+            $('.wizard_steps a').click(function () {
+                StepCheck();
+            })
+            function StepCheck() {
+                $("#wasteError").hide();
+                $("#ReturnError").hide();
+                var step = $('#wizard').smartWizard('currentStep')
+                if (step == 1 || step == 0) {
+                    $('.buttonNext').css("display", "inline")
+                    $('.buttonPrevious').css("display", "none");
+                    $('.buttonFinish').css("display", "none")
+                }
+                if (step == 2) {
+                    $('.buttonPrevious').css("display", "inline");
+                    $('.buttonNext').css("display", "inline")
+                    $('.buttonFinish').css("display", "none")
+                }
+                if (step == 3) {
+                    $('.buttonPrevious').css("display", "inline");
+                    $('.buttonNext').css("display", "inline")
+                    $('.buttonFinish').css("display", "none")
+                }
+                if (step == 4) {
+                    $('.buttonPrevious').css("display", "inline");
+                    $('.buttonNext').css("display", "none")
+                    $('.buttonFinish').css("display", "inline");
+                }
+            }
+            $('.buttonFinish').click(function () {
+                let orders = [];
+                let returnOrders = [];
+                let wasteOrders = [];
+                let orderTable = document.getElementById("OrdersTable").rows;
+                let returnTable = document.getElementById("ReturnTable").rows;
+                let totalTable = document.getElementById("TotalsTable").rows;
+                let wasteTable = document.getElementById("WasteTable").rows;
+                if (orderTable[1].innerText != "No data available") {
+                    if (orderTable.length > 1) {
+                        for (let i = 1; i < orderTable.length; i++) {
+                            orders.push({
+                                ProductId: orderTable[i].cells[6].innerHTML.replace(/,/g, ''),
+                                Price: orderTable[i].cells[3].innerHTML.replace(/,/g, ''),
+                                Discount:orderTable[i].cells[4].innerHTML.replace(/,/g, ''),
+                                Quantity: orderTable[i].querySelectorAll('input')[0].value,
+                                PromoId: orderTable[i].cells[1].innerHTML == "" ? null : orderTable[i].cells[8].innerHTML.replace(/,/g, ''),
+                                ReturnReason: null
+                            })
+                        }
+                    }
+                }
+                if (returnTable[1].innerText != "No data available") {
+                    if (returnTable.length > 1) {
+                        for (let i = 1; i < returnTable.length; i++) {
+                            returnOrders.push({
+                                ProductId: returnTable[i].cells[6].innerHTML.replace(/,/g, ''),
+                                Price: returnTable[i].cells[3].innerHTML.replace(/,/g, ''),
+                                Quantity: returnTable[i].querySelectorAll('input')[0].value,
+                                Discount:returnTable[i].cells[4].innerHTML.replace(/,/g, ''),
+                                PromoId: null,
+                                ReturnReason: returnTable[i].cells[1].innerHTML == "" ? null : returnTable[i].cells[1].innerHTML,
+                            })
+                        }
+                    }
+                }
+                 if (wasteTable[1].innerText != "No data available") {
+                    if (wasteTable.length > 1) {
+                        for (let i = 1; i < wasteTable.length; i++) {
+                            wasteOrders.push({
+                                ProductId: wasteTable[i].cells[6].innerHTML.replace(/,/g, ''),
+                                Price: wasteTable[i].cells[3].innerHTML.replace(/,/g, ''),
+                                Discount :wasteTable[i].cells[4].innerHTML.replace(/,/g, ''),
+                                Quantity: wasteTable[i].querySelectorAll('input')[0].value,
+                                PromoId: null,
+                                ReturnReason: wasteTable[i].cells[1].innerHTML == "" ? null : wasteTable[i].cells[1].innerHTML.replace(/,/g, ''),
+                            })
+                        }
+                    }
+                }
+                var discount =  parseFloat(totalTable[1].cells[2].innerHTML.replace(/,/g, ''));
+                productsDiscount = ProductsDiscount();
+
+                discount = discount - productsDiscount>0?discount - productsDiscount : 0;
+                $.ajax({
+                    url: "@Url.Action("EditOrder","Order")",
+                    method: "post",
+                    type: "post",
+                    data: {
+                        Total: totalTable[1].cells[4].innerHTML.replace(/,/g, ''),
+                        OrderId: $("#id").val(),
+                        Discount: discount,
+                        Orders: orders,
+                        ReturnOrders: returnOrders,
+                        WasteOrders : wasteOrders
+                    },
+                    success: function (response) {
+                        swal({
+                            title: 'Success',
+                            text: response.message,
+                            icon: "success",
+                            closeOnClickOutside: false
+                        }).then((ok) => {
+                            if (ok)
+                                history.go(-3);
+                        });
+                    },
+                    error: function (err) {
+                        ErrorNotification(err.responseJSON.message)
+                    }
+                })
+            });
+            ProductsDiscount = () => {
+                let orderTable = document.getElementById("OrdersTable").rows;
+                let discount = 0.00;
+                if (orderTable[1].innerText != "No data available") {
+                    if (orderTable.length > 1) {
+                        for (let i = 1; i < orderTable.length; i++) {
+                            discount +=  parseFloat(orderTable[i].querySelectorAll('input')[0].value) * parseFloat(orderTable[i].cells[4].innerHTML.replace(/,/g, ''));
+                        }
+                    }
+                }
+                return discount;
+            }
+            GetTotal = () => {
+                let total = 0.0;
+                let orderTable = document.getElementById("OrdersTable").rows;
+                let returnTable = document.getElementById("ReturnTable").rows;
+                let wasteTable = document.getElementById("WasteTable").rows;
+                if (orderTable[1].innerText != "No data available") {
+                    if (orderTable.length > 1) {
+                        for (let i = 1; i < orderTable.length; i++) {
+                            total += parseFloat(orderTable[i].querySelectorAll('input')[0].value) * (parseFloat(orderTable[i].cells[3].innerHTML.replace(/,/g, '')));
+                        }
+                    }
+                }
+
+                if (returnTable[1].innerText != "No data available") {
+                    if (returnTable.length > 1) {
+                        for (let i = 1; i < returnTable.length; i++) {
+                            total -= parseFloat(returnTable[i].querySelectorAll('input')[0].value) * ((parseFloat(returnTable[i].cells[3].innerHTML.replace(/,/g, '')) - parseFloat(returnTable[i].cells[4].innerHTML.replace(/,/g, ''))));
+                        }
+                    }
+                }
+                if (wasteTable[1].innerText != "No data available") {
+                    if (wasteTable.length > 1) {
+                        for (let i = 1; i < wasteTable.length; i++) {
+                            total -= parseFloat(wasteTable[i].querySelectorAll('input')[0].value) * (parseFloat(wasteTable[i].cells[3].innerHTML.replace(/,/g, '')) - parseFloat(wasteTable[i].cells[4].innerHTML.replace(/,/g, '')));
+                        }
+                    }
+                }
+                return total;
+            }
+            ApplyDiscount = (flag) => {
+                let totalTable = document.getElementById("TotalsTable").rows;
+                NetTotal = GetTotal();
+                var oldDiscount = parseFloat(totalTable[1].cells[2].innerHTML.replace(/,/g, ''));
+                var productsDiscount = ProductsDiscount();
+                //if (NetTotal >= 0) {
+                //    NetTotal -= productsDiscount;
+                //}
+                //else {
+                //    NetTotal += productsDiscount;
+                //}
+
+                NetTotal -= productsDiscount;
+                let discountAmt = parseFloat($("#discountAmt").val() == "" ? "0" : $("#discountAmt").val());
+                if (discountAmt > Math.abs(NetTotal)) {
+                    $("#discountAmt").val(0);
+                    $("#discountPer").val(0);
+                    totalTable[1].cells[2].innerHTML = productsDiscount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                    totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                }
+                if (flag == 1) {
+                    if (discountAmt != 0 && discountAmt != "0") {
+                        let percentage = (discountAmt / (Math.abs(NetTotal))) * 100;
+                        let roundPercentage = percentage.toFixed(2);
+                        $("#discountPer").val(Math.abs(roundPercentage));
+                        var result = 0.0;
+                        if (NetTotal > 0) {
+                            result = NetTotal - discountAmt;
+                            totalTable[1].cells[4].innerHTML = result.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            discountAmt += productsDiscount;
+                            NetTotal = parseFloat(totalTable[1].cells[4].innerHTML.replace(/,/g, ''));
+                            totalTable[1].cells[2].innerHTML = discountAmt.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        }
+                        else if (NetTotal < 0) {
+                            result = NetTotal + discountAmt;
+                            totalTable[1].cells[4].innerHTML = result.toFixed(2);
+                            NetTotal = parseFloat(totalTable[1].cells[4].innerHTML.replace(/,/g, ''));
+                            discountAmt += productsDiscount;
+                            totalTable[1].cells[2].innerHTML = discountAmt.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        }
+                        else {
+                            $("#discountAmt").val(0);
+                            $("#discountPer").val(0);
+                            totalTable[1].cells[2].innerHTML = 0.00;
+                        }
+
+                    }
+                    else {
+                        totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        totalTable[1].cells[2].innerHTML = productsDiscount.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        $("#discountPer").val(0);
+                    }
+                }
+                else if (flag == 2) {
+                    if (NetTotal > 0) {
+                        let discountPer = ($("#discountPer").val() == "" ? "0" : $("#discountPer").val());
+
+                        if (discountPer > 100) {
+                            $("#discountPer").val(100);
+                        }
+                        else if (discountPer != 0 && discountPer != "0") {
+                            let discountAmt = (discountPer * (Math.abs(NetTotal))) / 100;
+                            $("#discountAmt").val(discountAmt.toFixed(2));
+                            var result = NetTotal - discountAmt;
+                            discountAmt += productsDiscount;
+                            totalTable[1].cells[4].innerHTML = result.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            totalTable[1].cells[2].innerHTML = discountAmt.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            NetTotal = parseFloat(totalTable[1].cells[4].innerHTML.replace(/,/g, ''));
+                        }
+                        else {
+                            totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            totalTable[1].cells[2].innerHTML = productsDiscount;
+                            $("#discountAmt").val(0);
+                        }
+                    }
+                    else if(NetTotal < 0) {
+                         let discountPer = ($("#discountPer").val() == "" ? "0" : $("#discountPer").val());
+
+                        if (discountPer > 100) {
+                            $("#discountPer").val(100);
+                        }
+                        else if (discountPer != 0 && discountPer != "0") {
+                            let discountAmt = Math.abs((discountPer * Math.abs(NetTotal)) / 100);
+                            $("#discountAmt").val(discountAmt.toFixed(2));
+                            var result = NetTotal + discountAmt;
+                            discountAmt += productsDiscount;
+                            totalTable[1].cells[4].innerHTML = result.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            totalTable[1].cells[2].innerHTML = discountAmt.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            NetTotal = parseFloat(totalTable[1].cells[4].innerHTML.replace(/,/g, ''));
+                        }
+                        else {
+                            totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            totalTable[1].cells[2].innerHTML = productsDiscount;
+                            $("#discountAmt").val(0);
+                        }
+                    }
+                    else {
+                        totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        totalTable[1].cells[2].innerHTML = productsDiscount;
+                        $("#discountPer").val(0);
+                    }
+                }
+                else {
+                    var discount = 0;
+                    var discountPer = 0;
+                    if (NetTotal > 0) {
+                        @if (ViewBag.CustomerDiscount)
+                        {
+                            @if (ViewBag.Percentage)
+                            {
+                                {
+                                <text>
+                        discount = (parseFloat($("#discountPer").val()) / 100) * (NetTotal);
+                        $("#discountAmt").val(discount.toFixed(2));
+                        var result = NetTotal - discount
+                       if (result > 0) {
+                           totalTable[1].cells[4].innerHTML = result.toFixed(2);
+                           discount += productsDiscount;
+                           totalTable[1].cells[2].innerHTML = discount.toFixed(2);
+                        }
+                       else {
+                            totalTable[1].cells[4].innerHTML = NetTotal.toFixed(2);
+                            totalTable[1].cells[2].innerHTML = productsDiscount;
+                        }
+                                </text>
+                                }
+                            }
+                            else
+                            {
+                                {
+                                <text>
+                        discount = parseFloat($("#discountAmt").val());
+                        discountPer = (discount * 100) / (NetTotal);
+                        $("#discountPer").val(Math.abs(discountPer.toFixed(2)));
+                        var result = NetTotal - discount
+                        if (result > 0) {
+                            totalTable[1].cells[4].innerHTML = result.toFixed(2);
+                            discount += productsDiscount;
+                            totalTable[1].cells[2].innerHTML = discount.toFixed(2);
+                        }
+                        else {
+                            totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            totalTable[1].cells[2].innerHTML = productsDiscount;
+                        }
+                                </text>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            {
+                            <text>
+
+                        discount = parseFloat($("#discountAmt").val());
+                        discountPer = (discount * 100) / (NetTotal);
+                        $("#discountPer").val(Math.abs(discountPer.toFixed(2)));
+                        var result = NetTotal - discount
+                        if (result > 0) {
+                            totalTable[1].cells[4].innerHTML = result.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            discount += productsDiscount;
+                            totalTable[1].cells[2].innerHTML = discount.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        }
+                        else {
+                            totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            totalTable[1].cells[2].innerHTML = productsDiscount;
+                        }
+
+                            </text>
+                                }
+                            }
+                    }
+                    else if (NetTotal < 0) {
+                        @if (ViewBag.CustomerDiscount)
+                        {
+                            @if (ViewBag.Percentage)
+                            {
+                                {
+                                <text>
+                        discount = Math.abs((parseFloat($("#discountPer").val()) / 100) * (NetTotal));
+                        var result = NetTotal +  discount;
+                        if (0 > result) {
+                            $("#discountAmt").val(discount.toFixed(2));
+                            totalTable[1].cells[4].innerHTML = result.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            discount += productsDiscount;
+                            totalTable[1].cells[2].innerHTML = discount.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        }
+                        else {
+                            totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            totalTable[1].cells[2].innerHTML = productsDiscount;
+                        }
+                                </text>
+                                }
+                            }
+                            else
+                            {
+                                {
+                                <text>
+                        discount = parseFloat($("#discountAmt").val());
+                        discountPer = Math.abs((discount * 100) / (Math.abs(NetTotal)));
+                        $("#discountPer").val(Math.abs(discountPer.toFixed(2)));
+                        var result = NetTotal + discount;
+                        if (0 > result) {
+                            totalTable[1].cells[4].innerHTML = result.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            discount += productsDiscount;
+                            totalTable[1].cells[2].innerHTML = discount.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        }
+                        else {
+                            totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            totalTable[1].cells[2].innerHTML = productsDiscount;
+                        }
+                                </text>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            {
+                            <text>
+                        discount = parseFloat($("#discountAmt").val());
+                        discountPer = Math.abs((discount * 100) / (Math.abs(NetTotal)));
+                        $("#discountPer").val(Math.abs(discountPer.toFixed(2)));
+                        var result = NetTotal + discount;
+                        if (0 > result) {
+                            totalTable[1].cells[4].innerHTML = result.toLocaleString('en-US', {minimumFractionDigits: 2});
+                             discount += productsDiscount;
+                                totalTable[1].cells[2].innerHTML = discount.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        }
+                        else {
+                            totalTable[1].cells[4].innerHTML = NetTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+                            totalTable[1].cells[2].innerHTML = productsDiscount;
+                        }
+                            </text>
+                                }
+                            }
+
+                    }
+                    else {
+                        totalTable[1].cells[4].innerHTML = 0.00;
+                        totalTable[1].cells[2].innerHTML = 0.00;
+                        $("#discountAmt").val(0);
+                        $("#discountPer").val(0)
+                    }
+                }
+                totalTable[1].cells[3].innerHTML = parseFloat(totalTable[1].cells[4].innerHTML.replace(/,/g, '')).toLocaleString('en-US', {minimumFractionDigits: 2})
+                let payment = parseFloat(totalTable[1].cells[5].innerHTML.replace(/,/g, '')).toFixed(2);
+                if (payment != 0) {
+                    let balance = parseFloat(totalTable[1].cells[3].innerHTML.replace(/,/g, '')).toFixed(2) - payment;
+                    totalTable[1].cells[6].innerHTML = balance.toLocaleString('en-US', {minimumFractionDigits: 2});
+                }
+                if ($("#discountPer").val() != "") {
+                    $("#discountPer").val(parseFloat($("#discountPer").val()));
+                }
+                else {
+                    $("#discountPer").val(0);
+                }
+                if ($("#discountAmt").val() != "") {
+                    $("#discountAmt").val(parseFloat($("#discountAmt").val()));
+                }
+                else {
+                    $("#discountAmt").val(0);
+                }
+            }
+    })
+    </script>
+}

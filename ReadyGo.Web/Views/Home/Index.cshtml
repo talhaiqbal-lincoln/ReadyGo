@@ -1,0 +1,601 @@
+﻿@model ReadyGo.Domain.Entities.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var role = ViewBag.Role;
+    var cardClassLine = "";
+    var cardClassBar = "";
+    if (role.Equals("Admin"))
+    {
+        cardClassLine = "col-md-12";
+        cardClassBar = "col-md-12";
+    }
+    else if (role.Equals("Sales Manager"))
+    {
+        cardClassLine = "col-md-9";
+        cardClassBar = "col-md-12";
+    }
+    else
+    {
+        cardClassLine = "col-md-9";
+        cardClassBar = "col-md-9";
+    }
+}
+@section styles{
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+    <style>
+        .btnActive {
+            background-color: #343a40;
+            color: #efefef;
+            box-shadow: rgb(239 239 239) 0px 0px unset;
+        }
+
+        .card-header {
+            background-color: white;
+            text-align: center;
+        }
+    </style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Dashboard</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <b>Total Sales</b>
+                                <div class="row">
+                                    <div class="col-md-8" style="padding-left:0px">
+                                        <h2>@Math.Round(Model.Sales, 2).ToString("N2") Rs</h2>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span class="fa fa-line-chart float-right" style="padding:10px 0px 0px 0px;font-size:25px"></span>
+                                    </div>
+                                </div>
+                                @if (Model.SalesPercentage >= 0)
+                                {
+                                    <p style="color: #3a9437"><i class="fa fa-long-arrow-up"></i> @Math.Round(Model.SalesPercentage, 2)%  <span style="color:#212121">Since last month</span></p>
+                                }
+                                else
+                                {
+                                    <p style="color:red"><i class="fa fa-long-arrow-down"></i> @Math.Abs(Math.Round(Model.SalesPercentage, 2))%  <span style="color:#212121">Since last month</span></p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <b>Total Returns</b>
+                                <div class="row">
+                                    <div class="col-md-8" style="padding-left:0px">
+                                        <h2>@Math.Round(Model.Return, 2).ToString("N2") Rs</h2>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span class="fa fa-undo float-right" style="padding:10px 0px 0px 0px;font-size:25px"></span>
+                                    </div>
+                                </div>
+                                @if (Model.ReturnPercentage >= 0)
+                                {
+                                    <p style="color: #3a9437"><i class="fa fa-long-arrow-up"></i> @Math.Round(Model.ReturnPercentage, 2)%  <span style="color:#212121">Since last month</span></p>
+                                }
+                                else
+                                {
+                                    <p style="color:red"><i class="fa fa-long-arrow-down"></i> @Math.Abs(Math.Round(Model.ReturnPercentage, 2))%  <span style="color:#212121">Since last month</span></p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <b>Total Waste</b>
+                                <div class="row">
+                                    <div class="col-md-8" style="padding-left:0px">
+                                        <h2>@Math.Round(Model.Waste, 2).ToString("N2") Rs</h2>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span class="fa fa-trash float-right" style="padding:10px 0px 0px 0px;font-size:25px"></span>
+                                    </div>
+                                </div>
+                                @if (Model.WastePercentage >= 0)
+                                {
+                                    <p style="color: #3a9437"><i class="fa fa-long-arrow-up"></i> @Math.Round(Model.WastePercentage, 2)%  <span style="color:#212121">Since last month</span></p>
+                                }
+                                else
+                                {
+                                    <p style="color:red"><i class="fa fa-long-arrow-down"></i> @Math.Abs(Math.Round(Model.WastePercentage, 2))%  <span style="color:#212121">Since last month</span></p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <b>Total Outstanding Amount</b>
+                                <div class="row">
+                                    <div class="col-md-8" style="padding-left:0px">
+                                        <h2>@Math.Round(Model.Balance, 2).ToString("N2") Rs</h2>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span class="fa fa-money float-right" style="padding:10px 0px 0px 0px;font-size:25px"></span>
+                                    </div>
+                                </div>
+                                @if (Model.BalancePercentage >= 0)
+                                {
+                                    <p style="color: #3a9437"><i class="fa fa-long-arrow-up"></i> @Math.Round(Model.BalancePercentage, 2)%  <span style="color:#212121">Since last month</span></p>
+                                }
+                                else
+                                {
+                                    <p style="color:red"><i class="fa fa-long-arrow-down"></i> @Math.Abs(Math.Round(Model.BalancePercentage, 2))%  <span style="color:#212121">Since last month</span></p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ln_solid"></div>
+                <div class="row">
+                    <div class="@cardClassLine">
+                        <div class="card">
+                            <div class="card-body">
+                                <h2>
+                                    Total Sales Summary
+                                </h2>
+                                <div class="row">
+                                    <div class="col-md-3"></div>
+                                    <div class="col-md-3">
+                                        <div class="timespan1 col-md-12" style="display:none">
+                                            <label>From:</label>
+                                            <div class="col-md-12" style="padding-left: 0px; cursor: pointer;">
+                                                <input type="text" name="dateFrom" id="dateFrom" class="form-control customDate" onchange="FilterSales()" placeholder="dd/mm/yyyy" style="cursor:pointer;">
+                                                <span class="fa fa-calendar form-control-feedback right" aria-hidden="true" onclick="$('#dateFrom').focus()"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="timespan1 col-md-12" style="display:none">
+                                            <label>To:</label>
+                                            <div class="col-md-12" style="padding-left: 0px; cursor: pointer;">
+                                                <input type="text" name="dateTo" id="dateTo" class="form-control customDate" onchange="FilterSales()" placeholder="dd/mm/yyyy" style="cursor:pointer;">
+                                                <span class="fa fa-calendar form-control-feedback right" aria-hidden="true" onclick="$('#dateTo').focus()"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="col-md-12">
+                                            <label>Time Span</label>
+                                            <select id="timePeriod" onchange="FilterSales()" class="form-control">
+                                                <option value="Year">Yearly</option>
+                                                <option value="Half">6 Month</option>
+                                                <option value="Month" selected>Monthly</option>
+                                                <option value="Week">Weekly</option>
+                                                <option value="Range">Select Timespan Range</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <canvas id="lineChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @if (role.Equals("Sales Manager"))
+                    {
+                        <div class="col-md-3">
+                            <div class="card" style="height:100%">
+                                <div class="card-header">
+                                    <h2>Discount Order Statistic</h2>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="discountOrderStatsSM"></canvas>
+                                    <div class="row">
+                                        <div class="col-md-12" style="text-align:center">
+                                            <br />
+                                            <h2><b>Total</b></h2>
+                                            <h3 style="font-size:16px"><b>@Model.SMOrders Discounted Orders</b></h3>
+                                            <h3 style="font-size: 16px; color: #3a9437"><b>@Model.SMApprovedOrders Approved</b></h3>
+                                            <h3 style="font-size: 16px; color: #cd2025 "><b>@Model.SMReAdjustOrders Re-adjusted</b></h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (role.Equals("Marketing Manager"))
+                    {
+                        <div class="col-md-3">
+                            <div class="card" style="height:100%">
+                                <div class="card-header">
+                                    <h2>Marketing Manger Discount Order Statistic</h2>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="discountOrderStatsMM"></canvas>
+                                    <div class="row">
+                                        <div class="col-md-12" style="text-align:center">
+                                            <br />
+                                            <h2><b>Total</b></h2>
+                                            <h3 style="font-size:16px"><b>@Model.MMOrders Discounted Orders</b></h3>
+                                            <h3 style="font-size:16px; color: #3a9437"><b>@Model.MMApprovedOrders Approved</b></h3>
+                                            <h3 style="font-size: 16px; color: #cd2025 "><b>@Model.MMReAdjustOrders Re-adjusted</b></h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="ln_solid"></div>
+                <div class="row">
+                    <div class="@cardClassBar">
+                        <div class="card">
+                            <div class="card-body">
+                                <h2>Salesperson vs Sales</h2>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="timespan2 col-md-12" style="display:none">
+                                            <label>From:</label>
+                                            <div class="col-md-12" style="padding-left: 0px; cursor: pointer;">
+                                                <input type="text" name="dateFrom2" id="dateFrom2" class="form-control customDate" onchange="FilterSalesSp()"  placeholder="dd/mm/yyyy" style="cursor:pointer;">
+                                                <span class="fa fa-calendar form-control-feedback right" aria-hidden="true" onclick="$('#dateFrom2').focus()"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="timespan2 col-md-12" style="display:none">
+                                            <label>To:</label>
+                                            <div class="col-md-12" style="padding-left: 0px; cursor: pointer;">
+                                                <input type="text" name="dateTo2" id="dateTo2" class="form-control customDate" onchange="FilterSalesSp()" placeholder="dd/mm/yyyy" style="cursor:pointer;">
+                                                <span class="fa fa-calendar form-control-feedback right" aria-hidden="true" onclick="$('#dateTo2').focus()"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>Time Span</label>
+                                        <select id="timePeriod1" onchange="FilterSalesSp()" class="form-control">
+                                            <option value="Year">Yearly</option>
+                                            <option value="Half">6 Month</option>
+                                            <option value="Month" selected>Monthly</option>
+                                            <option value="Week">Weekly</option>
+                                            <option value="Range">Select Timespan Range</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>Salesperson</label>
+                                        <select id="spId" asp-items="@(new SelectList(Model.SalesPersons,"Id","Name"))" onchange="FilterSalesSp()" class="form-control" style="max-width:100%">
+                                            <option value="" selected>All Salesperson</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <canvas id="barChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @if (role.Equals("Marketing Manager"))
+                    {
+                        <div class="col-md-3">
+                            <div class="card" style="height:100%">
+                                <div class="card-header">
+                                    <h2>Sales Manger Discount Order Statistic</h2>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="discountOrderStatsSM"></canvas>
+                                    <div class="row">
+                                        <div class="col-md-12" style="text-align:center">
+                                            <br />
+                                            <h2><b>Total</b></h2>
+                                            <h3 style="font-size:16px"><b>@Model.MMOrders Discounted Orders</b></h3>
+                                            <h3 style="font-size: 16px; color: #3a9437"><b>@Model.MMApprovedOrders Approved</b></h3>
+                                            <h3 style="font-size: 16px; color: #cd2025 "><b>@Model.MMReAdjustOrders Re-adjusted</b></h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="ln_solid"></div>
+                <div class="row">
+                    <div class="col-md-8"></div>
+                    <div class="col-md-4" style="text-align:right">
+                        <input class='form-control custom-search' placeholder='Type and press enter to search' />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 table-responsive">
+                        <table id="spTable" class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Salesperson Name</th>
+                                    <th>Net Sales</th>
+                                    <th>Return/Waste</th>
+                                    <th>Discount</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script src="~/lib/Chart.js/chart.min.js"></script>
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#dateFrom").datepicker({
+                dateFormat: "dd/mm/yy",
+                maxDate: 0
+            }).val(new Date().toLocaleDateString("en-GB"));
+            $("#dateTo").datepicker({
+                dateFormat: "dd/mm/yy",
+                maxDate: 0,
+                val: new Date().toISOString().split("T")[0]
+            }).val(new Date().toLocaleDateString("en-GB"));
+            $("#dateFrom2").datepicker({
+                dateFormat: "dd/mm/yy",
+                maxDate: 0
+            }).val(new Date().toLocaleDateString("en-GB"));
+            $("#dateTo2").datepicker({
+                dateFormat: "dd/mm/yy",
+                maxDate: 0
+            }).val(new Date().toLocaleDateString("en-GB"));
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+
+                title: '<b>Search by</b><ul class="tooltip-ul1"><li>Salesperson name</li></ul>',
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            var timePeriod = 'Month'; salesPerson = '';
+            $("#spId").select2({
+                width: '100%'
+            });
+            //$("#timePeriod").select2();
+            const ctx = document.getElementById('lineChart').getContext('2d');
+            var lineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: "Sales",
+                        backgroundColor: "rgba(38, 185, 154, 0.31)",
+                        borderColor: "rgba(38, 185, 154, 0.7)",
+                        pointBorderColor: "rgba(38, 185, 154, 0.7)",
+                        pointBackgroundColor: "rgba(38, 185, 154, 0.7)",
+                        pointHoverBackgroundColor: "#fff",
+                        pointHoverBorderColor: "rgba(220,220,220,1)",
+                        pointBorderWidth: 1,
+                        data: [],
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            var ctx1 = document.getElementById("barChart");
+            var barChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Sales',
+                        backgroundColor: "#072e59",
+                        data: []
+                    }]
+                },
+                options: {
+                    //scales: {
+                    //    yAxes: [{
+                    //        ticks: {
+                    //            beginAtZero: true
+                    //        }
+                    //    }]
+                    //},
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            FilterSales = () => {
+                let timeSpan = $("#timePeriod option:selected").val()
+                let startDate = '', endDate = '';
+                if (timeSpan == "Range") {
+                    $(".timespan1").css("display", "block");
+                    timeSpan = null;
+                    startDate = $("#dateFrom").val();
+                    endDate = $("#dateTo").val();
+                }
+                else {
+                    $(".timespan1").css("display", "none");
+                }
+                $.ajax({
+                    url: '/Home/TotalSales',
+                    type: 'POST',
+                    method: 'post',
+                    dataType: 'json',
+                    data: { period: timeSpan, startDate: startDate, endDate: endDate },
+                    success: function (response) {
+                        lineChart.data.labels = response.labels;
+                        lineChart.data.datasets[0].data = response.sales;
+                        lineChart.update();
+                    },
+                    error: function (err) {
+                        console.log(err);
+                    }
+                })
+            }
+            FilterSalesSp = () => {
+                let timeSpan = $("#timePeriod1 option:selected").val()
+                let startDate = '', endDate = '';
+                if (timeSpan == "Range") {
+                    $(".timespan2").css("display", "block");
+                    timeSpan = null;
+                    startDate = $("#dateFrom2").val();
+                    endDate = $("#dateTo2").val();
+                }
+                else {
+                    $(".timespan2").css("display", "none");
+                }
+                $.ajax({
+                    url: '/Home/SPSales',
+                    type: 'POST',
+                    method: 'post',
+                    dataType: 'json',
+                    data: { period: timeSpan, sp: $("#spId option:selected").val(), startDate: startDate, endDate: endDate },
+                    success: function (response) {
+                        barChart.data.labels = response.name;
+                        barChart.data.datasets[0].data = response.sum;
+                        barChart.update();
+                    },
+                    error: function (err) {
+                        console.log(err);
+                    }
+                })
+            }
+            FilterSales();
+            FilterSalesSp();
+            var dashboard = JSON.parse('@Html.Raw(Json.Serialize(Model))')
+            if ($('#discountOrderStatsSM').length) {
+
+                var ctx3 = document.getElementById("discountOrderStatsSM");
+                var canvasDoughnut = new Chart(ctx3, {
+                    type: 'doughnut',
+                    tooltipFillColor: "rgba(51, 51, 51, 0.55)",
+                    data: {
+                        labels: ["Approved", "ReAdjusted"],
+                        datasets: [{
+                            data: [dashboard.smApprovedOrders, dashboard.smReAdjustOrders],
+                            backgroundColor: [
+                                "#3a9437",
+                                "#cd2025"
+                            ],
+                            hoverBackgroundColor: [
+                                "#3c8c3a",
+                                "#8c1c19"
+                            ]
+
+                        }]
+                    }
+                });
+
+            }
+            if ($('#discountOrderStatsMM').length) {
+
+                var ctx4 = document.getElementById("discountOrderStatsMM");
+                var canvasDoughnut = new Chart(ctx4, {
+                    type: 'doughnut',
+                    tooltipFillColor: "rgba(51, 51, 51, 0.55)",
+                    data: {
+                        labels: ["Approved", "ReAdjusted"],
+                        datasets: [{
+                            data: [dashboard.mmApprovedOrders, dashboard.mmReAdjustOrders],
+                            backgroundColor: [
+                                "#3a9437",
+                                "#cd2025"
+                            ],
+                            hoverBackgroundColor: [
+                                "#3c8c3a",
+                                "#8c1c19"
+                            ]
+
+                        }]
+                    }
+                });
+
+            }
+            var searchQuery = '';
+            var spTable = $('#spTable').DataTable({
+                dom: "rt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No matching results found'
+                },
+                order: [0, 'asc'],
+                length: 5,
+                lengthMenu: [5, 10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '/Home/SpTable',
+                    type: "post",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.search = searchQuery;
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: { name: 'name', profileImage: 'profileImage' },
+                        render: function (data) {
+                            return `<div class="row"><div style="width:40px"><div class="User-Image img-circle"><img src=${data.profileImage} height="30" class="inner-img"></div></div><span>${data.name}</span></div>`
+                        }
+                    },
+                    {
+                        data: 'sales',
+                        className: 'text-right',
+                        render: function (data) {
+                            return data.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        }
+                    },
+                    {
+                        data: 'waste',
+                        className: 'text-right',
+                        render: function (data) {
+                            return data.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        }
+                    },
+                    {
+                        data: 'discount',
+                        className: 'text-right',
+                        render: function (data) {
+                            return data.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                        }
+                    },
+                ]
+
+            });
+            $(".custom-search").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    searchQuery = $(".custom-search").val();
+                    spTable.ajax.reload();
+                }
+            });
+        })
+    </script>
+}

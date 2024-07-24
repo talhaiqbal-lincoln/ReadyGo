@@ -1,0 +1,323 @@
+﻿@model IEnumerable<ReadyGo.Domain.Entities.Category>;
+@{
+    ViewData["Title"] = "Stocks Categories";
+}
+@section Styles{
+    <link href="~/lib/OwlCarousel2/assets/owl.carousel.css" rel="stylesheet" />
+    <link href="~/jqueryui/jquery-ui.min.css" rel="stylesheet" />
+    <style>
+        .carousel-wrap {
+            margin: auto;
+            position: relative;
+        }
+
+        .owl-carousel .owl-nav {
+            overflow: hidden;
+            height: 0px;
+        }
+
+        .owl-theme .owl-dots .owl-dot.active span,
+        .owl-theme .owl-dots .owl-dot:hover span {
+            background: #2caae1;
+        }
+
+        .owl-carousel .item {
+            text-align: center;
+        }
+
+        .owl-carousel .nav-btn {
+            height: 47px;
+            position: absolute;
+            width: 26px;
+            cursor: pointer;
+            top: 100px !important;
+        }
+
+        .owl-carousel .owl-prev.disabled,
+        .owl-carousel .owl-next.disabled {
+            pointer-events: none;
+            opacity: 0.2;
+        }
+
+        .owl-carousel .prev-slide {
+            /*background: url(nav-icon.png) no-repeat scroll 0 0;*/
+            left: -22px;
+        }
+
+        .owl-carousel .next-slide {
+            /*background: url(nav-icon.png) no-repeat scroll -24px 0px;*/
+            right: -22px;
+        }
+
+        .owl-carousel .prev-slide:hover {
+            background-position: 0px -53px;
+        }
+
+        .owl-carousel .next-slide:hover {
+            background-position: -24px -53px;
+        }
+
+        span.img-text {
+            text-decoration: none;
+            outline: none;
+            transition: all 0.4s ease;
+            -webkit-transition: all 0.4s ease;
+            -moz-transition: all 0.4s ease;
+            -o-transition: all 0.4s ease;
+            cursor: pointer;
+            width: 100%;
+            font-size: 18px;
+            display: block;
+            text-transform: capitalize;
+        }
+
+        .owl-item {
+            width: 200px !important
+        }
+
+        .tab {
+            width: auto;
+            float: left;
+        }
+
+        .tab-active {
+            color: #2A3F54;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+            border-top: 1px solid #ddd;
+            border-top-right-radius: 3px;
+            border-top-left-radius: 3px;
+        }
+
+        .table-responsive {
+            overflow-x: hidden;
+        }
+
+        * {
+            padding: 0;
+            margin: 0;
+            /*cursor: default;*/
+            /*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+        }
+
+        .container {
+            margin: 0 auto;
+            padding: 0 20px;
+            max-width: 900px;
+            min-width: 300px;
+        }
+
+        .row {
+            width: 100%;
+            overflow: no-display;
+        }
+
+        .column {
+            float: left;
+            width: 100%;
+        }
+
+        .connected-sortable {
+            margin: 0 auto;
+            list-style: none;
+            width: 90%;
+        }
+
+        li.draggable-item {
+            width: inherit;
+            padding: 10px 10px;
+            text-align: center;
+            background-color: #f5f5f5;
+            -webkit-transition: transform .25s ease-in-out;
+            -moz-transition: transform .25s ease-in-out;
+            -o-transition: transform .25s ease-in-out;
+            transition: transform .25s ease-in-out;
+            -webkit-transition: box-shadow .25s ease-in-out;
+            -moz-transition: box-shadow .25s ease-in-out;
+            -o-transition: box-shadow .25s ease-in-out;
+            transition: box-shadow .25s ease-in-out;
+            margin-bottom: 5px;
+        }
+
+            li.draggable-item:hover {
+                cursor: pointer;
+                background-color: #eaeaea;
+            }
+
+            /* styles during drag */
+            li.draggable-item.ui-sortable-helper {
+                background-color: #e5e5e5;
+                -webkit-box-shadow: 0 0 8px rgba(53,41,41, .8);
+                -moz-box-shadow: 0 0 8px rgba(53,41,41, .8);
+                box-shadow: 0 0 8px rgba(53,41,41, .8);
+                transform: scale(1.015);
+                z-index: 100;
+            }
+
+            li.draggable-item.ui-sortable-placeholder {
+                background-color: #ddd;
+                -moz-box-shadow: inset 0 0 10px #000000;
+                -webkit-box-shadow: inset 0 0 10px #000000;
+                box-shadow: inset 0 0 10px #000000;
+            }
+
+        .modal-dialog-scrollable .modal-body {
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .owl-dots{
+            display:none;
+        }
+    </style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>@ViewData["Title"]</h2>
+                <h2 style="float:right;font-size:18px"><a href="#" onclick="loadModal(); return false;"><i class="fa fa-sort font-weight-bold" style="cursor:pointer"></i> Change Arrangement</a></h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                @foreach (var category in Model)
+                {
+                    <div class="card" style="margin-bottom:15px">
+                        <div class="card-header" style="padding-bottom:0.5px">
+                            <h5 style="color:#73879C" class="col-md-8">@category.Name</h5>
+                        </div>
+                        <div class="card-body carousel-wrap" style="margin: inherit; padding-bottom: 0.5px; margin-bottom:10px">
+                            <div class="owl-carousel owl-theme">
+                                @foreach (var product in category.Products.Where(p => p.ProductId == null).OrderBy(x => x.Name))
+                                {
+
+                                    <div class="item" style="border:1px solid #ddd;border-radius:5px;cursor:pointer">
+                                        <a href="@Url.ActionLink("ProductDetails", "Stock", new { id = product.Id })" style="width:100%">
+                                            @if (product.Image != null)
+                                            {
+                                                <img src="data:image;base64,@Convert.ToBase64String(product.Image.File)" style="border-radius:5px;align-self:center" height="150">
+                                            }
+                                            else
+                                            {
+                                                <img src="~/resource_files/defaultProduct.jpg" style="border-radius: 5px; align-self: center" height="150" />
+                                            }
+                                            <span class="img-text">@product.Name</span>
+                                            @*<span> @product.AxCode </span>*@
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Stock Modal-->
+<div class="modal fade bs-example-modal-lg" id="stock_Modal" tabindex="-1" data-backdrop="static" data-keyboard="false" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="stock_ModalLabel">Categories Arrangement</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="stockModalBody" style="padding:4%">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="submitButton" onclick="submitForm()">
+                    Save Arrangement
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Stock Modal-->
+@section Validation{
+    <script src="~/jqueryui/jquery-ui.min.js"></script>
+    <script src="~/js/ValidationScript.min.js"></script>
+}
+@section Scripts{
+    <script src="~/lib/OwlCarousel2/owl.carousel.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.owl-carousel').owlCarousel({
+                //margin: 10,
+                //items: 6,
+                //navigation: false,
+                //navigationText: ["prev", "next"],
+                //pagination: true,
+                //paginationNumbers: true,
+                //autoWidth: true,
+                margin: 10,
+                nav: true,
+                navText: ["<div class='nav-btn prev-slide'><i class='fa fa-angle-left' style='font-size:30px;font-weight:bold'></i></div>", "<div class='nav-btn next-slide'><i class='fa fa-angle-right' style='font-size:30px;font-weight:bold'></i></div>"],
+                autoWidth:true,
+                items: 6,
+                //responsive: {
+                //    0: {
+                //        items: 2
+                //    }
+                //}
+            });
+            loadModal = (id) => {
+                $.ajax({
+                    url: '../Stock/GetCategory',
+                    type: "Get",
+                    method: 'get',
+                    data: {},
+                    success: function (response) {
+                        $('#stockModalBody').html(response);
+                        $(init);
+                    },
+                    error: function (err) {
+                        console.log(err);
+                        ErrorNotification(err.responseJSON.message)
+                    }
+                })
+                $('#stock_Modal').modal("show");
+            }
+            HideModal = () => {
+                $('#stock_Modal').modal('hide');
+            }
+
+            function init() {
+                $(".droppable-area1").sortable({
+                    connectWith: ".connected-sortable",
+                    stack: '.connected-sortable ul',
+
+                }).disableSelection();
+            }
+              submitForm = () => {
+                  let href = "@Url.Action("UpdatePosition", "Stock")";
+
+                  var categoryIds = [];
+                  $('#categories li').each(function () {
+                      categoryIds.push($(this).attr('id'));
+                  });
+                  console.log(categoryIds.toString());
+                  var a = " ";
+                  $.ajax({
+                      url: href,
+                      type: "POST",
+                      traditional: true,
+                      beforeSend: LoadingSpinner(),
+                      data: JSON.stringify(categoryIds),
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (response) {
+                            swal.close();
+                            HideModal();
+                            location.reload();
+                        },
+                        error: function (err) { }
+                    })
+
+            }
+
+        })
+    </script>
+}

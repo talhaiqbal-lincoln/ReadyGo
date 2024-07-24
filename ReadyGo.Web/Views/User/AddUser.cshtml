@@ -1,0 +1,595 @@
+﻿@using ReadyGo.Domain.Enum;
+@using ReadyGo.Persistence.Seeds
+@model ReadyGo.Domain.Entities.ViewModels.UserViewModel
+@{
+    ViewData["Title"] = ViewBag.PageTitle;
+    var isEditable = ViewBag.Editable;
+}
+@section styles{
+    <link rel="stylesheet" href="~/lib/croppie/croppie.min.css" />
+    <style>
+        /*.profileImageContainer {
+            display: flex;
+            justify-content: center;*/
+        /*margin: 0% 0% 2% 0%;*/
+        /*}*/
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /*@@media screen and (min-width:991px){
+            .imageContainer {
+                margin-top: 20%
+            }
+        }*/
+    </style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2><a onclick='window.location.href = "@Url.Action("Index", "User")";'><i class="fa fa-angle-left font-weight-bold" style="font-size:22px"></i></a> @ViewBag.PageTitle</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <form id="UserForm" class="form-horizontal form-label-left">
+                    <input type="hidden" id="Id" asp-for="Id" />
+                    <input type="hidden" id="userRoleId" asp-for="RoleId" />
+                    <div class="row formGroup">
+                        <div class="col-md-4">
+                            @if (Model.SyncedAt != null)
+                            {
+                                <span class="userAxStatus">Synced</span>
+                            }
+                            else
+                            {
+                                <span class="userAxStatus" style="background-color: darkred">UnSynced</span>
+                            }
+                        </div>
+                        <div class="col-md-6"></div>
+                        <div class="col-md-2">
+                            @if (!isEditable)
+                            {
+                                <a id="EditUser"><i style="cursor:pointer" onclick='' class="fa fa-edit editIcon"></i></a>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="profile-image">
+                            <div class="col-md-10" style="text-align: -webkit-center">
+                                <div class="square-box">
+                                    <div class="square-content">
+                                        @if (isEditable)
+                                        {
+                                            <div id="ChangeDP" class="imageContainer img-thumbnail img-circle user-image-details">
+                                                @if (Model.ProfileImage != null)
+                                                {
+                                                    <img src="data:image;base64,@Convert.ToBase64String(Model.ProfileImage.File)" id="ProfilePic" class="image inner-img">
+                                                }
+                                                else
+                                                {
+                                                    <img src="~/resource_files/default_user.jpg" id="ProfilePic" class="image inner-img">
+                                                }
+                                                <div class="middle">
+                                                    <div><i class="fa fa-camera profileUpdate"></i></div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="imageContainer img-thumbnail img-circle user-image-details">
+                                                @if (Model.ProfileImage != null)
+                                                {
+                                                    <img src="data:image;base64,@Convert.ToBase64String(Model.ProfileImage.File)" id="ProfilePic" class="inner-img">
+                                                }
+                                                else
+                                                {
+                                                    <img src="~/resource_files/default_user.jpg" id="ProfilePic" class="inner-img">
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="user-info">
+                            <div class="form-group row">
+                                <div class="col-md-6">
+                                    <label class="col-md-12 col-sm-12 col-xs-12" for="ax-code">
+                                        AxCode
+                                    </label>
+                                    @if (!string.IsNullOrEmpty(Model.AxCode))
+                                    {
+                                        <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                            <input type="text" readonly class="form-control has-feedback-left" asp-for="AxCode" />
+                                            <i class="fa fa-qrcode form-control-feedback left" aria-hidden="true"></i>
+                                            <span asp-validation-for="AxCode" class="text-danger"></span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                            <input type="text" class="form-control has-feedback-left" asp-for="AxCode" />
+                                            <i class="fa fa-qrcode form-control-feedback left" aria-hidden="true"></i>
+                                            <span asp-validation-for="AxCode" class="text-danger"></span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="col-md-12 col-sm-12 col-xs-12 required" for="first-name">
+                                        First Name
+                                    </label>
+                                    <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                        <input type="text" class="form-control has-feedback-left" asp-for="FirstName" />
+                                        <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-6">
+                                    <label class="col-md-12 col-sm-12 col-xs-12">
+                                        Last Name
+                                    </label>
+                                    <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                        <input type="text" class="form-control has-feedback-left" asp-for="LastName" />
+                                        <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                        <span asp-validation-for="LastName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="col-md-12 col-sm-12 col-xs-12 required">
+                                        Email
+                                    </label>
+                                    <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                        @{if (ViewBag.EmailConfirmed != null)
+                                            {
+                                                <input type="text" readonly required asp-for="Email" class="form-control has-feedback-left" /> }
+                                            else
+                                            {
+                                                <input type="email" asp-for="Email" required class="form-control has-feedback-left" />
+                                            }
+                                        }
+                                        <i class="fa fa-envelope form-control-feedback left" aria-hidden="true"></i>
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-6">
+                                    <label class="ccol-md-12 col-sm-12 col-xs-12 required">
+                                        Mobile Number
+                                    </label>
+                                    <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                        <input type="text" required data-inputmask="'mask': '+\\929999999999'" asp-for="PhoneNumber" class="form-control has-feedback-left" onkeyup="ValidatePhone(this)" />
+                                        <i class="fa fa-phone form-control-feedback left" aria-hidden="true"></i>
+                                        <span id="phoneNumber-error" asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="col-md-12 col-sm-12 col-xs-12">
+                                        Province
+                                    </label>
+                                    <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                        <input type="text" asp-for="Province" class="form-control has-feedback-left" />
+                                        <i class="fa fa-globe form-control-feedback left" aria-hidden="true"></i>
+                                        <span asp-validation-for="Province" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-6">
+                                    <label class="col-md-12 col-sm-12 col-xs-12">
+                                        City
+                                    </label>
+                                    <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                        <input type="text" asp-for="City" class="form-control has-feedback-left" />
+                                        <i class="fa fa-globe form-control-feedback left" aria-hidden="true"></i>
+                                        <span asp-validation-for="City" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="col-md-12 col-sm-12 col-xs-12 required">
+                                        Address Line 1
+                                    </label>
+                                    <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                        <input type="text" asp-for="Address1" class="form-control has-feedback-left" />
+                                        <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                        <span asp-validation-for="Address1" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (!isEditable)
+                            {
+                                <div class="form-group row">
+                                    <div class="col-md-6">
+                                        <label class="col-md-12 col-sm-12 col-xs-12">
+                                            Address Line 2
+                                        </label>
+                                        <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                            <input type="text" asp-for="Address2" class="form-control has-feedback-left" />
+                                            <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                            <span asp-validation-for="Address2" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="col-md-12 col-sm-12 col-xs-12">
+                                            Role
+                                        </label>
+                                        <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                            <input disabled asp-for="RoleType" value="@Model.RoleType.GetDescription()" class="form-control has-feedback-left" />
+                                            <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                            <span asp-validation-for="RoleType" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                @if (ViewBag.Action.Equals("AddUser"))
+                                {
+                                    <div class="form-group row">
+                                        <div class="col-md-6">
+                                            <label class="col-md-12 col-sm-12 col-xs-12">
+                                                Address Line 2
+                                            </label>
+                                            <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                                <input type="text" asp-for="Address2" class="form-control has-feedback-left" />
+                                                <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                                <span asp-validation-for="Address2" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="col-md-12 col-sm-12 col-xs-12 required">
+                                                Role
+                                            </label>
+                                            <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                                @*<select asp-for="RoleType" required asp-items="Html.GetEnumSelectList<Roles>().Where(x => x.Text != Roles.Admin.ToString())" class="form-control has-feedback-left">
+                                                        <option value="" disabled selected>Select Role</option>
+                                                    </select>*@
+                                                <select required asp-for="RoleId" asp-items="@(new SelectList(ViewBag.Roles,"Id","Role"))" class="form-control has-feedback-left">
+                                                    <option value="" disabled hidden selected>Select Role</option>
+                                                </select>
+                                                <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                                <span asp-validation-for="RoleId" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    @if (Model.RoleType != Roles.Admin && Model.RoleType != Roles.SalesPerson)
+                                    {
+                                        <div class="row formGroup">
+                                            <div class="col-md-6">
+                                                <label class="col-md-12 col-sm-12 col-xs-12">
+                                                    Address Line 2
+                                                </label>
+                                                <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                                    <input type="text" asp-for="Address2" class="form-control has-feedback-left" />
+                                                    <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                                    <span asp-validation-for="Address2" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="col-md-12 col-sm-12 col-xs-12 required" for="role">
+                                                    Role
+                                                </label>
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <select required asp-for="RoleId" asp-items="@(new SelectList(ViewBag.Roles,"Id","Role"))" class="form-control has-feedback-left">
+                                                        <option value="" disabled hidden selected>Select Role</option>
+                                                    </select>
+                                                    @*<select asp-for="RoleType" asp-items="Html.GetEnumSelectList<Roles>().Where(x => x.Text != Roles.Admin.ToString())" class="form-control has-feedback-left"></select>*@
+                                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                                    <span asp-validation-for="RoleId" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="row formGroup">
+                                            <div class="col-md-6">
+                                                <label class="col-md-12 col-sm-12 col-xs-12">
+                                                    Address Line 2
+                                                </label>
+                                                <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                                    <input type="text" asp-for="Address2" class="form-control has-feedback-left" />
+                                                    <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                                    <span asp-validation-for="Address2" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="col-md-12 col-sm-12 col-xs-12 required" for="role">
+                                                    Role
+                                                </label>
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <input disabled asp-for="RoleType" value="@Model.RoleType" class="form-control has-feedback-left" />
+                                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            }
+                            <input type="file" name="file" accept=".jpg,.png" id="import" style="visibility:hidden" onchange="ChangePic(this)" />
+
+                        </div>
+                    </div>
+                </form>
+                <div id="buttonsDiv">
+                    <div class="ln_solid"></div>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 submit-btn">
+                            <button type="button" id="Cancel" class="btn btn-danger">Cancel</button>
+                            <button type="button" id="SaveChanges" onclick="submitUserForm()" class="btn btn-default"> Save </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/Image Upload Modal-->
+<div class="modal fade bs-example-modal-sm" id="profileImageModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel2">Upload Image</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:2%">
+                <div class="row">
+                    <div id="CropContainer" class="col-md-12">
+                        <img class="my-image" id="my-image" src="~/resource_files/default_user.jpg" />
+                    </div>
+                    <div class="col-md-12 text-center">
+                        <button class="btn btn-default" onclick="$('#import').click()"><i class="fa fa-upload"></i> Select image</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" id="CancelChanges">Cancel</button>
+                <button type="button" id="saveCropImage" class="btn btn-default">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script src="~/lib/croppie/croppie.js"></script>
+    <script src="~/js/ValidationScript.min.js"></script>
+    <script src="~/lib/jquery.inputmask/jquery.inputmask.min.js"></script>
+    <script src="~/lib/jquery.inputmask/bindings/inputmask.binding.js"></script>
+    <script>
+        $(document).ready(function () {
+            var editable = JSON.parse('@Html.Raw(Json.Serialize(isEditable))');
+            if (!editable) {
+                $("#buttonsDiv").hide();
+                $('#UserForm').find('input,select').attr('disabled', 'disabled');
+                $('#UserForm label').removeClass('required');
+                $('#ProfilePic').removeClass("image");
+                $(".middle").hide();
+            }
+            ChangeSrc = (obj) => {
+                let file = obj.value;
+                let fileName = file.split("\\");
+                let span = document.getElementById("filename");
+                let fileTitle = fileName[fileName.length - 1];
+                let fileExtension = fileTitle.replace(/^.*\./, '');
+                if (fileExtension != 'csv') {
+                    swal({
+                        title: "Wrong file selection",
+                        text: 'Please Select the csv file',
+                        icon: "error",
+                        dangerMode: true,
+                    })
+                    span.innerHTML = '';
+                }
+                else {
+                    span.innerHTML = fileTitle;
+                }
+            }
+            $('#ChangeDP').click(function (event) {
+                let dp = $('.imageContainer img').attr('src');
+                $('#my-image').attr('src', dp);
+                uploadCrop.croppie('bind', {
+                    url: $('#my-image').attr('src'),
+                });
+                $('#profileImageModal').modal('show');
+            });
+            $('#CancelChanges').click(function (event) {
+                $('#import').val("");
+                uploadCrop.croppie('bind', {
+                    url: $('#my-image').attr('src'),
+                });
+                $('#profileImageModal').modal('hide');
+            });
+
+            $('#Cancel').click(function (event) {
+                window.location.href = "@Url.Action("Index", "User")";
+            });
+            ChangePic = (input) => {
+                if (input.value != "") {
+                    var url = input.value;
+                    var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+                    if (input.files && input.files[0] && (ext == "png" || ext == "jpg")) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            var image = new Image();
+                            //Set the Base64 string return from FileReader as source.
+                            image.src = e.target.result;
+                            image.onload = function () {
+                                uploadCrop.croppie('bind', {
+                                    url: e.target.result
+                                });
+                                return true;
+                            };
+                        }
+                        reader.readAsDataURL(input.files[0]);
+                    }
+                    else {
+                        ErrorNotification("Please select jpg and png format pictures.");
+                        $('#img').attr('src', '~/images/default_user.jpg');
+                    }
+                }
+            }
+            var uploadCrop = $('.my-image').croppie({
+                enableExif: true,
+                viewport: {
+                    width: 300,
+                    height: 300,
+                    type: 'circle'
+                },
+                boundary: {
+                    width: 300,
+                    height: 300
+                },
+                showZoomer: false
+            });
+            $('#saveCropImage').click(function (event) {
+                uploadCrop.croppie('result', {
+                    type: 'blob',
+                    size: {
+                        width: 300,
+                        height: 300
+                    },
+                    quality: 1
+                }).then(function (blob) {
+                    fileInputElement = document.getElementById('import')
+                    let base64Image = URL.createObjectURL(blob);
+
+                    $("#ProfilePic").attr('src', base64Image)
+
+                    let file = new File([blob], "img.png", { type: "image/png", lastModified: new Date().getTime() });
+                    let container = new DataTransfer();
+                    container.items.add(file);
+                    fileInputElement.files = container.files;
+                    $('#profileImageModal').modal('hide');
+                })
+            })
+             $('#EditUser').click(function () {
+                 window.location.href = '@Url.Action("UpdateUser", "User" , new {id = "ID", flag = "Editable"})'.replace("ID", "@Model.Id");
+                 //location.reload();
+             })
+            var axCode = "@Model.AxCode"
+            submitUserForm = () => {
+                event.preventDefault();
+                if ($("#UserForm").valid) {
+                    var phoneNumber = $('#PhoneNumber').val().split('_')[0];
+                    let roleId = $('#RoleId').val()
+                    let roleType = $('#RoleType').val()
+                    let Reqtype = $('#Id').val();
+                    let href = Reqtype == "" ? "@Url.Action("AddUser","User")" : "@Url.Action("UpdateUser","User")";
+                    var fd = new FormData();
+                    files = $('#import')[0].files;
+                    fd.append("Id", $('#Id').val());
+                    fd.append("FirstName", $('#FirstName').val());
+                    fd.append("LastName", $('#LastName').val());
+                    fd.append("Email", $('#Email').val());
+                    fd.append("PhoneNumber", phoneNumber);
+                    fd.append("City", $('#City').val());
+                    fd.append("Province", $('#Province').val());
+                    fd.append("Address1", $('#Address1').val());
+                    fd.append("Address2", $('#Address2').val());
+                    fd.append("RoleType", roleType != undefined ? roleType : "SalesPerson");
+                    fd.append("RoleId", roleId != undefined ? roleId : $("#userRoleId").val());
+                    if (axCode == "")
+                        fd.append("AxCode", $("#AxCode").val());
+                    fd.append('File', files[0]);
+                    if ($("#UserForm").valid()) {
+                        $.ajax({
+                            url: href,
+                            type: "POST",
+                            method: "post",
+                            processData: false,
+                            contentType: false,
+                            beforeSend: LoadingSpinner(),
+                            data: fd,
+                            success: function (response) {
+                                swal.close();
+                                swal({
+                                    title: "Success",
+                                    text: response.message,
+                                    icon: "success",
+                                    closeOnClickOutside: false
+                                }).then((ok) => {
+                                    if (ok) {
+                                        let url = document.referrer;
+                                        window.location.href = url;
+                                    }
+                                });
+                            },
+                            error: function (err) {
+                                swal.close();
+                                if (err.status == 409) {
+                                    swal({
+                                        title: "User Already Deleted",
+                                        text: err.responseJSON.message,
+                                        icon: "error",
+                                        buttons: true,
+                                        dangerMode: true,
+                                    })
+                                        .then((willDelete) => {
+                                            if (willDelete) {
+                                                $.ajax({
+                                                    url: '../User/UndoDelete',
+                                                    type: "Post",
+                                                    method: 'post',
+                                                    data: { id: err.responseJSON.userId },
+                                                    beforeSend: LoadingSpinner(),
+                                                    success: function (response) {
+                                                        swal.close();
+                                                        swal({
+                                                            title: "Success",
+                                                            text: response.message,
+                                                            icon: "success",
+                                                            closeOnClickOutside: false
+                                                        }).then((ok) => {
+                                                            if (ok) {
+                                                                let url = document.referrer;
+                                                                window.location.href = url;
+                                                            }
+                                                        });
+                                                    },
+                                                    error: function (err) {
+                                                        swal.close();
+                                                        ErrorNotification(err.responseJSON.message)
+                                                    }
+
+                                                })
+                                            }
+                                        });
+                                }
+                                else {
+                                    if (err.responseJSON.message != null) {
+                                        ErrorNotification(err.responseJSON.message)
+                                    }
+                                }
+                            }
+                        })
+
+                    }
+                    else {
+                        $(".input-validation-error")[0].focus();
+                        return false;
+                    }
+                }
+            }
+        });
+    </script>
+
+
+}

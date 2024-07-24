@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MigraDocCore.DocumentObjectModel" Version="1.3.14" />
+    <PackageReference Include="MigraDocCore.Rendering" Version="1.3.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ReadyGo.Persistence\ReadyGo.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,152 @@
+﻿@model ReadyGo.Domain.Entities.ViewModels.AssignRouteViewModel
+<div>
+    <form id="RouteForm" class="form-horizontal form-label-left">
+
+        <input type="hidden" id="SalesPersonId" asp-for="SalesPersonId" />
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row form-group">
+
+                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="first-name">
+                        Salesperson
+                    </label>
+                    <div class="col-md-4 col-sm-4 col-xs-12">
+                        <input asp-for="SPName" type="text" id="SPName" readonly class="form-control">
+                        @* <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>*@
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="sp">
+                        Permanent Route
+                    </label>
+                    <div class="col-md-4 col-sm-4 col-xs-12">
+                        <select class="form-control" id="RouteId" asp-for="RouteId" asp-items="@(new SelectList(ViewBag.Routes,"Id","Name"))">
+                            <option selected value="">No Route</option>
+                        </select>
+                        @*<i class="fa fa-map-signs form-control-feedback left" aria-hidden="true"></i>*@
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="col-md-2 col-sm-4 col-xs-12"></div>
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <span asp-validation-for="SalesPersonId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-6" style="padding:unset">
+                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="sp">
+                            Temporary Route
+                        </label>
+                        <div class="col-md-8 col-sm-8 col-xs-12">
+                            <select class="form-control" id="TempRouteId" asp-for="TempRouteId" onchange="CheckDate(this);" asp-items="@(new SelectList(ViewBag.TempRoutes,"Id","Name"))">
+                                <option selected value="">No Route</option>
+                            </select>
+                            @*<i class="fa fa-map-signs form-control-feedback left" aria-hidden="true"></i>*@
+                        </div>
+                    </div>
+                    <div id="DateDiv" class="col-md-6" style="padding:unset">
+                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="sp">
+                            Select Date
+                        </label>
+                        <div class="col-md-8 col-sm-8 col-xs-12">
+                            @if (Model.TemporaryAssignedTill.HasValue)
+                            {
+                                <input type="hidden" value="@Model.TemporaryAssignedTill.Value" id="TempDate" asp-for="TemporaryAssignedTill" />
+                                <input @*onchange="DateChange();"*@ type="text" value="@Model.TemporaryAssignedTill.Value.ToString("dd/MM/yyyy")" id="date" class="form-control" autocomplete="off" readonly="readonly" />
+                            }
+                            else
+                            {
+                                <input type="hidden" id="TempDate" asp-for="TemporaryAssignedTill" />
+                                <input @*onchange="DateChange();"*@ type="text" id="date" class="form-control" autocomplete="off" readonly="readonly" />
+                            }
+                            @* <i class="fa fa-calendar form-control-feedback left" onclick='$("#date").focus();' aria-hidden="true"></i>*@
+                        </div>
+                        <div class="col-md-4 col-sm-4 col-xs-12"></div>
+                        <div class="col-md-8 col-sm-8 col-xs-12">
+                            <span class="text-danger" id="TempError">The date field is required</span>
+                            @*<span asp-validation-for="TemporaryAssignedTill" class="text-danger"></span>*@
+                        </div>
+                    </div>
+                    @*<div class="col-md-12">
+                <div class="col-md-2 col-sm-2 col-xs-12"></div>
+                <div class="col-md-4 col-sm-4 col-xs-12" id="TempError">
+                    <span asp-validation-for="TempRouteId" class="text-danger"></span>
+                </div>
+            </div>*@
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#TempError").hide();
+        $("#RouteId").select2({
+            dropdownParent: $('#route_Modal'),
+            width:'100%'
+        });
+        $("#TempRouteId").select2({
+            dropdownParent: $('#route_Modal'),
+            width: '100%'
+        });
+        var spName =  JSON.parse('@Html.Raw(Json.Serialize(Model.SPName))');
+        var label = $('#route_ModalLabel').html();
+        $('#route_ModalLabel').html(label + " (" + spName + ")");
+        if ($("#date").val() != "") {
+            var splitdate = $("#date").val().split('/');
+            var newDate = `${splitdate[1]}/${splitdate[0]}/${splitdate[2]}`;
+            var assignDate = new Date(newDate);
+            console.log(assignDate);
+            $('#TempDate').val(assignDate);
+        }
+
+        //$('form#RouteForm').removeData("validator");
+        //$('form#RouteForm').removeData("unobtrusiveValidation");
+        //$.validator.unobtrusive.parse($('form#RouteForm'));
+
+        if ($('#TempRouteId').val() == "") {
+            $('#DateDiv').hide()
+        }
+        $('select').on('change', function (event) {
+            //restore previously selected value
+            var prevValue = $(this).data('previous');
+            $('select').not(this).find('option[value="' + prevValue + '"]').show();
+            //hide option selected
+            var value = $(this).val();
+            //update previously selected data
+            $(this).data('previous', value);
+            if (value != "") {
+                $('select').not(this).find('option[value="' + value + '"]').hide();
+            }
+        });
+        //DateChange = () => {
+        //    $('#TempError').hide();
+        //    //$("#TempDate").val($("#date").val());
+        //    if ($('#date').val() == "") {
+        //         $('#TempDate').val("");
+        //    }
+        //    else {
+        //        var parsedDate = Date.parse($('#date').val());
+        //        // You want to check again for !isNaN(parsedDate) here because Dates can be converted
+        //        // to numbers, but a failed Date parse will not.
+        //        if (isNaN($('#date').val()) && !isNaN(parsedDate)) {
+        //            $('#TempDate').val(assignDate);
+        //        }
+        //        else {
+        //            $('#TempDate').val("");
+        //            $('#TempError').show();
+        //        }
+        //    }
+        //}
+        CheckDate = (sel) => {
+            $('#TempError').hide()
+            if (sel.value == "") {
+                $('#DateDiv').hide()
+            }
+            else {
+                $('#DateDiv').show()
+            }
+        }
+    })
+</script>

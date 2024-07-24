@@ -1,0 +1,136 @@
+﻿@model ReadyGo.Domain.Entities.ViewModels.PromoTableViewModel
+@{
+    ViewData["Title"] = " Promo Details";
+}
+
+@section Styles{ 
+<style>
+    input{
+        pointer-events:none;
+    }
+</style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2><a onclick="history.back()"><i class="fa fa-angle-left font-weight-bold" style="font-size:22px"></i></a> @ViewData["Title"]</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row formGroup">
+                    <div class="col-md-4">
+                        @if (Model.IsActive)
+                        {
+                            <span class="userAxStatus">Enabled</span>
+                        }
+                        else
+                        {
+                            <span class="userAxStatus" style="background-color: darkred">Disabled</span>
+                        }
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Title
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input class="form-control has-feedback-left" readonly asp-for="Title" />
+                                    <i class="fa fa-tag form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Base Product
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input type="text" class="form-control has-feedback-left" readonly asp-for="BaseProduct" />
+                                    <i class="fa fa-cube form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Base Product Quantity
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input type="text" class="form-control has-feedback-left text-right" readonly asp-for="BaseQuantity" />
+                                    <i class="fa fa-cubes form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Start Date
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input type="text" class="form-control has-feedback-left" readonly asp-for="StartDate" />
+                                    <i class="fa fa-clock-o form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Max Promo Quantity
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input type="text" class="form-control has-feedback-left text-right" readonly asp-for="MaxQuantity" />
+                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12">
+                                    Route
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    @if (string.IsNullOrEmpty(Model.RouteName))
+                                    {
+                                        <input type="text" class="form-control has-feedback-left" readonly value="" />
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control has-feedback-left" readonly asp-for="RouteName" />
+                                    }
+                                    <i class="fa fa-map-signs form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Promo Product
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input type="text" class="form-control has-feedback-left" readonly asp-for="PromoProduct" />
+                                    <i class="fa fa-cube form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Promo Product Quantity
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input type="text" class="form-control has-feedback-left text-right" readonly asp-for="PromoQuantity" />
+                                    <i class="fa fa-cubes form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    End Date
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input type="text" class="form-control has-feedback-left" readonly asp-for="EndDate" />
+                                    <i class="fa fa-clock-o form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

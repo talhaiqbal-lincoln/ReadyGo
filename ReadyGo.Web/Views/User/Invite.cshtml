@@ -1,0 +1,222 @@
+﻿@{
+    ViewData["Title"] = "User Invites";
+}
+
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+}
+<div id="exportCsv">
+</div>
+
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>User Invites</h2>
+                <div class="nav navbar-right panel_toolbox">
+                    <input class='form-control custom-search' placeholder='Type and press enter to search' />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content table-responsive">
+                <table id="InvitesTable" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>
+                                <div class='dropdown'>
+                                    <a class='dropdown-toggle' data-toggle='dropdown'><span>User Role</span><i style="float:right;opacity:.5;margin-top:2px" class='fa fa-filter'></i></a>
+                                    <ul class='dropdown-menu'>
+                                        <li class='dropdown-item' onclick="FilterUser('All Roles','role')"><a>All Roles</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Admin','role')"><a>Admin</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Sales Person','role')"><a>Salesperson</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Sales Manager','role')"><a>Sales Manager</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Marketing Manager','role')"><a>Marketing Manager</a></li>
+                                    </ul>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='dropdown'>
+                                    <a class='dropdown-toggle' data-toggle='dropdown'><span>Status</span><i style="float:right;opacity:.5;margin-top:2px" class='fa fa-filter'></i></a>
+                                    <ul class='dropdown-menu'>
+                                        <li class='dropdown-item' onclick="FilterStatus('All')"><a>All Invited</a></li>
+                                        <li class='dropdown-item' onclick="FilterStatus('Pending')"><a>Pending</a></li>
+                                        <li class='dropdown-item' onclick="FilterStatus('Expired')"><a>Expired</a></li>
+                                    </ul>
+                                </div>
+                            </th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+                title: '<b>Search by</b><ul class="tooltip-ul1"><li>First name</li><li>Last Name</li><li>Email</li></ul>',
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            var searchQuery = ''; var filterFlag = 'All Roles'; var status = 'All';
+            var userDataTable = $('#InvitesTable').DataTable({
+                dom: "rt<'row'<'col-md-6 col-xs-12'i><'col-md-2 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No matching results found'
+                },
+                order: [1, 'asc'],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '@Url.Action("AllInvites", "User")',
+                    type: "post",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.search = searchQuery;
+                        d.flag = filterFlag;
+                        d.status = status;
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: 'profileImage',
+                        sortable: false,
+                        render: function (data) {
+                            return `<div class="User-Image img-circle"><img src=${data} height="30" class="inner-img"></div>`
+                        },
+                    },
+                    {
+                        data: 'firstName',
+                    },
+                    {
+                        data: 'lastName',
+                    },
+                    {
+                        data: 'email',
+                        render: function (data) {
+                            return `<a href="mailto:${data}">${data}</a>`;
+                        }
+                    },
+                    {
+                        data: 'userRole',
+                        sortable: false,
+                        searchable: false,
+                    },
+                    {
+                        data: { inviteTime: 'invitetime' },
+                        searchable: false,
+                        sortable: false,
+                        render: function (data) {
+                            if (data.inviteTime != null) {
+                                var date = new Date(Date.parse(data.inviteTime));
+                                date.setDate(date.getDate() + 1);
+                                if (date > Date.now()) {
+                                    return `<b style="color:Orange">Pending</b>`;
+                                }
+                                else {
+                                    return `<b style="color:Red">Invitation Expired</b>`;
+                                }
+                            }
+                            return `<b style="color:Red">Invitation Expired</b>`;
+                        }
+                    },
+                    {
+                        data: { inviteTime: 'invitetime', email: 'email' },
+                        sortable: false,
+                        searchable: false,
+                        render: function (data) {
+                            if (data.inviteTime != null) {
+                                var date = new Date(Date.parse(data.inviteTime));
+                                date.setDate(date.getDate() + 1);
+                                if (date > Date.now()) {
+                                    return ``;
+                                }
+                                else {
+                                    return `<div class='dropdown'>
+                                                    <a class='dropdown-toggle actionBtn' data-toggle='dropdown'>
+                                                        <i class='fa fa-ellipsis-v icons' aria-hidden='true'></i>
+                                                    </a>
+                                                    <ul class='dropdown-menu' id='ActionLink'>
+                                                       <li onclick='SendEmail("${data.email}","editable")' class='dropdown-item'>
+                                                            <a>Resend</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>`;
+                                }
+                            }
+                            return `<div class='dropdown'>
+                                                    <a class='dropdown-toggle' data-toggle='dropdown'>
+                                                        <i class='fa fa-ellipsis-v icons' aria-hidden='true'></i>
+                                                    </a>
+                                                    <ul class='dropdown-menu' id='ActionLink'>
+                                                       <li onclick='SendEmail("${data.email}","editable")' class='dropdown-item'>
+                                                            <a>Resend</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>`;
+                        }
+                    }
+                ]
+
+            });
+            $(".custom-search").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    searchQuery = $(".custom-search").val();
+                    userDataTable.ajax.reload();
+                }
+            });
+
+            SendEmail = (param) => {
+                $.ajax({
+                    url: '../User/SendInvite',
+                    type: "Post",
+                    method: 'post',
+                    datatype: 'text/html',
+                    data: { email: param },
+                    beforeSend: LoadingSpinner(),
+                    success: function (response) {
+                        SuccessNotification(response.message);
+                        userDataTable.ajax.reload();
+                    },
+                    error: function (err) {
+                        ErrorNotification(err.responseJSON.message)
+                    }
+                })
+            }
+            FilterUser = (option, flag) => {
+                filterFlag = option;
+                filterFlag != "All Roles" ? $('#roleFilter').html(' (' + filterFlag + ')') : $('#roleFilter').html('');
+                userDataTable.ajax.reload();
+            }
+            FilterStatus = (flag) => {
+                status = flag;
+                userDataTable.ajax.reload();
+            }
+        })
+    </script>
+}

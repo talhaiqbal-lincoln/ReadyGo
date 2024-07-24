@@ -1,0 +1,25 @@
+﻿@model ReadyGo.Domain.Entities.ViewModels.CashShortViewModel
+<div>
+    <form id="CashForm" class="form-horizontal form-label-left">
+        <input type="hidden" id="ReportId" asp-for="ReportId" />
+        <div class="form-group row">
+            <div class="col-md-6">
+                <label class="col-md-12 col-sm-12 col-xs-12">
+                    Recievable
+                </label>
+                <div class="col-md-12 col-sm-12  form-group has-feedback">
+                    <input type="text" class="form-control text-right" readonly asp-for="Recievable" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="col-md-12 col-sm-12 col-xs-12 required">
+                    Cash Short
+                </label>
+                <div class="col-md-12 col-sm-12  form-group has-feedback">
+                    <input type="number" min="0" id="cash" dir="rtl" required asp-for="CashShort" class="form-control text-right" /> 
+                    <span asp-validation-for="CashShort" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

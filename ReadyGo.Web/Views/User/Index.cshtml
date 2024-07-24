@@ -1,0 +1,614 @@
+﻿@{ ViewData["Title"] = "User Listing";
+    if (ViewBag.Message != null)
+    {
+        <p>@ViewBag.Message</p> } }
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/croppie/croppie.min.css" />
+    <style>
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+}
+<div class="clearfix"></div>
+<div class="row importUser">
+    <button onclick="ImportFile()" class="btn btn-default">
+        <i class="fa fa-cloud-upload"></i> Import
+    </button>
+    <button onclick="window.location = '@Url.Action("AddUser", "User" )';" class="btn btn-default">
+        <i class="fa fa-users"></i> Add New
+    </button>
+</div>
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>User Listing</h2>
+                <div class="nav navbar-right panel_toolbox">
+                    <input class='form-control custom-search' id='searchFilter' placeholder='Type and press enter to search' type="search" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content table-responsive">
+                <table id="UsersTable" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>AxCode</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Mobile Number</th>
+                            <th>Email</th>
+                            <th>
+                                <div class='dropdown'>
+                                    <a class='dropdown-toggle' data-toggle='dropdown'><span>User Role</span><i style="float:right;opacity:.5;margin-top:3px" class='fa fa-filter'></i></a>
+                                    <ul class='dropdown-menu'>
+                                        <li class='dropdown-item' onclick="FilterUser('All Roles','role')"><a>All Roles</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Admin','role')"><a>Admin</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Sales Person','role')"><a>Salesperson</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Sales Manager','role')"><a>Sales Manager</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Marketing Manager','role')"><a>Marketing Manager</a></li>
+                                    </ul>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='dropdown'>
+                                    <a class='dropdown-toggle' data-toggle='dropdown'><span>Sync Status</span><i style="float:right;opacity:.5;margin-top:3px" class='fa fa-filter'></i></a>
+                                    <ul class='dropdown-menu'>
+                                        <li class='dropdown-item' onclick="FilterUser('All Users', 'status')"><a>All Users</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Synced', 'status')"><a>Synced</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('UnSynced', 'status')"><a>UnSynced</a></li>
+                                    </ul>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='dropdown'>
+                                    <a class='dropdown-toggle' data-toggle='dropdown'><span>Active</span><i style="float:right;opacity:.5;margin-top:3px" class='fa fa-filter'></i></a>
+                                    <ul class='dropdown-menu'>
+                                        <li class='dropdown-item' onclick="FilterUser('All Users','activeStatus')"><a>All Users</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Active','activeStatus')"><a>Active</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('InActive','activeStatus')"><a>Not Active</a></li>
+                                    </ul>
+                                </div>
+                            </th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="datatable_body" id="datatable_body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--User Detail Modal-->
+<div class="modal fade bs-example-modal-xl" id="usersDetailModal" tabindex="-1" data-backdrop="static" data-keyboard="false" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="user_ModalLabel">Users Detail</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="usersDetailModalBody">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th colspan="11" style="text-align:center;font-size:15px" id="userDetailTitle">Users Details</th>
+                        </tr>
+                        <tr>
+                            <th>AxCode</th>
+                            <th class="required">First Name</th>
+                            <th>Last Name</th>
+                            <th class="required">Email</th>
+                            <th class="required">Mobile Number</th>
+                            <th class="required">Role</th>
+                            <th class="required">Address Line 1</th>
+                            <th>Address Line 2</th>
+                            <th>City</th>
+                            <th>Province</th>
+                            <th>Error Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersDetailBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" onclick="UploadUserInBulk(2)">
+                    <i class="fa fa-spinner fa-spin fa-fw" style="display:none"></i>Proceed
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/User Detail Modal-->
+<!--Import User Modal-->
+<div class="modal fade bs-example-modal-sm" id="importUserModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel2">Import Users</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:2%">
+                <div class="row" style="display:flex;">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p><span style="font-size:17px">Import File</span><br />Add csv file with user information to add user in bulk.</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a class="btn btn-success" onclick="$('#import_Users').click()"><i class="fa fa-upload" style="color:inherit;margin-left:3px;"></i> Upload file</a>
+                                <span id="filename"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div>
+                            <span style="font-size:17px">Instruction</span>
+                            <br />
+                            <ul>
+                                <li>
+                                    Required Field
+                                    <ul>
+                                        <li>First Name (Length: 2 to 100)</li>
+                                        <li>Email Address</li>
+                                        <li>Phone Number (must start with 92 and contain atleast 12 digits)</li>
+                                        <li>Role Name</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    Non Required Field/Optional
+                                    <ul>
+                                        <li>Last Name (Length: 2 to 100)</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    You can only choose one of these roles.
+                                    <ul>
+                                        <li>Salesperson.</li>
+                                        <li>Sales Manager.</li>
+                                        <li>Marketing Manager.</li>
+                                    </ul>
+                                </li>
+                                <li>Total records should not be more than 500.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <label>Download Sample File: </label>
+                            <a class="btn btn-outline-dark" href="~/resource_files/UserSample.csv"><i class="fa fa-cloud-download"></i> UserSample.csv</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" onclick="UploadUserInBulk(1)" class="btn btn-primary">Add Users</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<input type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="visibility:hidden" id="import_Users" onchange="ChangeSrc(this)" />
+@section Validation{
+    <script src="~/js/ValidationScript.min.js"></script>
+}
+@section scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            window.onpageshow = function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            };
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+                title: `<b>Search by</b>
+                        <ul class='tooltip-ul'>
+                            <li>AxCode</li>
+                            <li>Last name</li>
+                            <li>Email</li>
+                            <li>First name</li>
+                            <li>Phone number</li>
+                        </ul>`,
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            var status = 'All Users'; var filterFlag = 'All Roles'; var activeStatus = '';
+            var searchQuery = '';
+            // Reset the file in case if user close the modal.
+            $('.modal').on('hidden.bs.modal', function (e) {
+                $("#filename").html("");
+            });
+            var dataTable = $('#UsersTable').DataTable({
+                dom: "frt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                responsive: true,
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable:'No matching results found'
+                },
+                order: [1, "asc"],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: "../User/AllUsers",
+                    type: "POST",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.status = status;
+                        d.flag = filterFlag;
+                        d.activeStatus = activeStatus;
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: 'profileImage',
+                        sortable: false,
+                        render: function (data) {
+                            return `<div class="User-Image img-circle"><img src=${data} height="30" class="inner-img"></div>`
+                        }
+                    },
+                    {
+                        data: 'axCode',
+                        render: function (data) {
+                            return data == null ? '---' : data;
+                        }
+                    },
+                    {
+                        data: 'firstName',
+                    },
+                    {
+                        data: 'lastName',
+                        render: function (data) {
+                            return data == null ? '---' : data;
+                        }
+                    },
+                    {
+                        data: 'phoneNumber',
+                        render: function (data) {
+                            return data == null ? '---' : data;
+                        }
+                    },
+                    {
+                        data: {email: 'email'},
+                        render: function (data) {
+                            return `<a href="mailto:${data.email}">${data.email}</a>`;
+                        }
+                    },
+                    {
+                        data: 'userRole',
+                        sortable: false,
+                        searchable: false,
+                    },
+                    {
+                        data: 'syncedStatus',
+                        sortable: false,
+                        searchable: false,
+                        render: function (data) {
+                            return data == true ? `<b class="activeStatus"><i class="fa fa-check-circle"></i></b>` : `<b class="inActiveStatus"><i class="fa fa-times-circle"></b>`
+                        }
+                    },
+                    {
+                        data: 'isActive',
+                        sortable: false,
+                        searchable: false,
+                        render: function (data) {
+                            return data == true ? `<b class="activeStatus"><i class="fa fa-check-circle"></i></b>` : `<b class="inActiveStatus"><i class="fa fa-times-circle"></b>`
+                        }
+                    },
+                    {
+                        data: { id: 'id', isActive: 'isActive', isCurrentUser: 'isCurrentUser', userRole: 'userRole', syncedStatus: 'syncedStatus' },
+                        sortable: false,
+                        searchable: false,
+                        render: function (data) {
+                            var statusText = "Deactivate"
+                            let deleteUserLi = !data.syncedStatus ? `<li onclick='DeleteUser("${data.id}","${data.userRole}")' class='dropdown-item'>
+                                                <a>Delete</a>
+                                            </li>`: ``;
+                            if (data.isActive == false) {
+                                statusText = "Activate"
+                            }
+                            return data.isCurrentUser == true ? `<div class='dropdown'>
+                                        <a class='dropdown-toggle actionBtn' data-toggle='dropdown'>
+                                            <i class='fa fa-ellipsis-v icons' aria-hidden='true'></i>
+                                        </a>
+                                        <ul class='dropdown-menu' id='ActionLink'>
+                                           <li onclick='EditUser("${data.id}","editable","Edit User")' class='dropdown-item'>
+                                                <a>Edit</a>
+                                            </li>
+                                        </ul>
+                                    </div>`:`<div class='dropdown'>
+                                        <a class='dropdown-toggle actionBtn' data-toggle='dropdown'>
+                                            <i class='fa fa-ellipsis-v icons' aria-hidden='true'></i>
+                                        </a>
+                                        <ul class='dropdown-menu' id='ActionLink'>
+                                           <li onclick='EditUser("${data.id}","editable","Edit User")' class='dropdown-item'>
+                                                <a>Edit</a>
+                                            </li>
+                                            ${deleteUserLi}
+                                            <li onclick='ChangeStatus("${data.id}","${statusText}","${data.userRole}")' class='dropdown-item'>
+                                                <a>${statusText}</a>
+                                            </li>
+                                            <li onclick='ResetPassword("${data.id}")' class='dropdown-item'>
+                                                <a>Send Reset Password Link</a>
+                                            </li>
+                                        </ul>
+                                    </div>`;
+                        }
+                    }
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    row.title="Click to view details."
+                    $('[data-toggle="tooltip"]', row).tooltip();
+                }
+
+            });
+
+            searchQuery = $(".dataTables_filter input").val();
+            $(".custom-search").val(searchQuery);
+
+            $(".custom-search").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    dataTable.search(this.value).draw();
+                }
+            });
+            $('input[type=search]').on('search', function () {
+                dataTable.search("").draw();
+            });
+
+            $('#UsersTable tbody').on('click', 'tr td:not(:last-child)', function () {
+                var data = dataTable.row($(this).parent()).data();
+                EditUser(data.id, 'readonly','User Details');
+            });
+
+            EditUser = (param,flag,title) => {
+                window.location.href = '@Url.Action("UpdateUser", "User" , new {id = "ID", flag = "Editable"})'.replace("ID", param).replace("Editable",flag);
+            }
+            DeleteUser = (param, role) => {
+                var txt = role == "Sales Person" ? "Deleting this salesperson will delete all assigned routes and stocks." : "Are you sure you want to delete this user?";
+                swal({
+                    text: txt,
+                    icon: "error",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                    .then((willDelete) => {
+                        if (willDelete) {
+                            $.ajax({
+                                url: '../User/DeleteUser',
+                                type: "POST",
+                                method: 'post',
+                                data: { id: param },
+                                success: function (response) {
+                                    SuccessNotification(response.message);
+                                    dataTable.ajax.reload();
+                                },
+                                error: function (err) {
+                                    ErrorNotification(err.responseJSON.message)
+                                }
+
+                            })
+                        }
+                    });
+            }
+            ResetPassword = (param) => {
+                $('#user_ModalLabel').html('Add User')
+                $.ajax({
+                    url: '@Url.Action("SendResetLink", "User")',
+                    type: "POST",
+                    method: 'post',
+                    data: { id: param },
+                    beforeSend: LoadingSpinner(),
+                    datatype:'text/html',
+                    success: function (response) {
+                        swal.close();
+                        SuccessNotification(response.message)
+                    },
+                    error: function (err) {
+                        swal.close();
+                        ErrorNotification(err.responseJSON.message)
+                    }
+                })
+            }
+
+            ChangeStatus = (param, status, role) => {
+                var message = "";
+                if (role == "Sales Person" && status == "Deactivate") {
+                    message = `Are you sure you want to ${status} this user? Associated routes will also be removed.`;
+                }
+                else {
+                    message = `Are you sure you want to ${status} this user?`;
+                }
+                swal({
+                    text: message,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                    .then((willDelete) => {
+                        if (willDelete) {
+                            $.ajax({
+                                url: '../User/ChangeStatus',
+                                type: "GET",
+                                method: 'get',
+                                data: { id: param },
+                                success: function (response) {
+                                    SuccessNotification(response.message);
+                                    dataTable.ajax.reload();
+                                },
+                                error: function (err) {
+                                    console.log(err)
+                                      ErrorNotification(err.responseJSON.message)
+                                }
+
+                            })
+                        }
+                    });
+            }
+            FilterUser = (option, flag) => {
+                if (flag == 'status')
+                    status = option;
+                else if (flag == 'role')
+                    filterFlag = option;
+                else
+                    activeStatus = option;
+                $('#status').html(status)
+                filterFlag != "All Roles" ? $('#roleFilter').html(' (' + filterFlag + ')') : $('#roleFilter').html('');
+                dataTable.ajax.reload();
+            }
+            ChangeSrc = (obj) => {
+                let file = obj.value;
+                let fileName = file.split("\\");
+                let span = document.getElementById("filename");
+                let fileTitle = fileName[fileName.length - 1];
+                let fileExtension = fileTitle.replace(/^.*\./, '');
+                if (fileExtension != 'csv') {
+                    swal({
+                        title: "Wrong file selection",
+                        text: 'Please Select the csv file',
+                        icon: "error",
+                        dangerMode: true,
+                    })
+                    span.innerHTML = '';
+                }
+                else {
+                    span.innerHTML = fileTitle;
+                }
+            }
+            ImportFile = () => {
+                $("body").css({ 'overflow': 'hidden' });
+                $('#filename').html('');
+                $('#import_Users').val('');
+                $("#importUserModal").modal("show");
+            }
+
+            UploadUserInBulk = (flag) => {
+                var files;
+                var fd = new FormData();
+                $("body").css({ 'overflow': 'hidden' });
+
+                let fileName = document.getElementById("filename");
+                if (fileName.innerHTML && fileName.innerHTML != '' && flag == 1) {
+                    files = $('#import_Users')[0].files;
+                }
+                else if (!fileName.innerHTML && flag == 2) {
+                    files = $('#import_Users')[0].files;
+                }
+
+                // Check file selected or not
+                if (files && files.length > 0) {
+
+                    fd.append('File', files[0]);
+                    fd.append('flag', flag);
+
+                    $.ajax({
+                        url: '@Url.Action("BulkImport", "User")',
+                        type: 'post',
+                        data: fd,
+                        contentType: false,
+                        processData: false,
+                        beforeSend: LoadingSpinner(),
+                        success: function (response) {
+                            swal.close();
+                            $("#importUserModal").modal("hide");
+                            $("#usersDetailModal").modal("show");
+                            $('#userDetailTitle').html(`<div class="row">
+                                                            <div class="col-md-3" style="text-align:center">
+                                                                <span>Total Record: ${response.invaliduser + response.validUsers}</span>
+                                                            </div>
+                                                            <div class="col-md-3" style="text-align:center;color:green">
+                                                                <span>Valid Records: ${response.validUsers}</span>
+                                                            </div>
+                                                            <div class="col-md-3" style="text-align:center;color:red">
+                                                                <span>Invalid Records: ${response.invaliduser}</span>
+                                                            </div>
+                                                            <div class="col-md-3" style="text-align:center;color:#d17813">
+                                                                <span>Deleted Records: ${response.deletedUser}</span>
+                                                            </div>
+                                                        </div>`);
+                            if (response.message == "Submitted") {
+                                $('#import_Users').val('');
+                                $("#filename").html("");
+                                $("#usersDetailModal").modal("hide");
+                                response.flag ? SuccessNotification("All valid users added successfully rest of them are invalid") : SuccessNotification("All users added successfully");
+                                $("body").css({ 'overflow': 'auto' });
+                                dataTable.ajax.reload();
+                            }
+                            else {
+                                $('#usersDetailBody').empty()
+                                for (let i = 0; i < response.data.length; i++) {
+                                    let error = response.data[i].errorStatus;
+                                    let errorMsg = GetErrorMsg(error);
+                                    let phone = response.data[i].phoneNumber == "+" ? "" : response.data[i].phoneNumber;
+                                    let color = error == "" ? "#d4edda" : error == "Deleted" ? "#fcf8e3" : "#f8d7da";
+                                    $('#usersDetailBody').append(`<tr style="background-color:${color}">
+                                                                    <td>${response.data[i].axCode}</td>
+                                                                    <td>${response.data[i].firstName}</td>
+                                                                    <td>${response.data[i].lastName == null ? "" : response.data[i].lastName}</td>
+                                                                    <td>${response.data[i].email}</td>
+                                                                    <td>${phone}</td>
+                                                                    <td>${response.data[i].userRole}</td>
+                                                                    <td>${response.data[i].address1}</td>
+                                                                    <td>${response.data[i].address2 == null ? "" : response.data[i].address2}</td>
+                                                                    <td>${response.data[i].city}</td>
+                                                                    <td>${response.data[i].province}</td>
+                                                                    <td class="errorMessageTooltip" style="cursor: pointer;" title="${errorMsg}">${error == "" ? "---" : error.length > 10 ? error.substring(0, 10) + "..." : error}</td>
+                                                                </tr>`)
+                                }
+                                $(".errorMessageTooltip").tooltip({
+                                    placement: 'right',
+                                    html: true,
+                                    template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+                                });
+                            }
+                        },
+                        error: function (err) {
+                            swal.close();
+                            $('#import_Users').val('');
+                            $("#filename").html("");
+                            $("#usersDetailModal").modal("hide");
+                            ErrorNotification(err.responseJSON.message);
+                            $("body").css({ 'overflow': 'auto' });
+                        }
+                    });
+                } else {
+                    ErrorNotification("Please select a file.");
+                }
+            }
+        });
+    </script>
+
+}

@@ -1,0 +1,184 @@
+﻿@model ReadyGo.Domain.Entities.TransferStock;
+@{
+    ViewData["Title"] = "StockDetail";
+    var Status = Model.Status ? 1 : 0;
+    var price = 0.0;
+    var total = 0.0;
+}
+@section Styles{
+    <link href="~/lib/switchery/switchery.min.css" rel="stylesheet" />
+    <style>
+        td {
+            cursor: default !important;
+        }
+        #editIcon {
+            font-size: 25px;
+            float: right;
+        }
+    </style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2><a onclick="history.back()"><i class="fa fa-angle-left font-weight-bold" style="font-size:22px"></i></a> Assigned Stock Detail</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row formGroup">
+                    <div class="col-md-11"></div>
+                    <div class="col-md-1">
+                        <i id="editIcon" style="cursor: pointer" onclick='location.href="@Url.Action("EditStock", "Stock" , new {id = Model.Id})"' class="fa fa-edit"></i>
+                    </div>
+                </div>
+                <div class="card table-responsive" style="padding:10px 10px 0px 10px">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Vehicle No</th>
+                                <th>Driver Name</th>
+                                <th>Salesperson Name</th>
+                                <th>Route</th>
+                                <th>Business Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>@Model.Vehicle.VehicleNumber</td>
+                                <td>@Model.DriverName</td>
+                                <td>@ViewBag.SalesPerson</td>
+                                <td>@Model.Route.Name</td>
+                                <td>
+                                    <ol>
+                                        @foreach (var customer in Model.Route.Customers.Where(x => x.DeletedAt == null))
+                                        {
+                                            <li>@customer.BusinessName</li>
+                                        }
+                                    </ol>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="ln_solid"></div>
+                <div class="card table-responsive" style="padding:10px 10px 0px 10px">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Product Name</th>
+                                <th>Product Variant</th>
+                                <th>Item Quantity</th>
+                                <th>Stock Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var prod in Model.AssignStocks)
+                            {
+                                price = prod.Product.Prices.Where(x => x.From <= Model.CreatedAt).OrderByDescending(x => x.From).FirstOrDefault()?.Price ?? 0;
+                                total += price * prod.Quantity;
+                                <tr>
+                                    <td>@prod.Product.Category.Name</td>
+                                    @if (prod.Product.VariantOf != null)
+                                    {
+                                        <td>@prod.Product.VariantOf.Name</td>
+                                        <td>@prod.Product.Name</td>
+                                    }
+                                    else
+                                    {
+                                        <td>@prod.Product.Name</td>
+                                        <td>---</td>
+                                    }
+                                    <td class="text-right">@prod.Quantity</td>
+                                    <td class="text-right">@Math.Round(prod.Quantity*price,2).ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr style="border:20px">
+                                <td colspan="3"><b>Total</b></td>
+                                <td class="text-right"><b>@Model.AssignStocks.Sum(x => x.Quantity)</b></td>
+                                <td class="text-right"><b>@total.ToString("N2")</b></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="ln_solid"></div>
+                <div class="card" style="padding:10px">
+                    <div class="row">
+                        <div class="col-md-6" style="border: 1px solid #e5e5e5;padding:10px">
+                            <div class="col-md-6">
+                                <h2>Enable/Disable:</h2>
+                            </div>
+                            <div class="col-md-6" style="text-align:right;padding-top:10px">
+                                <input type="hidden" value="0" name="Status" />
+                                <input type="checkbox" value="@Status" name="Status" class="js-switch" checked />
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="border: 1px solid #e5e5e5;padding:10px">
+                            <div class="col-md-6">
+                                <h2>Edit:</h2>
+                            </div>
+                            <div class="col-md-6">
+                                <a class="btn btn-default" style="margin-top:5px;float:right" href="../EditStock/@Model.Id"><i class="fa fa-edit"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/lib/switchery/switchery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            window.onpageshow = function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            };
+            $('input[type=checkbox]').each(function () {
+                if ($(this).val() == 0)
+                    $(this).click()
+            });
+            $('input[type="checkbox"]').on('change', function () {
+                let status = Number($(this).prop('checked'));
+                let txt = status == 1 ? "Enable" : "Disable";
+                swal({
+                    text: `Are you sure you want to ${txt} this assigned stock?`,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                    .then((willDelete) => {
+                        if (willDelete) {
+                            $(this).val(status);
+                            $.ajax({
+                                url: '../ChangeStatus',
+                                type: "POST",
+                                method: 'post',
+                                data: { id: "@Model.Id" },
+                                beforeSend: LoadingSpinner(),
+                                success: function (response) {
+                                    swal.close();
+                                    SuccessNotification(response.message);
+                                },
+                                error: function (err) {
+                                    swal.close();
+                                    console.log(err)
+                                    ErrorNotification(err.responseJSON.message)
+                                }
+
+                            })
+                        }
+                        else {
+                            window.location.reload();
+                        }
+                    });
+            })
+        })
+    </script>
+}

@@ -1,0 +1,182 @@
+﻿@model ReadyGo.Domain.Entities.Identity.ApplicationUser
+@using ReadyGo.Domain.Enum
+@using ReadyGo.Domain.Constants;
+@using ReadyGo.Persistence.Seeds;
+@using ReadyGo.Service.Interfaces;
+@inject IConfigurationService sysConfig;
+@{
+    var configs = sysConfig.GetConfiguration(Model.Role.Name);
+    var salesPersonManag = configs.Where(x => x.ConfigKey == "salesPersonManag").FirstOrDefault().Value == "1";
+    var custManag = configs.Where(x => x.ConfigKey == "custManag").FirstOrDefault().Value == "1";
+    var stockManag = configs.Where(x => x.ConfigKey == "stockManag").FirstOrDefault().Value == "1";
+}
+
+<div class="clearfix app_logo">
+    <div>
+        <a asp-controller="Home" asp-action="Index"><img src="~/images/lighthouse_logo.png" alt="..." class="app_logoImg"></a>
+    </div>
+    <div class="clearfix"></div>
+</div>
+<!-- /menu profile quick info -->
+
+<div class="ln_solid_sidebar"></div>
+<!-- sidebar menu -->
+<div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+    <div class="menu_section">
+        <ul class="nav side-menu">
+            <li>
+                <a asp-controller="Home" asp-action="Index"><i class="fa fa-area-chart"></i> Dashboard </a>
+            </li>
+            @if (custManag)
+            {
+                <li>
+                    <a asp-controller="Customer" asp-action="Index"><i class="fa fa-users"></i> Customers </a>
+                </li>
+            }
+            @if (salesPersonManag)
+            {
+                if (Model.Role.Name.Equals(Roles.Admin.GetDescription()))
+                {
+                    <li>
+                        <a><i class="fa fa-user"></i> Salespersons <span class="fa fa-chevron-down"></span></a>
+                        <ul class="nav child_menu">
+                            <li><a asp-controller="SalesPerson" asp-action="Index">Salesperson Listing </a></li>
+                            <li><a asp-controller="SalesPerson" asp-action="SettlementSheet">Settlement Sheet Listing </a></li>
+                            <li><a asp-controller="SalesPerson" asp-action="Routes">Salesperson Routes </a></li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li>
+                        <a><i class="fa fa-user"></i> Salesperson <span class="fa fa-chevron-down"></span></a>
+                        <ul class="nav child_menu">
+                            <li><a asp-controller="SalesPerson" asp-action="Index">Salesperson Listing </a></li>
+                            <li><a asp-controller="SalesPerson" asp-action="Routes">Salesperson Routes </a></li>
+                        </ul>
+                    </li>
+                }
+
+            }
+            @if (stockManag)
+            {
+                <li>
+                    <a><i class="fa fa-truck"></i> Stocks<span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                        <li><a asp-controller="Stock" asp-action="Index">Stock Listing </a></li>
+                        <li><a asp-controller="Stock" asp-action="Assignment">Stock Assignment </a></li>
+                    </ul>
+                </li>
+            }
+            @if (salesPersonManag)
+            {
+                if (Model.Role.Name.Equals(Roles.Admin.GetDescription()))
+                {
+
+                    <li>
+                        <a><i class="fa fa-shopping-basket"></i> Orders <span class="fa fa-chevron-down"></span></a>
+                        <ul class="nav child_menu">
+                            <li><a asp-controller="Order" asp-action="Index">Orders Listing </a></li>
+                            <li><a asp-controller="Order" asp-action="MarkedOrders">Marked Orders </a></li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li><a asp-controller="Order" asp-action="Index"><i class="fa fa-shopping-basket"></i> Orders</a></li>
+                }
+            }
+            @if (salesPersonManag)
+            {
+                if (Model.Role.Name.Equals(Roles.Admin.GetDescription()))
+                {
+                    <li>
+                        <a><i class="fa fa-credit-card"></i> Payments <span class="fa fa-chevron-down"></span></a>
+                        <ul class="nav child_menu">
+                            <li><a asp-controller="Payment" asp-action="Index">Payments Listing </a></li>
+                            <li><a asp-controller="Payment" asp-action="MarkedPayments">Marked Payments </a></li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li><a asp-controller="Payment" asp-action="MarkedPayments"><i class="fa fa-credit-card"></i> Payments </a></li>
+                }
+            }
+            @if (Model.Role.Name.Equals(Roles.Admin.GetDescription()))
+            {
+                <li>
+                    <a><i class="fa fa-money"></i> Discount<span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                        <li><a asp-controller="Discount" asp-action="Overview">Discount Rules </a></li>
+                        <li><a asp-controller="Discount" asp-action="Config">Discount Config </a></li>
+                        <li><a asp-controller="Discount" asp-action="SalesManagerDiscount">Sales Manager </a></li>
+                        <li><a asp-controller="Discount" asp-action="MarketingManagerDiscount">Marketing Manager </a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a asp-controller="Promo" asp-action="Index"><i class="fa fa-tags"></i> Promo Management </a>
+                </li>
+            }
+            else if (Model.Role.Name.Equals(Roles.MarketingManager.GetDescription()))
+            {
+                <li>
+                    <a asp-controller="Discount" asp-action="MarketingManagerDiscount"><i class="fa fa-money"></i> Discount</a>
+                </li>
+            }
+            else
+            {
+                <li>
+                    <a asp-controller="Discount" asp-action="SalesManagerDiscount"><i class="fa fa-money"></i> Discount</a>
+                </li>
+            }
+            @if (Model.Role.Name.Equals(Roles.Admin.GetDescription()))
+            {
+                <li>
+                    <a><i class="fa fa-users"></i> Users <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                        <li><a asp-controller="User" asp-action="Index">User Listing </a></li>
+                        <li><a asp-controller="User" asp-action="Invite">User Invites </a></li>
+                    </ul>
+                </li>
+            }
+            <li>
+                <a asp-controller="LogInformation" asp-action="Index"><i class="fa fa-history"></i> Logs Information </a>
+            </li>
+            @if (Model.Role.Name.Equals(Roles.Admin.GetDescription()))
+            {
+                <li>
+                    <a asp-controller="Configuration" asp-action="Index"><i class="fa fa-wrench"></i> System Configuration </a>
+                </li>
+                <li>
+                    <a asp-controller="MailSettings" asp-action="Index"><i class="fa fa-cog"></i> Mail Configuration</a>
+                </li>
+            }
+            @*<li>
+            <a asp-controller="Home" asp-action="Component"><i class="fa fa-desktop"></i> UI Component (Dev) </a>
+        </li>*@
+        </ul>
+    </div>
+</div>
+<!-- /sidebar menu -->
+<!-- menu profile quick info -->
+<div class="row profile">
+    <div class="col-md-4 image-container">
+        @if (Model.ProfileImage != null)
+        {
+        <img src="data:image;base64,@Convert.ToBase64String(Model.ProfileImage.File)" alt="..." class="image img-thumbnail img-circle">
+        }
+        else
+        {
+        <img src="~/resource_files/default_user.jpg" alt="..." class="image img-thumbnail img-circle">
+        }
+    </div>
+    <div class="col-md-8 profile_info">
+        <a asp-controller="Account" asp-action="ManageProfile"><h2 class="truncate">@Model.FirstName @Model.LastName</h2></a>
+        <span>@Model.Role.NormalizedName</span>
+        <div class="ln_solid_sidebar"></div>
+        <a class="logOffBtn" asp-controller="Account" asp-action="LogOff"><b>Logout</b></a>
+    </div>
+    <div class="clearfix"></div>
+</div>
+<!-- /menu profile quick info -->

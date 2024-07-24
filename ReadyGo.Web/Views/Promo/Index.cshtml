@@ -1,0 +1,220 @@
+﻿@{
+    ViewData["Title"] = "Promo Information";
+}
+
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+}
+<div id="exportCsv">
+</div>
+
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>@ViewData["Title"]</h2>
+                <div class="nav navbar-right panel_toolbox">
+                    <input class='form-control custom-search' placeholder='Type and enter to make a search' type="search" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content table-responsive">
+                <table id="PromosTable" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>AxCode</th>
+                            <th>Promo Title</th>
+                            <th>Route</th>
+                            <th>Base Product</th>
+                            <th>Promo Product</th>
+                            <th>Max Promo Quantity</th>
+                            <th>Active Till</th>
+                            <th>Active</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var searchQuery = '';
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+                title: `<b>Search by</b>
+                        <ul class='tooltip-ul'>
+                            <li>AxCode</li>
+                            <li>Base product</li>
+                            <li>Route name</li>
+                            <li>Title</li>
+                            <li>Promo product</li>
+                        </ul>`,
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            var promoDataTable = $('#PromosTable').DataTable({
+                dom: "frt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No matching results found'
+                },
+                "order": [6, 'desc'],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '../Promo/AllPromos',
+                    type: "post",
+                    datatype: "json",
+                    method: 'post',
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: { axCode: 'axCode' },
+                        render: function (data) {
+                            return data.axCode != "" ? data.axCode : "---";
+                        }
+                    },
+                    {
+                        data:  'title',
+                    },
+                    {
+                        data: { routeName : 'routeName'},
+                        render: function (data) {
+                            if (data.routeName != null && data.routeName != "") {
+                                return data.routeName;
+                            }
+                            return "";
+                        },
+                    },
+                    {
+                        data: { baseProduct: 'baseProduct', baseQuantity:'baseQuantity' },
+                        render: function (data) {
+                            return data.baseProduct + " (" + data.baseQuantity + ")";
+                        },
+                        className:'text-right',
+                    },
+                    {
+                       data: { promoProduct: 'promoProduct', promoQuantity:'promoQuantity' },
+                        render: function (data) {
+                            return data.promoProduct + " (" + data.promoQuantity + ")";
+                        },
+                        className:'text-right',
+                    },
+                    {
+                        data: 'maxQuantity',
+                        className:'text-right',
+                    },
+                    {
+                        data: { startDate: 'startDate', endDate: 'endDate' },
+                        render: function (data) {
+                            return data.startDate + " To " + data.endDate;
+                        }
+                    },
+                    {
+                        data: 'isActive',
+                        sortable: false,
+                        searchable: false,
+                        render: function (data) {
+                            return data == true ? `<b class="activeStatus"><i class="fa fa-check-circle"></i></b>` : `<b class="inActiveStatus"><i class="fa fa-times-circle"></b>`
+                        }
+                    },
+                    {
+                        data: { id: 'id', isActive: 'isActive', isExpired: 'isExpired' },
+                         sortable: false,
+                        searchable: false,
+                        render: function (data) {
+                            if (data.isExpired) {
+                                return '';
+                            }
+                            else {
+                                var statusText = "Disable"
+
+                                if (data.isActive == false) {
+                                    statusText = "Enable"
+                                }
+                                return `<div class='dropdown'>
+                                        <a class='dropdown-toggle actionBtn' data-toggle='dropdown'>
+                                            <i class='fa fa-ellipsis-v icons' aria-hidden='true'></i>
+                                        </a>
+                                        <ul class='dropdown-menu' id='ActionLink'>
+                                           <li onclick='ChangeStatus("${data.id}","${statusText}")' class='dropdown-item'>
+                                                <a>${statusText}</a>
+                                            </li>
+                                        </ul>
+                                    </div>`;
+                            }
+                        }
+                    },
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    row.title = "Click to view details."
+                    $('[data-toggle="tooltip"]', row).tooltip();
+                }
+
+            });
+              ChangeStatus = (param, status) => {
+                swal({
+                    text: `Are you sure you want to ${status} this promo?`,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                    .then((willDelete) => {
+                        if (willDelete) {
+                            $.ajax({
+                                url: '../Promo/ChangeStatus',
+                                type: "GET",
+                                method: 'get',
+                                data: { id: param },
+                                success: function (response) {
+                                    SuccessNotification(response.message);
+                                    promoDataTable.ajax.reload();
+                                },
+                                error: function (err) {
+                                    console.log(err)
+                                    ErrorNotification(err.responseJSON.message)
+                                }
+
+                            })
+                        }
+                    });
+            }
+
+            searchQuery = $(".dataTables_filter input").val();
+            $(".custom-search").val(searchQuery);
+
+            $(".custom-search").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    promoDataTable.search(this.value).draw();
+                }
+            });
+            $('input[type=search]').on('search', function () {
+                promoDataTable.search("").draw();
+            });
+
+            $('#PromosTable tbody').on('click', 'tr td:not(:last-child)', function () {
+                var data = promoDataTable.row($(this).parent()).data();
+                 window.location.href = '@Url.Action("Details", "Promo" , new {id = "ID"})'.replace("ID", data.id);
+            });
+        })
+    </script>
+}

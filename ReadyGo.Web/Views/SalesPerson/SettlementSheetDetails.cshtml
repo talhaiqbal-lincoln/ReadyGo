@@ -1,0 +1,852 @@
+﻿@model ReadyGo.Domain.Entities.ViewModels.DeliveryReportViewModel
+@{
+    ViewData["Title"] = "Settlement Sheet";
+    int sr = 0;
+
+}
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+    <style>
+        .card {
+            margin-top: 8px;
+        }
+
+        #editIcon {
+            font-size: 25px;
+            float: right;
+        }
+
+        .userAxStatus {
+            background-color: darkblue !important;
+            font-size: 15px
+        }
+
+        .form-group {
+            padding-top: 10px;
+        }
+
+        .profileImageContainer {
+            margin-bottom: unset !important;
+        }
+
+        #OrderDetails_wrapper {
+            overflow: auto;
+        }
+
+        .custom-link {
+            color: #1000ffeb;
+            float: right;
+        }
+    </style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <button id="downloadInvoice" style="display:none"></button>
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="row x_title" style="padding-bottom:0px">
+                <h2 style="padding-top:10px">
+                    <a onclick='window.location.href = "@Url.Action("SettlementSheet", "SalesPerson")";'><i class="fa fa-angle-left font-weight-bold" style="font-size:22px"></i></a>
+                </h2>
+                <nav style="padding:inherit">
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <a class="nav-item nav-link active" id="nav-HO-tab" data-toggle="tab" href="#nav-HO" role="tab" aria-controls="nav-order" aria-selected="true"> <h2> Settlement Sheet Report (HO)</h2> </a>
+                        <a class="nav-item nav-link" id="nav-WH-tab" data-toggle="tab" href="#nav-WH" role="tab" aria-controls="nav-payment" aria-selected="false"> <h2> Settlement Sheet Report (WH) </h2> </a>
+                    </div>
+                </nav>
+            </div>
+            <div class="x_content">
+
+
+                <div class="row formGroup">
+                    <div class="row col-md-2 card" style="background-color:#f2f2f2">
+                        <h4>Driver: @Model.DriverName</h4>
+                        <h4>Route: @Model.RouteName</h4>
+                        <h4>Vehicle: @Model.VehicleNumber</h4>
+                    </div>
+                    <div class="col-md-8"></div>
+                    <div class="col-md-2">
+                        @*<span class="userAxStatus">@Model.CreatedAt</span>*@
+                        @if (Model.IsMarked)
+                        {
+                            <span class="userAxStatus" style="float:right">Approved</span>
+                        }
+                        else
+                        {
+                            <span class="userAxStatus" style="background-color: darkorange !important; float:right">Dispproved</span>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-12" style="text-align: -webkit-center">
+                    <div class="profile-image">
+                        <div class="col-md-10">
+                            <div class="square-box">
+                                <div class="square-content">
+                                    <div id="ChangeDP" class="imageContainer img-thumbnail img-circle user-image-details">
+                                        @if (Model.ProfilePicture != null)
+                                        {
+                                            <img src="data:image;base64,@Convert.ToBase64String(Model.ProfilePicture.File)" id="ProfilePic" class="inner-img">
+                                        }
+                                        else
+                                        {
+                                            <img src="~/resource_files/default_user.jpg" id="ProfilePic" class="inner-img">
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <h2 class="text-center font-weight-bold">@Model.SalesPersonName</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active table-responsive" id="nav-HO" role="tabpanel" aria-labelledby="nav-HO-tab">
+                        <div>
+                            <div class="row col-md-7">
+                                <div class="card col-md-12 table-responsive">
+                                    <table id="Products" class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="9" class="text-center">
+                                                    Stock Details
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th>Sr. No.</th>
+                                                <th>Code</th>
+                                                <th>Item Name</th>
+                                                <th>Unit Price</th>
+                                                <th>Assigned Stock</th>
+                                                <th>Sales</th>
+                                                <th>Return</th>
+                                                <th>Waste</th>
+                                                <th>Stock Balance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model.OrderProducts != null && Model.OrderProducts.Count > 0)
+                                            {
+                                                @foreach (var data in Model.OrderProducts)
+                                                {
+                                                    sr += 1;
+                                                    <tr>
+                                                        <td>@sr</td>
+                                                        <td>@data.ProductCode</td>
+                                                        <td>@data.ProductName</td>
+                                                        <td class="text-right">@Math.Round(data.Price, 2).ToString("N2")</td>
+                                                        <td class="text-right">@Math.Round(data.Assigned).ToString()</td>
+                                                        <td class="text-right">@Math.Round(data.Quantity, 2).ToString("N2")</td>
+                                                        <td class="text-right">@Math.Round(data.ReturnQuantity, 2).ToString("N2")</td>
+                                                        <td class="text-right">@Math.Round(data.WasteQuantity, 2).ToString("N2")</td>
+                                                        <td class="text-right">@Math.Round(data.Assigned + data.ReturnQuantity - (data.WasteQuantity + data.Quantity)).ToString()</td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                        <tfoot>
+                                            <tr style="border:20px">
+                                                <td colspan="4"><b>Total</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => x.Assigned)).ToString()</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => x.Quantity)).ToString("N2")</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => x.ReturnQuantity)).ToString("N2")</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => x.WasteQuantity)).ToString("N2")</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => x.Assigned + x.ReturnQuantity - (x.WasteQuantity + x.Quantity))).ToString()</b></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                <div class="card col-md-12 table-responsive">
+                                    <table id="Orders" class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="7" class="text-center">
+                                                    Order Details
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th>Sr. No.</th>
+                                                <th>Order Code</th>
+                                                <th>Business Name</th>
+                                                <th>Customer Code</th>
+                                                <th>Gross Sale</th>
+                                                <th>Discount</th>
+                                                <th>Return / Waste</th>
+                                                <th>Net Sale</th>
+                                            </tr>
+                                        </thead>
+                                        @if (Model.Orders != null && Model.Orders.Count > 0)
+                                        {
+                                            sr= 0;
+                                            <tbody>
+                                                @foreach (var data in Model.Orders)
+                                                {
+                                                    sr += 1;
+                                                    <tr>
+                                                        <td>@sr</td>
+                                                        <td><a href="@Url.Action("OrderDetails","Order", new { id = data.Id })">@data.Code</a></td>
+                                                        <td>@data.BusinessName</td>
+                                                        <td>@data.CustomerCode</td>
+                                                        <td class="text-right">@Math.Round(data.Gross).ToString("N2")</td>
+                                                        <td class="text-right">@Math.Round(data.Discount, 2).ToString("N2")</td>
+                                                        <td class="text-right">@Math.Round(data.Return).ToString("N2")</td>
+                                                        <td class="text-right">@Math.Round(data.Total).ToString("N2")</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+
+                                            <tfoot>
+                                                <tr style="border:20px">
+                                                    <td colspan="4"><b>Total</b></td>
+                                                    <td class="text-right"><b>@Math.Round(Model.TotalGross).ToString("N2")</b></td>
+                                                    <td class="text-right"><b>@Math.Round(Model.TotalDiscount, 2).ToString("N2")</b></td>
+                                                    <td class="text-right"><b>@Math.Round(Model.TotalReturn).ToString("N2")</b></td>
+                                                    <td class="text-right"><b>@Math.Round(Model.Total).ToString("N2")</b></td>
+                                                </tr>
+                                            </tfoot>
+                                        }
+
+                                    </table>
+
+                                </div>
+                                <div class="card col-md-12 table-responsive">
+                                    <table id="Payments" class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="7" class="text-center">
+                                                    Payment Details
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th>Sr. No.</th>
+                                                <th>Payment Code</th>
+                                                <th>Business Name</th>
+                                                <th>Customer Code</th>
+                                                <th>Payment Recieved</th>
+                                            </tr>
+                                        </thead>
+
+                                        @if (Model.Payments != null && Model.Payments.Count > 0)
+                                        {
+                                            sr = 0; 
+                                            <tbody>
+                                                @foreach (var data in Model.Payments)
+                                                {
+                                                    sr += 1;
+                                                    <tr>
+                                                        <td>@sr</td>
+                                                        <td><a href="@Url.Action("PaymentDetails","Payment", new { id = data.PaymentId , flag="readonly" })">@data.PaymentCode</a></td>
+                                                        <td>@data.BusinessName</td>
+                                                        <td>@data.CustomerCode</td>
+                                                        <td class="text-right">@Math.Round(data.Payment, 2).ToString("N2")</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                            <tfoot>
+                                                <tr style="border:20px">
+                                                    <td colspan="4"><b>Total</b></td>
+                                                    <td class="text-right"><b>@Math.Round(Model.TotalCash, 2).ToString("N2")</b></td>
+                                                </tr>
+                                            </tfoot>
+                                        }
+
+                                    </table>
+
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                @*<div class="card">
+            <div class="row form-group">
+                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                    Dispatch
+                </label>
+                <div class="col-md-9 col-sm-9 col-xs-9">
+                    <input value="@Math.Round(Model.Dispatch,2).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                    <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                </div>
+            </div>
+            <div class="row form-group ">
+                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                    Unsold
+                </label>
+                <div class="col-md-9 col-sm-9 col-xs-9">
+                    <input value="@Math.Round(Model.Unsold,2).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                    <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                </div>
+            </div>
+            <div class="row form-group">
+                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                    Gross Sale
+                </label>
+                <div class="col-md-9 col-sm-9 col-xs-9">
+                    <input value="@Math.Round(Model.TotalGross).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                    <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                </div>
+            </div>
+            <div class="row form-group">
+                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                    Discount
+                </label>
+                <div class="col-md-9 col-sm-9 col-xs-9">
+                    <input value="@Math.Round(Model.TotalDiscount,2).ToString("N2")" style=" color: darkred" readonly class="form-control has-feedback-left text-right">
+                    <i class="fa fa-tags form-control-feedback left" aria-hidden="true"></i>
+                </div>
+            </div>
+            <div class="row form-group">
+                <label class="control-label-left col-md-3 col-sm-3 col-xs-3 " for="showSP">
+                    Return / Wastage
+                </label>
+                <div class="col-md-9 col-sm-9 col-xs-9">
+                    <input value="@Math.Round(Model.TotalReturn).ToString("N2")" style=" color: darkred" readonly class="form-control has-feedback-left text-right">
+                    <i class="fa fa-trash form-control-feedback left" aria-hidden="true"></i>
+                </div>
+            </div>
+            <div class="row form-group">
+                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                    Net Sale
+                </label>
+                <div class="col-md-9 col-sm-9 col-xs-9">
+                    <input value="@Math.Round(Model.Total).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                    <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                </div>
+            </div>
+
+        </div>
+        <div class="card">
+            <div class="row form-group">
+                <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                    Net Cash
+                </label>
+                <div class="col-md-9 col-sm-9 col-xs-9">
+                    <input value="@Math.Round(Model.TotalCash,2).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                    <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                </div>
+            </div>
+        </div>*@
+                                <div class="card">
+                                    <div class="row form-group">
+                                        <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                            Dispatch
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-9">
+                                            <input value="@Math.Round(Model.Dispatch,2).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                            <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group ">
+                                        <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                            Unsold/Return
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-9">
+                                            <input value="@Math.Round(Model.OrderProducts.Sum(x => (x.ReturnQuantity + (x.Assigned - x.Quantity)) * x.Price),2).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                            <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group ">
+                                        <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                            Waste
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-9">
+                                            <input value="@Math.Round(Model.OrderProducts.Sum(x => x.WasteQuantity * x.Price),2).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                            <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                            Gross Sale
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-9">
+                                            <input value="@Math.Round(Model.Dispatch - Model.OrderProducts.Sum(x => (x.ReturnQuantity + (x.Assigned - x.Quantity)) * x.Price) - Model.OrderProducts.Sum(x => x.WasteQuantity * x.Price)).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                            <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                            Discount
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-9">
+                                            <input value="@Math.Round(Model.TotalDiscount,2).ToString("N2")" style=" color: darkred" readonly class="form-control has-feedback-left text-right">
+                                            <i class="fa fa-tags form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                            Discount %
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-9">
+                                            <input value="@Math.Round(Model.TotalGross == 0 ? 0 : (Model.TotalDiscount/Model.TotalGross)*100,2).ToString("N2")%" style=" color: darkred" readonly class="form-control has-feedback-left text-right">
+                                            <i class="fa fa-tags form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                            Net Sale
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-9">
+                                            <input value="@Math.Round(Model.Dispatch - Model.OrderProducts.Sum(x => (x.ReturnQuantity + (x.Assigned - x.Quantity)) * x.Price) - Model.OrderProducts.Sum(x => x.WasteQuantity * x.Price) - Model.TotalDiscount).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                            <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                            Cash Short
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-9">
+                                            <input value="@Math.Round(Model.CashShort).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                            <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                            Market Credit
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-9">
+                                            <input value="@Math.Round(Model.Total - Model.TotalCash).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                            <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                            Net Cash Recievable
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-9">
+                                            <input id="recievable" value="@Math.Round(Model.Dispatch - Model.OrderProducts.Sum(x => (x.ReturnQuantity + (x.Assigned - x.Quantity)) * x.Price) - Model.OrderProducts.Sum(x => x.WasteQuantity * x.Price) - Model.TotalDiscount - Model.CashShort - (Model.Total - Model.TotalCash)).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                            <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade table-responsive" id="nav-WH" role="tabpanel" aria-labelledby="nav-WH-tab">
+                        <div>
+                            <div class="row col-md-12">
+                                <div class="card col-md-12 table-responsive">
+                                    <table id="Settlement" class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="12" class="text-center">
+                                                    Settlement Sheet
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th>Sr.</th>
+                                                <th>Code</th>
+                                                <th>Item Name</th>
+                                                <th>Unit Price</th>
+                                                <th colspan="2">Assigned Stock</th>
+                                                <th colspan="2">Unsold/Return</th>
+                                                <th colspan="2">Waste</th>
+                                                <th colspan="2">Sold Stock</th>
+                                            </tr>
+                                            <tr>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th>Unit</th>
+                                                <th>Value</th>
+                                                <th>Unit</th>
+                                                <th>Value</th>
+                                                <th>Unit</th>
+                                                <th>Value</th>
+                                                <th>Unit</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model.OrderProducts != null && Model.OrderProducts.Count > 0)
+                                            {
+                                                sr = 0;
+                                                @foreach (var data in Model.OrderProducts)
+                                                {
+                                                    sr += 1;
+                                                    <tr>
+
+                                                        <td>@sr</td>
+                                                        <td>@data.ProductCode</td>
+                                                        <td>@data.ProductName</td>
+                                                        <td class="text-right">@Math.Round(data.Price, 2).ToString("N2")</td>
+                                                        <td class="text-right">@Math.Round(data.Assigned).ToString()</td>
+                                                        <td class="text-right">@Math.Round(data.Assigned * data.Price, 2).ToString("N2")</td>
+                                                        <td class="text-right">@Math.Round(Math.Abs(data.ReturnQuantity) + (data.Assigned - data.Quantity)).ToString()</td>
+                                                        <td class="text-right">@Math.Round(Math.Abs(data.ReturnQuantity) + (data.Assigned - data.Quantity) * data.Price, 2).ToString("N2")</td>
+                                                        <td class="text-right">@Math.Round(data.WasteQuantity).ToString()</td>
+                                                        <td class="text-right">@Math.Round(data.WasteQuantity * data.Price, 2).ToString("N2")</td>
+                                                        <td class="text-right">@Math.Round(data.Quantity).ToString()</td>
+                                                        <td class="text-right">@Math.Round(data.Quantity * data.Price, 2).ToString("N2")</td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                        <tfoot>
+                                            <tr style="border:20px">
+                                                <td colspan="4"><b>Total</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => x.Assigned)).ToString()</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => x.Assigned * x.Price), 2).ToString("N2")</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => Math.Abs(x.ReturnQuantity) + (x.Assigned - x.Quantity))).ToString()</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => Math.Abs(x.ReturnQuantity) + (x.Assigned - x.Quantity) * x.Price), 2).ToString("N2")</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => x.WasteQuantity)).ToString()</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => x.WasteQuantity * x.Price), 2).ToString("N2")</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => x.Quantity)).ToString()</b></td>
+                                                <td class="text-right"><b>@Math.Round(Model.OrderProducts.Sum(x => x.Quantity * x.Price), 2).ToString("N2")</b></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-7"></div>
+                                <div class="col-md-5">
+                                    <div class="card">
+                                        <div class="row form-group">
+                                            <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                                Dispatch
+                                            </label>
+                                            <div class="col-md-9 col-sm-9 col-xs-9">
+                                                <input value="@Math.Round(Model.Dispatch,2).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                                <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                        <div class="row form-group ">
+                                            <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                                Unsold/Return
+                                            </label>
+                                            <div class="col-md-9 col-sm-9 col-xs-9">
+                                                <input value="@Math.Round(Model.OrderProducts.Sum(x => (x.ReturnQuantity + (x.Assigned - x.Quantity)) * x.Price),2).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                                <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                        <div class="row form-group ">
+                                            <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                                Waste
+                                            </label>
+                                            <div class="col-md-9 col-sm-9 col-xs-9">
+                                                <input value="@Math.Round(Model.OrderProducts.Sum(x => x.WasteQuantity * x.Price),2).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                                <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                                Gross Sale
+                                            </label>
+                                            <div class="col-md-9 col-sm-9 col-xs-9">
+                                                <input value="@Math.Round(Model.Dispatch - Model.OrderProducts.Sum(x => (x.ReturnQuantity + (x.Assigned - x.Quantity)) * x.Price) - Model.OrderProducts.Sum(x => x.WasteQuantity * x.Price)).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                                <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                                Discount
+                                            </label>
+                                            <div class="col-md-9 col-sm-9 col-xs-9">
+                                                <input value="@Math.Round(Model.TotalDiscount,2).ToString("N2")" style=" color: darkred" readonly class="form-control has-feedback-left text-right">
+                                                <i class="fa fa-tags form-control-feedback left" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                                Discount %
+                                            </label>
+                                            <div class="col-md-9 col-sm-9 col-xs-9">
+                                                <input value="@Math.Round(Model.TotalGross == 0 ? 0 : (Model.TotalDiscount/Model.TotalGross)*100,2).ToString("N2")%" style=" color: darkred" readonly class="form-control has-feedback-left text-right">
+                                                <i class="fa fa-tags form-control-feedback left" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                                Net Sale
+                                            </label>
+                                            <div class="col-md-9 col-sm-9 col-xs-9">
+                                                <input value="@Math.Round(Model.Dispatch - Model.OrderProducts.Sum(x => (x.ReturnQuantity + (x.Assigned - x.Quantity)) * x.Price) - Model.OrderProducts.Sum(x => x.WasteQuantity * x.Price) - Model.TotalDiscount).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                                <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                                Cash Short
+                                            </label>
+                                            <div class="col-md-9 col-sm-9 col-xs-9">
+                                                <input value="@Math.Round(Model.CashShort).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                                <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                                Market Credit
+                                            </label>
+                                            <div class="col-md-9 col-sm-9 col-xs-9">
+                                                <input value="@Math.Round(Model.Total - Model.TotalCash).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                                <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <label class="control-label-left col-md-3 col-sm-3 col-xs-3">
+                                                Net Cash Recievable
+                                            </label>
+                                            <div class="col-md-9 col-sm-9 col-xs-9">
+                                                <input id="recievable" value="@Math.Round(Model.Dispatch - Model.OrderProducts.Sum(x => (x.ReturnQuantity + (x.Assigned - x.Quantity)) * x.Price) - Model.OrderProducts.Sum(x => x.WasteQuantity * x.Price) - Model.TotalDiscount - Model.CashShort - (Model.Total - Model.TotalCash)).ToString("N2")" readonly class="form-control has-feedback-left text-right">
+                                                <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 submit-btn">
+                        <button id="cashShort" class="btn btn-default" onclick="ShortCash();"><i class="fa fa-money"></i> Cash Short Submission</button>
+                        @if (!Model.IsMarked)
+                        {
+                            <button id="MarkDelivery" class="btn btn-default"><i class="fa fa-check"></i> Approve Report</button>
+                        }
+                        else
+                        {
+                            <button id="MarkDelivery" class="btn btn-danger"><i class="fa fa-remove"></i> Disapprove Report</button>
+                        }
+                        <button id="PrintOrder" class="btn btn-default"><i class="fa fa-print"></i> Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Cash Short Modal-->
+<div class="modal fade bs-example-modal-lg" id="cash_Modal" data-backdrop="static" data-keyboard="false" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content" style="width:915px;height:350px">
+            <div class="modal-header">
+                <h4 class="modal-title" id="cash_ModalLabel"></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="cashModalBody" style="padding:4%;overflow:hidden">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" id="submitButton" onclick="submitForm()">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Validation{
+    <script src="~/js/ValidationScript.min.js"></script>
+}
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            window.onpageshow = function (event) {
+                if (event.persisted) {
+                    localStorage.removeItem("activeSheetTab");
+                }
+            };
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                localStorage.setItem('activeSheetTab', $(e.target).attr('href'));
+                //console.log($(e.target).attr('href'));
+                if ($(e.target).attr('href') === '#nav-WH') {
+                    $('#cashShort').show();
+                }
+                else {
+                    $('#cashShort').hide();
+                }
+            });
+            if ($("#nav-tab a.active").attr('id') === 'nav-HO-tab') {
+                $('#cashShort').hide();
+            }
+            else {
+                $('#cashShort').show();
+            }
+            var activeTab = localStorage.getItem('activeSheetTab');
+            if (activeTab) {
+                $('#nav-tab a[href="' + activeTab + '"]').tab('show');
+            }
+
+
+            $('#Products').DataTable({
+                dom: "rt<'row'<'col-md-6 col-xs-12'i><'col-md-2 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: false,
+                paging: false,
+                processing: false,
+                info: false,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                },
+                "order": [0, 'asc']
+            });
+            $('#Settlement').DataTable({
+                dom: "rt<'row'<'col-md-6 col-xs-12'i><'col-md-2 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: false,
+                paging: false,
+                processing: false,
+                info: false,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                },
+                "order": [0, 'asc']
+            });
+            $('#Orders').DataTable({
+                dom: "rt<'row'<'col-md-6 col-xs-12'i><'col-md-2 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: false,
+                paging: false,
+                processing: false,
+                info: false,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                },
+                "order": [0, 'asc']
+             });
+             $('#Payments').DataTable({
+                dom: "rt<'row'<'col-md-6 col-xs-12'i><'col-md-2 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: false,
+                paging: false,
+                processing: false,
+                info: false,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                },
+                "order": [0, 'asc']
+             });
+            var status = "";
+            var check = "@Model.IsMarked";
+            if (check == "True") {
+                status = "disapprove";
+            }
+            else {
+                status = "approve";
+            }
+            $('#MarkDelivery').click(function () {
+                swal({
+                    title: 'Warning',
+                    text: `Are you sure you want to ${status} this report`,
+                    icon: "warning",
+                    buttons: {
+                        cancel: true,
+                        confirm: true,
+                    },
+                    dangerMode: false,
+                }).then((ok) => {
+                    if (ok) {
+                        $.ajax({
+                            url: '../ChangeReportStatus',
+                            type: "GET",
+                            method: 'get',
+                            data: { id: "@Model.Id" },
+                            success: function (response) {
+                                swal({
+                                    title: "Success",
+                                    text: response.message,
+                                    icon: "success",
+                                    closeOnClickOutside: false
+                                }).then((ok) => {
+                                    location.reload();
+                                })
+                            },
+                            error: function (err) {
+                                ErrorNotification(err.responseJSON.message)
+                            }
+                        })
+                    }
+                });
+            });
+
+            $('#PrintOrder').click(function () {
+                if ($("#nav-tab a.active").attr('id') === 'nav-HO-tab') {
+                   window.open('@Url.Action("SettlementSheetInvoice", "SalesPerson", new { id=Model.Id})', '_blank');
+                }
+                else {
+                    
+                   window.open('@Url.Action("SettlementSheetWHInvoice", "SalesPerson", new { id=Model.Id})', '_blank');
+                }
+            });
+             ShortCash = () => {
+                $.ajax({
+                    url: '../EditCashShort',
+                    type: "Get",
+                    method: 'get',
+                    data: { id: '@Model.Id', amount: $("#recievable").val()},
+                    success: function (response) {
+                        $('#cashModalBody').html(response);
+                        $('#cash_ModalLabel').html("Cash Short Submission");
+                        $('#cash_Modal').modal("show");
+                    },
+                    error: function (err) {
+                        ErrorNotification(err.responseJSON.message)
+                    }
+                })
+            }
+
+             submitForm = () => {
+                var form = $('#CashForm');
+                form.validate();
+                if (form.valid()) {
+                    let href = "@Url.Action("UpdateShortCash","SalesPerson")";
+
+                    var fd = new FormData();
+
+                    fd.append("Id", $('#ReportId').val());
+                    fd.append("Amount", $('#cash').val());
+
+                    $.ajax({
+                        url: href,
+                        type: "POST",
+                        method: "post",
+                        processData: false,
+                        contentType: false,
+                        beforeSend: LoadingSpinner(),
+                        data: fd,
+                        success: function (response) {
+                             swal({
+                                title: 'Success',
+                                text: response.message,
+                                icon: "success",
+                                closeOnClickOutside: false
+                            }).then((ok) => {
+                                if (ok) {
+                                    location.reload();
+                                }
+                            })
+                        },
+                        error: function (err) {
+                            swal.close();
+                            if (err.responseJSON.message != null) {
+                                ErrorNotification(err.responseJSON.message)
+                            }
+                            else {
+                                var array = JSON.parse("[" + err.responseText + "]");
+                                var message = array[0][0];
+                                ErrorNotification(message)
+                            }
+                            HideModal();
+                        }
+                    })
+                }
+            }
+              HideModal = () => {
+                $('#cash_Modal').modal('hide');
+            }
+
+        });
+
+    </script>
+}
+
+

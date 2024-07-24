@@ -1,0 +1,687 @@
+﻿@model ReadyGo.Domain.Entities.ViewModels.UserViewModel;
+@using ReadyGo.Domain.Enum;
+@using ReadyGo.Domain.Entities;
+@using ReadyGo.Persistence.Seeds;
+@using ReadyGo.Domain.Constants
+@{
+    ViewData["Title"] = "ManageProfile";
+    var permissions = ViewData["NotificationSettings"] as List<Configuration>;
+}
+
+@section Styles{
+    <link href="~/lib/switchery/switchery.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/croppie/croppie.min.css" />
+    <style>
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+}
+
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>User Profile Settings</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h2>User Profile</h2>
+                            </div>
+                            <div class="col-md-6 submit-btn" style="padding-top:8px">
+                                <button class="btn btn-default" id="ChangePasswordLink"><i class="fa fa-lock"></i> Change Password</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="profile-image">
+                                @if (Model.ProfileImage != null)
+                                {
+                                    <input type="hidden" id="imgId" value="@Model.ProfileImage.Id" />
+                                }
+                                <div class="col-md-10" style="text-align: -webkit-center">
+                                    <div class="square-box">
+                                        <div class="square-content">
+                                            <div id="ChangeDP" class="imageContainer img-thumbnail img-circle user-image-details">
+                                                @if (Model.ProfileImage != null)
+                                                {
+                                                    <img src="data:image;base64,@Convert.ToBase64String(Model.ProfileImage.File)" id="ProfilePic" class="image inner-img">
+                                                }
+                                                else
+                                                {
+                                                    <img src="~/resource_files/default_user.jpg" id="ProfilePic" class="image inner-img">
+                                                }
+                                                <div class="middle">
+                                                    <div><i class="fa fa-camera profileUpdate"></i></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <h2 class="text-center font-weight-bold">@Model.FirstName @Model.LastName</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="user-info">
+                                <form method="post" enctype="multipart/form-data" id="userProfileForm" class="form-label-left input_mask">
+                                    <input type="hidden" asp-for="Id" />
+                                    <div class="form-group row">
+                                        <div class="col-md-6">
+                                            <label class="col-md-12 col-sm-12 col-xs-12 required">
+                                                First Name
+                                            </label>
+                                            <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                                <input type="text" class="form-control has-feedback-left" placeholder="Firstname" asp-for="FirstName" />
+                                                <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="col-md-12 col-sm-12 col-xs-12">
+                                                Last Name
+                                            </label>
+                                            <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                                <input type="text" class="form-control has-feedback-left" placeholder="LastName" asp-for="LastName" />
+                                                <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                                <span asp-validation-for="LastName" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-6">
+                                            <label class="col-md-12 col-sm-12 col-xs-12 required">
+                                                Email
+                                            </label>
+                                            <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                                <input type="email" class="form-control has-feedback-left" readonly placeholder="Email" asp-for="Email" />
+                                                <i class="fa fa-envelope form-control-feedback left" aria-hidden="true"></i>
+                                                <span asp-validation-for="Email" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="col-md-12 col-sm-12 col-xs-12 required">
+                                                Mobile Number
+                                            </label>
+                                            <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                                <input type="text" data-inputmask="'mask': '+\\929999999999'" class="form-control has-feedback-left" placeholder="Phone" asp-for="PhoneNumber" onkeyup="ValidatePhone(this)" />
+                                                <i class="fa fa-phone form-control-feedback left" aria-hidden="true"></i>
+                                                <span id="phoneNumber-error" asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-6">
+                                            <label class="col-md-12 col-sm-12 col-xs-12 required">
+                                                Address Line 1
+                                            </label>
+                                            <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                                <input type="text" class="form-control has-feedback-left" placeholder="Address Line 1" asp-for="Address1" />
+                                                <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                                <span asp-validation-for="Address1" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="col-md-12 col-sm-12 col-xs-12">
+                                                Address Line 2
+                                            </label>
+                                            <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                                <input type="text" class="form-control has-feedback-left" placeholder="Address Line 2" asp-for="Address2" />
+                                                <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                                <span asp-validation-for="Address2" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-6">
+                                            <label class="col-md-12 col-sm-12 col-xs-12">
+                                                City
+                                            </label>
+                                            <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                                <input type="text" class="form-control has-feedback-left" placeholder="City" asp-for="City" />
+                                                <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                                <span asp-validation-for="City" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="col-md-12 col-sm-12 col-xs-12">
+                                                Province
+                                            </label>
+                                            <div class="col-md-12 col-sm-12  form-group has-feedback">
+                                                <input type="text" class="form-control has-feedback-left" placeholder="Province" asp-for="Province" />
+                                                <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                                <span asp-validation-for="Province" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </form>
+                                <div class="ln_solid"></div>
+                                <div class="form-group row">
+                                    <div class="col-md-12 col-sm-12 submit-btn">
+                                        <button type="button" id="SaveProfile" class="btn btn-default"><i class="fa fa-send"></i> Update</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="file" name="file" accept=".jpg,.png,.jpeg" id="import" style="visibility:hidden" onchange="ChangeSrc(this)" />
+                    </div>
+                </div>
+                <div class="ln_solid"></div>
+                <div class="card">
+                    <div class="card-header"><h2>Notification Settings</h2></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 ">
+                                <form id="NotificationForm">
+                                    @if (Model.Role.Name == Roles.Admin.GetDescription())
+                                    {
+                                        <div class="row">
+                                            <div class="col-md-6">Turn ON/OFF the notification of the Salesperson.</div>
+                                            <div class="col-md-6" style="text-align:right">
+                                                <label>
+                                                    <input type="hidden" value="0" name="SpNotification" />
+                                                    <input type="checkbox" value="@Convert.ToInt32(Model.SpNotification)" name="SpNotification" class="js-switch" checked />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">Turn ON/OFF the notification of the Sales Manager.</div>
+                                            <div class="col-md-6" style="text-align:right">
+                                                <label>
+                                                    <input type="hidden" value="0" name="SmNotification" />
+                                                    <input type="checkbox" value="@Convert.ToInt32(Model.SmNotification)" name="SmNotification" class="js-switch" checked />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">Turn ON/OFF the notification of the Marketing Manager.</div>
+                                            <div class="col-md-6" style="text-align:right">
+                                                <label>
+                                                    <input type="hidden" value="0" name="MmNotification" />
+                                                    <input type="checkbox" value="@Convert.ToInt32(Model.MmNotification)" name="MmNotification" class="js-switch" checked />
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="row">
+                                            <div class="col-md-6">Turn ON/OFF the notification of the new discounted orders.</div>
+                                            <div class="col-md-6" style="text-align:right">
+                                                <label>
+                                                    <input type="hidden" value="0" name="SmNotification" />
+                                                    <input type="checkbox" value="@Convert.ToInt32(Model.SmNotification)" name="SmNotification" class="js-switch" checked />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        if (Model.Role.Name == Roles.SalesManager.GetDescription())
+                                        {
+                                            if (permissions.Where(x => x.ConfigKey.Equals("Sales Manager_SalesPerson")).First().Value == "1")
+                                            {
+                                                <div class="row">
+                                                    <div class="col-md-6">Turn ON/OFF the notification of the salesperson route.</div>
+                                                    <div class="col-md-6" style="text-align:right">
+                                                        <label>
+                                                            <input type="hidden" value="0" name="SpNotification" />
+                                                            <input type="checkbox" value="@Convert.ToInt32(Model.SpNotification)" name="SpNotification" class="js-switch" checked />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            }
+                                            if (permissions.Where(x => x.ConfigKey.Equals("Sales Manager_Customer")).First().Value == "1")
+                                            {
+                                                <div class="row">
+                                                    <div class="col-md-6">Turn ON/OFF the notification of the customer.</div>
+                                                    <div class="col-md-6" style="text-align:right">
+                                                        <label>
+                                                            <input type="hidden" value="0" name="MmNotification" />
+                                                            <input type="checkbox" value="@Convert.ToInt32(Model.MmNotification)" name="MmNotification" class="js-switch" checked />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                        if (Model.Role.Name == Roles.MarketingManager.GetDescription())
+                                        {
+                                            if (permissions.Where(x => x.ConfigKey.Equals("Marketing Manager_SalesPerson")).First().Value == "1")
+                                            {
+                                                <div class="row">
+                                                    <div class="col-md-6">Turn ON/OFF the notification of the salesperson route.</div>
+                                                    <div class="col-md-6" style="text-align:right">
+                                                        <label>
+                                                            <input type="hidden" value="0" name="SpNotification" />
+                                                            <input type="checkbox" value="@Convert.ToInt32(Model.SpNotification)" name="SpNotification" class="js-switch" checked />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            }
+                                            if (permissions.Where(x => x.ConfigKey.Equals("Marketing Manager_Customer")).First().Value == "1")
+                                            {
+                                                <div class="row">
+                                                    <div class="col-md-6">Turn ON/OFF the notification of the customer.</div>
+                                                    <div class="col-md-6" style="text-align:right">
+                                                        <label>
+                                                            <input type="hidden" value="0" name="MmNotification" />
+                                                            <input type="checkbox" value="@Convert.ToInt32(Model.MmNotification)" name="MmNotification" class="js-switch" checked />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                </form>
+                                <div class="ln_solid"></div>
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 submit-btn">
+                                        <button type="button" onclick="SaveNotificationSettings()" class="btn btn-default"><i class="fa fa-send"></i> Update</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @*<div class="ln_solid"></div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <a class="btn btn-default" asp-controller="Account" asp-action="LogOff"><i class="fa fa-sign-out"></i> Logout</a>
+                        </div>
+                    </div>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bs-example-modal-lg" id="ChangePasswordModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg passwordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel2">Change Password</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div id="changePasswordBdy">
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
+                <button type="button" id="ChangePasswordSubmit" class="btn btn-default">Update <i class="fa fa-send"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bs-example-modal-sm" id="profileImageModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel2">Upload Image</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:2%">
+                <div class="row">
+                    <div id="CropContainer" class="col-md-12">
+                        @if (Model.ProfileImage != null)
+                        {
+                            <img class="my-image" id="my-image" src="data:image;base64,@Convert.ToBase64String(Model.ProfileImage.File)" />
+                        }
+                        else
+                        {
+                            <img class="my-image" id="my-image" src="~/resource_files/default_user.jpg" />
+                        }
+                    </div>
+                    <div class="col-md-12 text-center" style="padding-top:10px">
+                        <button class="btn btn-default" onclick="$('#import').click()">Select Image</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <span id="dp-error" class="error"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="row">
+                    <div class="col-md-4">
+                        @if (Model.ProfileImage != null)
+                        {
+                            <button type="button" class="btn btn-default" id="DeleteImage" style="float:left"><i class="fa fa-trash"></i> Delete</button>
+                        }
+                    </div>
+                    <div class="col-md-8">
+                        <button type="button" id="saveCropImage" class="btn btn-default float-right"><i class="fa fa-upload"></i> Upload Image</button>
+                        <button type="button" class="btn btn-outline-danger float-right" data-dismiss="modal" id="CancelChanges">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/lib/switchery/switchery.min.js"></script>
+    <script src="~/lib/croppie/croppie.js"></script>
+    <script src="~/js/ValidationScript.min.js"></script>
+    <script src="~/lib/jquery.inputmask/inputmask.min.js"></script>
+    <script src="~/lib/jquery.inputmask/jquery.inputmask.min.js"></script>
+    <script src="~/lib/jquery.inputmask/bindings/inputmask.binding.js"></script>
+    <script>
+        $(document).ready(function () {
+            var isDpChanged = false;
+            $('input[type=checkbox]').each(function () {
+                if ($(this).val() == 0)
+                    $(this).click()
+            });
+            $('input[type="checkbox"]').on('change', function () {
+                $(this).val(Number($(this).prop('checked')))
+            })
+
+            SaveNotificationSettings = () => {
+                $.ajax({
+                    url: "../Notification/NotificationSetting",
+                    method: "post",
+                    beforeSend: LoadingSpinner(),
+                    datatype: 'text/html',
+                    data: $("#NotificationForm").serialize(),
+                    success: function (response) {
+                        swal.close();
+                        SuccessNotification(response.message)
+                        console.log(response)
+                    },
+                    error: function (err) {
+                        console.log(err)
+                    }
+                })
+            }
+            $('body').delegate('.pass-toggle', 'click', function (event) {
+                $(this).toggleClass("fa-eye fa-eye-slash");
+                var input = $($(this).attr("toggle"));
+                if (input.attr("type") == "password") {
+                    input.attr("type", "text");
+                } else {
+                    input.attr("type", "password");
+                }
+            });
+            $('#ChangeDP').click(function () {
+                $('#profileImageModal').modal('show');
+            })
+            $('#CancelChanges').click(function () {
+                isDpChanged = false;
+                $('#import').val("");
+                uploadCrop.croppie('bind', {
+                    url: $('#my-image').attr('src'),
+                });
+                $("#dp-error").html("");
+                $('#profileImageModal').modal('hide');
+            })
+            ChangeSrc = (input) => {
+                if (input.value != "") {
+                    var url = input.value;
+                    var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+                    if (input.files && input.files[0] && (ext == "png" || ext == "jpeg" || ext == "jpg")) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            isDpChanged = true;
+                            var image = new Image();
+                            //Set the Base64 string return from FileReader as source.
+                            image.src = e.target.result;
+                            image.onload = function () {
+                                uploadCrop.croppie('bind', {
+                                    url: e.target.result
+                                });
+                                return true;
+                            };
+                        }
+                        reader.readAsDataURL(input.files[0]);
+                        $("#dp-error").html("");
+                    }
+                    else {
+                        $("#dp-error").html("Please select jpg and png format pictures.");
+                        $('#img').attr('src', '~/images/default_user.jpg');
+                    }
+                }
+            }
+
+            var uploadCrop = $('#my-image').croppie({
+                enableExif: true,
+                viewport: {
+                    width: 300,
+                    height: 300,
+                    type: 'circle'
+                },
+                boundary: {
+                    width: 300,
+                    height: 300
+                },
+                showZoomer: false,
+                enableZoom: false
+            });
+            $('#saveCropImage').click(function () {
+                uploadCrop.croppie('result', {
+                    type: 'blob',
+                    size: {
+                        width: 300,
+                        height: 300
+                    },
+                    quality: 1
+                }).then(function (blob) {
+                    fileInputElement = document.getElementById('import')
+                    let base64Image = URL.createObjectURL(blob);
+
+                    $("#ProfilePic").attr('src', base64Image)
+
+                    let file = new File([blob], "img.png", { type: "image/png", lastModified: new Date().getTime() });
+                    let container = new DataTransfer();
+                    container.items.add(file);
+                    fileInputElement.files = container.files;
+
+                    SaveImage();
+                })
+            })
+
+            $('#ChangePasswordLink').click(function () {
+                $.ajax({
+                    url: '@Url.Action("ChangePasswordFields", "Account")',
+                    type: 'post',
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        $('#changePasswordBdy').html(response);
+                        $('#ChangePasswordModal').modal('show');
+                    },
+                    error: function (err) {
+                        console.log(err);
+                    }
+                });
+            })
+
+            $('#SaveProfile').click(function () {
+                var phoneNumber = $('#PhoneNumber').val().split('_')[0];
+                var fd = new FormData();
+                fd.append("FirstName", $('#FirstName').val());
+                fd.append("LastName", $('#LastName').val());
+                fd.append("Email", $('#Email').val());
+                fd.append("Address1", $('#Address1').val());
+                fd.append("Address2", $('#Address2').val());
+                fd.append("PhoneNumber", phoneNumber);
+                fd.append("Province", $('#Province').val());
+                fd.append("City", $('#City').val());
+                if ($('#userProfileForm').valid()) {
+                    swal({
+                        text: `Are you sure, you want to update your profile information?`,
+                        icon: "warning",
+                        buttons: true,
+                        dangerMode: true,
+                    }).then((willDelete) => {
+                        if (willDelete) {
+                            $.ajax({
+                                url: '@Url.Action("ManageProfile", "Account")',
+                                type: 'post',
+                                method: 'post',
+                                contentType: false,
+                                processData: false,
+                                beforeSend: LoadingSpinner(),
+                                data: fd,
+                                success: function (response) {
+                                    swal({
+                                        title: 'Success',
+                                        text: response.message,
+                                        icon: "success",
+                                        closeOnClickOutside: false
+                                    }).then((ok) => {
+                                        if (ok)
+                                            location.reload();
+                                    })
+                                },
+                                error: function (err) {
+                                    swal.close();
+                                    if (err.responseJSON[0] != "")
+                                        $("#phoneNumber-error").html(err.responseJSON[0]);
+                                    else
+                                        ErrorNotification(err.responseJSON.message);
+                                }
+                            });
+                        }
+                        else {
+                            swal.close();
+                            $('#ChangePasswordModal').modal('hide');
+                        }
+                    });
+                }
+            })
+
+            SaveImage = () => {
+                if (isDpChanged) {
+                    var img = new FormData();
+                    var files = $('#import')[0].files;
+                    img.append("File", files[0]);
+                    $.ajax({
+                        url: '@Url.Action("UpdateImage", "Account")',
+                        type: 'post',
+                        contentType: false,
+                        processData: false,
+                        beforeSend: LoadingSpinner(),
+                        data: img,
+                        success: function (response) {
+                            swal({
+                                title: 'Success',
+                                text: response.message,
+                                icon: "success",
+                                closeOnClickOutside: false
+                            }).then((ok) => {
+                                if (ok)
+                                    location.reload();
+                            })
+                        },
+                        error: function (err) {
+                            ErrorNotification(err.responseJSON.message);
+                        }
+                    });
+                    $('#profileImageModal').modal('hide');
+                }
+                else {
+                    $("#dp-error").html("Please select image file.");
+                }
+            }
+
+            $('#ChangePasswordSubmit').click(function () {
+                let defaultError = '@ErrorMessageConstants.Error';
+                var fd = new FormData();
+                fd.append("OldPassword", $('#oldPass').val());
+                fd.append("NewPassword", $('#password').val());
+                fd.append("ConfirmPassword", $('#confirmPassword').val());
+                if ($('#ChangePasswordForm').valid()) {
+                    swal({
+                        text: `Are you sure, you want to update your account old password with this new password? `,
+                        icon: "warning",
+                        buttons: true,
+                        dangerMode: true,
+                    }).then((willDelete) => {
+                        if (willDelete) {
+                            $.ajax({
+                                url: '@Url.Action("ChangePassword", "Account")',
+                                type: 'post',
+                                method: 'post',
+                                contentType: false,
+                                processData: false,
+                                beforeSend: LoadingSpinner(),
+                                data: fd,
+                                success: function (response) {
+                                    swal.close();
+                                    SuccessNotification(response.message);
+                                    $('#ChangePasswordModal').modal('hide');
+                                },
+                                error: function (err) {
+                                    swal.close();
+                                    if (err.responseJSON.message == defaultError)
+                                        ErrorNotification(err.responseJSON.message);
+                                    else {
+                                        $('#oldPass').parent().find("span").html(err.responseJSON.message);
+                                    }
+                                }
+                            });
+                        }
+                        else {
+                            swal.close();
+                            $('#ChangePasswordModal').modal('hide');
+                        }
+                    });
+                }
+            });
+            $("#DeleteImage").click(function () {
+                swal({
+                    text: `Are you sure, you want to delete your display picture?`,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                }).then((willDelete) => {
+                    if (willDelete) {
+                        $.ajax({
+                            url: '@Url.Action("DeleteDp", "Account")',
+                            type: 'delete',
+                            method:'delete',
+                            beforeSend: LoadingSpinner(),
+                            data: { id: $("#imgId").val()},
+                            success: function (response) {
+                                swal.close();
+                                $('#profileImageModal').modal('hide');
+                                swal({
+                                    title: 'Success',
+                                    text: response.message,
+                                    icon: "success",
+                                    closeOnClickOutside: false
+                                }).then((ok) => {
+                                    if (ok)
+                                        location.reload();
+                                })
+                            },
+                            error: function (err) {
+                                console.log(err);
+                            }
+                        });
+                    }
+                    else {
+                        swal.close();
+                    }
+                });
+            })
+        })
+    </script>
+}

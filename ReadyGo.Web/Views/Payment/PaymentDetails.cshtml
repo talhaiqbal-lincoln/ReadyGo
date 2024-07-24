@@ -1,0 +1,388 @@
+﻿@model ReadyGo.Domain.Entities.ViewModels.PaymentViewModel
+@{
+    ViewData["Title"] = ViewBag.PageTitle;
+}
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+    <style>
+        .card {
+            margin-top: 8px;
+        }
+
+        #editIcon {
+            font-size: 25px;
+            float: right;
+        }
+
+        .userAxStatus {
+            background-color: darkblue !important;
+            font-size: 15px
+        }
+
+        .form-group {
+            padding-top: 10px;
+        }
+
+        .profileImageContainer {
+            margin-bottom: unset !important;
+        }
+
+        #OrderDetails_wrapper {
+            overflow: auto;
+        }
+
+        .custom-link {
+            color: #1000ffeb;
+            float: right;
+        }
+
+        .amount ::-webkit-outer-spin-button,
+        .amount ::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        .amount {
+            -moz-appearance: textfield;
+        }
+    </style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <button id="downloadInvoice" style="display:none"></button>
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2><a onclick="history.back()"><i class="fa fa-angle-left font-weight-bold" style="font-size:22px"></i></a> @ViewBag.PageTitle</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row formGroup">
+                    <div class="col-md-4">
+                        <span class="userAxStatus">Payment#: @Model.PaymentCode</span>
+                    </div>
+                    <div class="col-md-6"></div>
+                    <div class="col-md-2">
+                        @if (!ViewBag.Editable && !Model.IsMarked)
+                        {
+                            <a id="EditPayment"><i style="cursor:pointer" onclick='' class="fa fa-edit editIcon"></i></a>
+                        }
+                    </div>
+                </div>
+                <div class="card" id="custInfo">
+                    <div class="col-md-12" style="background-color:#f7f7f7">
+                        <div style="text-align:center">
+                            <h2>Loading...</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h2>Payment Details</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <form id="paymentForm" style="width:100%">
+                                <input type="hidden" asp-for="Id" />
+
+                                <div style="padding-top:10px">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showEmail">
+                                                    Opening Balance
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    @if (!ViewBag.Editable)
+                                                    {
+                                                        <input class="form-control has-feedback-left text-right" readonly value="@Model.CurrentBalance.ToString("N2")" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="number" id="oldBalance" class="form-control has-feedback-left text-right amount" readonly asp-for="CurrentBalance" value="@Math.Round(Model.CurrentBalance, 2)" />
+                                                    }
+                                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showEmail">
+                                                    Salesperson
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input class="form-control has-feedback-left" readonly value="@Model.SpName" />
+                                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showEmail">
+                                                    Device Name
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input class="form-control has-feedback-left" readonly value="@Model.DeviceName" />
+                                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-6">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 required">
+                                                    Amount Received
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    @if (!ViewBag.Editable)
+                                                    {
+                                                        <input class="form-control has-feedback-left text-right" readonly value="@Model.PaymentReceived.ToString("N2")" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="number" min="0" step="1" dir="rtl" required id="amount" class="form-control has-feedback-left text-right" asp-for="PaymentReceived" value="@Math.Round(Model.PaymentReceived, 2)" />
+                                                    }
+                                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                                    <span class="text-danger" asp-validation-for="PaymentReceived"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showEmail">
+                                                    New Balance
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    @if (!ViewBag.Editable)
+                                                    {
+                                                        <input class="form-control has-feedback-left text-right" readonly value="@Model.NewBalance.ToString("N2")" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="number" id="newBalance" class="form-control has-feedback-left text-right amount" readonly asp-for="NewBalance" value="@Math.Round(Model.NewBalance, 2)" />
+                                                    }
+                                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row form-group">
+                                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showEmail">
+                                                    Created At
+                                                </label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input class="form-control has-feedback-left" readonly value="@Model.ReceivedAt.ToString("dd/MM/yyyy h:mm tt")" />
+                                                    <i class="fa fa-calendar form-control-feedback left" aria-hidden="true"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ln_solid"></div>
+                                <div class="row">
+                                    <div class="col-md-6"></div>
+                                    <div class="col-md-6 col-sm-6">
+                                        <div class="col-md-12 col-sm-12 col-xs-12 submit-btn">
+                                            <button type="button" id="DeletePayment" class="btn btn-outline-danger"><i class="fa fa-trash"></i> Delete Payment</button>
+                                            @if (!Model.IsMarked)
+                                            {
+                                                <button type="button" id="PrintOrder" class="btn btn-default"><i class="fa fa-print"></i> Print Invoice</button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" id="unmark" class="btn btn-default"><i class="fa fa-check-square"></i> Un-mark Payment</button>
+                                            }
+                                            <button type="button" onclick="submitPaymentForm()" id="save" class="btn btn-default"><i class="fa fa-check-square"></i> Save</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/js/ValidationScript.min.js"></script>
+    <script>
+        $(document).ready(function () {
+              $('#EditPayment').click(function () {
+                 window.location.href = '@Url.Action("PaymentDetails", "Payment" , new {id = "ID", flag = "Editable"})'.replace("ID", "@Model.Id");
+                 //location.reload();
+            })
+            var editable = JSON.parse('@Html.Raw(Json.Serialize(ViewBag.Editable))');
+            if (!editable) {
+                //$("#buttonsDiv").hide();
+                //$('#paymentForm').find('input,select').attr('disabled', 'disabled');
+
+                $('#paymentForm label').removeClass('required');
+                $('#save').hide();
+            }
+            else {
+                $("#PrintOrder").hide();
+                $("#DeletePayment").hide();
+            }
+            $('#amount').on('change', function () {
+                if ($("#paymentForm").valid) {
+                    var amount = parseFloat($('#amount').val());
+                    if (!isNaN(amount)) {
+                        this.value = parseFloat(this.value);
+                        var oldBalance = parseFloat($('#oldBalance').val());
+                        $('#newBalance').val((oldBalance - amount).toFixed(2));
+                    }
+
+                }
+            });
+             submitPaymentForm = () => {
+                event.preventDefault();
+                if ($("#paymentForm").valid) {
+                    var phoneNumber = $('#PhoneNumber').val().split('_')[0];
+                    let Reqtype = $('#Id').val();
+                    let href = "@Url.Action("EditPayment","Payment")";
+                    var fd = new FormData();
+                    fd.append("Id", $('#Id').val());
+                    fd.append("PaymentReceived", $('#amount').val());
+                    if ($("#paymentForm").valid()) {
+                        $.ajax({
+                            url: href,
+                            type: "POST",
+                            method: "post",
+                            processData: false,
+                            contentType: false,
+                            beforeSend: LoadingSpinner(),
+                            data: fd,
+                            success: function (response) {
+                                swal.close();
+                                swal({
+                                    title: "Success",
+                                    text: response.message,
+                                   icon: "success",
+                                    buttons: {
+                                        cancel: false,
+                                        confirm: true,
+                                    },
+                                }).then((ok) => {
+                                    if(ok) {
+                                       history.go(-2);
+                                    }
+                                });
+                            },
+                            error: function (err) {
+                                swal.close();
+                                if (err.responseJSON.message != null) {
+                                    ErrorNotification(err.responseJSON.message)
+                                }
+                            }
+                        })
+                    }
+                    else {
+                        $(".input-validation-error")[0].focus();
+                        return false;
+                    }
+                }
+            };
+            $.ajax({
+                url: '@Url.Action("CustomerInfo","Customer")',
+                type: "Get",
+                method: 'get',
+                data: { id: "@Model.CustomerId"},
+                success: function (response) {
+                    $('#custInfo').html(response);
+                },
+                error: function (err) {
+                    ErrorNotification(err.responseJSON.message);
+                }
+            });
+            $("#DeletePayment").click(function () {
+                swal({
+                    title: 'Delete Payment',
+                    text: `Are you sure, you want to delete this Payment?`,
+                    buttons: true,
+                    icon: "error",
+                }).then((willDelete) => {
+                    if (willDelete) {
+                        $.ajax({
+                            url: '@Url.Action("DeletePayment","Payment")',
+                            type: "POST",
+                            method: 'post',
+                            beforeSend: LoadingSpinner(),
+                            data: { id: $("#Id").val() },
+                            success: function (response) {
+                                swal.close();
+                                swal({
+                                    title: 'Success',
+                                    text: response.message,
+                                    icon: "success",
+                                    closeOnClickOutside: false
+                                }).then((ok) => {
+                                    if (ok) {
+                                        let url = document.referrer;
+                                        window.location.href = url;
+                                    }
+                                })
+                            },
+                            error: function (err) {
+                                swal.close();
+                                ErrorNotification(err.responseJSON.message);
+                            }
+                        });
+                    }
+                })
+            })
+            $('#unmark').click(function () {
+                swal({
+                    title: 'Un-mark Payment',
+                    text: `Are you sure, you want to un-mark this payment?`,
+                    buttons: true,
+                    icon: "warning",
+                }).then((unMark) => {
+                    if (unMark) {
+                        $.ajax({
+                            url: '@Url.Action("UnMarkPayment","Payment")',
+                            type: "POST",
+                            method: 'post',
+                            beforeSend: LoadingSpinner(),
+                            data: { id :'@Model.Id'},
+                            success: function (response) {
+                                swal.close();
+                                swal({
+                                    title: 'Success',
+                                    text: response.message,
+                                    icon: "success",
+                                    closeOnClickOutside: false
+                                }).then((ok) => {
+                                    if (ok)
+                                        history.go(-1);
+                                })
+                            },
+                            error: function (err) {
+                                swal.close();
+                                ErrorNotification(err.responseJSON.message);
+                            }
+                        });
+                    }
+                });
+            });
+            $('#PrintOrder').click(function () {
+                window.open('@Url.Action("PaymentInvoice", "Payment", new { id=Model.Id})', '_blank');
+            });
+        })
+    </script>
+}

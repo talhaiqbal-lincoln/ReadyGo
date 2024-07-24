@@ -1,0 +1,77 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using ReadyGo.Domain.Entities.Identity
+@using System.Linq;
+@using Microsoft.EntityFrameworkCore;
+@inject UserManager<ApplicationUser> userManager
+@{
+    var user = userManager.Users.Include(x => x.ProfileImage).Include(x => x.Role).Include(x => x.Notifications)
+        .First(x => x.Id.Equals(User.Claims.First().Value));
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LightHouse</title>
+    <link rel="icon" href="~/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="~/jqueryui/jquery-ui.min.css" />
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Font Awesome -->
+    <link href="~/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    @RenderSection("Styles", required: false)
+    <!-- Custom Theme Style -->
+    <link href="~/css/site.min.css" rel="stylesheet">
+</head>
+<body class="nav-md">
+    <div class="container body">
+        <div class="main_container">
+            <!-- side navigation -->
+            <div class="col-md-3 left_col menu_fixed">
+                <div class="left_col scroll-view" style="width:100%">
+                    <partial name="~/Views/Shared/_SideNav.cshtml" for="@user" />
+                </div>
+            </div>
+            <!-- side navigation -->
+            <!-- top navigation -->
+            <div class="top_nav">
+                <partial name="~/Views/Shared/_TopNav.cshtml" for="@user" />
+            </div>
+            <!-- /top navigation -->
+            <!-- page content -->
+            <div class="right_col" role="main">
+                @RenderBody()
+            </div>
+            <!-- /page content -->
+            <!-- footer content -->
+            <partial name="~/Views/Shared/_Footer.cshtml" />
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/jqueryui/jquery-ui.min.js"></script>
+    @RenderSection("Validation", required: false)
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/sweetalert/sweetalert.min.js"></script>
+    <!-- FastClick -->
+    <script src="~/lib/fastclick/fastclick.js"></script>
+    <!-- Custom Theme Scripts -->
+    <script src="~/js/site.min.js" asp-append-version="true"></script>
+    <script>
+        $(document).ready(function () {
+            // Select required elements from the DOM
+            const modal = document.querySelector(".modal");
+            if (modal != null && modal != undefined) {
+                if (modal.classList.contains("show")) {
+                    // Disable scroll
+                    document.body.scroll = "no";
+                } else {
+                    // Enable scroll
+                    document.body.scroll = "yes";
+                }
+            }
+        });
+    </script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,197 @@
+﻿@model IEnumerable<ReadyGo.Domain.Entities.Configuration>
+@{ ViewData["Title"] = "Configuration"; }
+@section Styles{
+    <link href="~/lib/switchery/switchery.min.css" rel="stylesheet" />
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2><i class="fa fa-gears"></i> Configuration</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <form method="post" id="ConfigForm" enctype="multipart/form-data">
+                    <div class="card">
+                        <div class="card-header"><h2>Sales Manager Screen View</h2></div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12 ">
+                                    <div class="row">
+                                        <div class="col-md-6">Customer Management</div>
+                                        <div class="col-md-6" style="text-align:right">
+                                            <label>
+                                                <input type="hidden" value="0" name="@Model.Where(x => x.ConfigKey == "Sales Manager_Customer").FirstOrDefault().ConfigKey" />
+                                                <input type="checkbox" value="@Model.Where(x => x.ConfigKey == "Sales Manager_Customer").FirstOrDefault().Value" name="@Model.Where(x => x.ConfigKey == "Sales Manager_Customer").FirstOrDefault().ConfigKey" class="js-switch" checked />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">Salesperson Management</div>
+                                        <div class="col-md-6" style="text-align:right">
+                                            <label>
+                                                <input type="hidden" value="0" name="@Model.Where(x => x.ConfigKey == "Sales Manager_SalesPerson").FirstOrDefault().ConfigKey" />
+                                                <input type="checkbox" value="@Model.Where(x => x.ConfigKey == "Sales Manager_SalesPerson").FirstOrDefault().Value" name="@Model.Where(x => x.ConfigKey == "Sales Manager_SalesPerson").FirstOrDefault().ConfigKey" class="js-switch" checked />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">Stock Management</div>
+                                        <div class="col-md-6" style="text-align:right">
+                                            <label>
+                                                <input type="hidden" value="0" name="@Model.Where(x => x.ConfigKey == "Sales Manager_Stock").FirstOrDefault().ConfigKey" />
+                                                <input type="checkbox" value="@Model.Where(x => x.ConfigKey == "Sales Manager_Stock").FirstOrDefault().Value" name="@Model.Where(x => x.ConfigKey == "Sales Manager_Stock").FirstOrDefault().ConfigKey" class="js-switch" checked />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ln_solid"></div>
+                    <div class="card">
+                        <div class="card-header"><h2>Marketing Manager Screen</h2></div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12 ">
+                                    <div class="row">
+                                        <div class="col-md-6">Customer Management</div>
+                                        <div class="col-md-6" style="text-align:right">
+                                            <label>
+                                                <input type="hidden" value="0" name="@Model.Where(x => x.ConfigKey == "Marketing Manager_Customer").FirstOrDefault().ConfigKey" />
+                                                <input type="checkbox" value="@Model.Where(x => x.ConfigKey == "Marketing Manager_Customer").FirstOrDefault().Value" name="@Model.Where(x => x.ConfigKey == "Marketing Manager_Customer").FirstOrDefault().ConfigKey" class="js-switch" checked />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">Salesperson Management</div>
+                                        <div class="col-md-6" style="text-align:right">
+                                            <label>
+                                                <input type="hidden" value="0" name="@Model.Where(x => x.ConfigKey == "Marketing Manager_SalesPerson").FirstOrDefault().ConfigKey" />
+                                                <input type="checkbox" value="@Model.Where(x=>x.ConfigKey=="Marketing Manager_SalesPerson").FirstOrDefault().Value" name="@Model.Where(x=>x.ConfigKey=="Marketing Manager_SalesPerson").FirstOrDefault().ConfigKey" class="js-switch" checked />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">Stock Management</div>
+                                        <div class="col-md-6" style="text-align:right">
+                                            <label>
+                                                <input type="hidden" value="0" name="@Model.Where(x => x.ConfigKey == "Marketing Manager_Stock").FirstOrDefault().ConfigKey" />
+                                                <input type="checkbox" value="@Model.Where(x=>x.ConfigKey=="Marketing Manager_Stock").FirstOrDefault().Value" name="@Model.Where(x=>x.ConfigKey=="Marketing Manager_Stock").FirstOrDefault().ConfigKey" class="js-switch" checked />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="ln_solid"></div>
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 submit-btn">
+                        <button id="SaveConfig" class="btn btn-default"><i class="fa fa-wrench"></i> Save & Apply Config</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" style="margin-top:-40px">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2><i class="fa fa-legal"></i> Terms & Conditions</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row">
+                    <form id="termsForm" class="form-horizontal" style="width:100%">
+                        <textarea id="terms" required rows="3" placeholder="Enter Terms & Conditions" class="form-control" style="border-radius:3px">@Model.Where(x=>x.ConfigKey=="TermsConditions").FirstOrDefault().Value</textarea>
+                    </form>
+                </div>
+                <div class="ln_solid"></div>
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 submit-btn">
+                        <button id="SaveTerms" class="btn btn-default"><i class="fa fa-legal"></i> Save Terms & Conditions</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/js/ValidationScript.min.js"></script>
+    <script src="~/lib/switchery/switchery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('input[type=checkbox]').each(function () {
+                if ($(this).val() == 0)
+                    $(this).click()
+            });
+            $('input[type="checkbox"]').on('change', function () {
+                $(this).val(Number($(this).prop('checked')))
+            })
+            $('#SaveConfig').click(function () {
+                swal({
+                    title: 'Apply Configuration',
+                    text: `Are you sure, you want to apply this Configuration?`,
+                    buttons: true,
+                    icon: "warning",
+                }).then((saveConfig) => {
+                    if (saveConfig) {
+                        $.ajax({
+                            url: '../Configuration/SaveConfiguration',
+                            type: "POST",
+                            method: 'post',
+                            beforeSend: LoadingSpinner(),
+                            datatype: 'text/html',
+                            data: JSON.stringify($("#ConfigForm").serialize()),
+                            success: function (response) {
+                                swal.close();
+                                SuccessNotification(response.message);
+                            },
+                            error: function (err) {
+                                swal.close();
+                                ErrorNotification(err.responseJSON.message);
+                            }
+                        });
+                    }
+                });
+            })
+
+            $("#SaveTerms").click(function () {
+                if ($("#termsForm").valid()) {
+                    swal({
+                        title: 'Save Terms & Conditions',
+                        text: `Are you sure, you want to save terms and conditions?`,
+                        buttons: true,
+                        icon: "warning",
+                    }).then((saveConfig) => {
+                        if (saveConfig) {
+                            $.ajax({
+                                url: '../Configuration/SaveTerms',
+                                type: "POST",
+                                method: 'post',
+                                beforeSend: LoadingSpinner(),
+                                datatype: 'text/html',
+                                data: { terms: $("textarea#terms").val() },
+                                success: function (response) {
+                                    swal.close();
+                                    SuccessNotification(response.message);
+                                },
+                                error: function (err) {
+                                    swal.close();
+                                    ErrorNotification(err.responseJSON.message);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

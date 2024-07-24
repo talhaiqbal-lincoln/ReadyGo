@@ -1,0 +1,312 @@
+﻿@model ReadyGo.Domain.Entities.Customer;
+
+@{
+    string createdBy = "";
+    var routeName = "";
+    ViewData["Title"] = "Customer Management";
+    routeName = Model.Route != null ? Model.Route.Name : string.Empty;
+
+    if (Model.CreatedBy != null)
+    {
+        createdBy = $"{Model.CreatedBy.FirstName} {Model.CreatedBy.LastName}";
+    }
+    else
+    {
+        createdBy = "---";
+    }
+}
+@section styles{
+    <style>
+        .profileImageContainer {
+            display: flex;
+            justify-content: center;
+            /*margin: 0% 0% 2% 0%;*/
+        }
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2><a onclick="history.back()"><i class="fa fa-angle-left font-weight-bold" style="font-size:22px"></i></a> @ViewData["PageTitle"]</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row formGroup">
+                    <div class="col-md-4">
+                        @if (Model.SyncedAt != null)
+                        {
+                            <span class="userAxStatus">Synced</span>
+                        }
+                        else
+                        {
+                            <span class="userAxStatus" style="background-color: darkred">UnSynced</span>
+                        }
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="row">
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showAX">
+                                    AxCode
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input class="form-control has-feedback-left" readonly asp-for="AxCode" />
+                                    <i class="fa fa-qrcode form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showBusinessName">
+                                    Business Name
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input class="form-control has-feedback-left" readonly asp-for="BusinessName" />
+                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showFirstName">
+                                    First Name
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input class="form-control has-feedback-left" readonly asp-for="FirstName" />
+                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showLastName">
+                                    Last Name
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input class="form-control has-feedback-left" readonly asp-for="LastName" />
+                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Email
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input type="email" class="form-control has-feedback-left" readonly asp-for="Email" />
+                                    <i class="fa fa-envelope form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showPhonenumber">
+                                    Mobile Number
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input type="text" class="form-control has-feedback-left" id="phonenumber" readonly asp-for="PhoneNumber" />
+                                    <i class="fa fa-phone form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    CNIC
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input type="email" class="form-control has-feedback-left" readonly asp-for="CNIC" />
+                                    <i class="fa fa-credit-card form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Street Address1
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input type="text" class="form-control has-feedback-left" placeholder="Street Address" readonly asp-for="Address1" />
+                                    <i class="fa fa-street-view form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="province">
+                                    Province
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input type="text" class="form-control has-feedback-left" placeholder="Province" readonly asp-for="Province" />
+                                    <i class="fa fa-globe form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    City
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input type="text" class="form-control has-feedback-left" placeholder="City" readonly asp-for="City" />
+                                    <i class="fa fa-globe form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Created At
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input value="@Model.CreatedAt.ToString("ddd, dd MMM yyy HH:mm:ss")" id="createdat" readonly class="form-control has-feedback-left">
+                                    <i class="fa fa-clock-o form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Created By
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input value="@createdBy" id="createdBy" readonly class="form-control has-feedback-left">
+                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Enabled/Disabled
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    @if (Model.IsActive)
+                                    {
+                                        <input value="Enabled" id="isActive" readonly class="form-control has-feedback-left">
+                                        <i class="fa fa-check-circle form-control-feedback left" aria-hidden="true"></i>
+                                    }
+                                    else
+                                    {
+                                        <input value="Disabled" id="isActive" readonly class="form-control has-feedback-left">
+                                        <i class="fa fa-ban form-control-feedback left" aria-hidden="true"></i>
+                                    }
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 " for="showSP">
+                                    Salesperson
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    @if (ViewBag.Sp != null)
+                                    {
+                                        <input type="text" id="showSP" name="showSP" value="@ViewBag.Sp" readonly class="form-control has-feedback-left">
+                                    }
+                                    else
+                                    {
+                                        <input type="text" id="showSP" name="showSP" value="Not Assigned" readonly class="form-control has-feedback-left">
+
+                                    }
+                                    <i class="fa fa-user form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12 ">
+                                    Current Balance
+                                </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                    <input type="text" class="form-control has-feedback-left text-right" placeholder="Current Balance" readonly asp-for="Balance" value="@Math.Round(Model.Balance).ToString("N2")" />
+                                    <i class="fa fa-money form-control-feedback left" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <a id="EditCustomer"><i style="cursor:pointer" onclick='' class="fa fa-edit editIcon"></i></a>
+                            </div>
+                        </div>
+                        <div class="row formGroup profileImageContainer">
+                            <div class="profile-image">
+                                <div class="col-md-12" style="text-align: -webkit-center">
+                                    <div class="square-box">
+                                        <div class="square-content">
+                                            <div class="imageContainer img-thumbnail img-circle user-image-details">
+                                                @if (Model.ProfilePicture != null)
+                                                {
+                                                    <img src="data:image;base64,@Convert.ToBase64String(Model.ProfilePicture.File)" id="ProfilePic" class="inner-img" style="width:100%">
+                                                }
+                                                else
+                                                {
+                                                    <img src="~/resource_files/default_user.jpg" id="ProfilePic" class="inner-img" style="width:100%">
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h2 class="text-center font-weight-bold">@Model.FirstName @Model.LastName</h2>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="map" style="width:100%;height:464px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" value="@Model.Longitude" id="longitude" />
+<input type="hidden" value="@Model.Latitude" id="latitude" />
+@section Scripts{
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIB3IfoXSHA50wo_WQvLpn-CvGjafm5Cg&callback=initMap&libraries=&v=weekly"
+            async></script>
+    <script>
+        let map;
+        let lat;
+        let long;
+        let marker;
+        function initMap() {
+            if (document.getElementById("longitude").value != 0 && document.getElementById("latitude").value != 0) {
+                lat = parseFloat(document.getElementById('latitude').value, 15);
+                long = parseFloat(document.getElementById('longitude').value, 15);
+            }
+            else {
+                lat = 31.52;
+                long = 74.35;
+            }
+            uluru = { lat: lat, lng: long }
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: lat, lng: long },
+                zoom: 8,
+                streetViewControlOptions: {
+                    position: google.maps.ControlPosition.LEFT_CENTER,
+                },
+            });
+            if (document.getElementById("longitude").value != 0 && document.getElementById("latitude").value != 0) {
+                // The marker, positioned at Uluru
+                marker = new google.maps.Marker({
+                    position: uluru,
+                    map: map,
+                });
+            }
+            else {
+                marker = new google.maps.Marker({
+                    map: map,
+                });
+            }
+        }
+        $(document).ready(function () {
+            window.onpageshow = function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            };
+            $('#EditCustomer').click(function () {
+                window.location.href = `/Customer/EditCustomer/${$("#Id").val()}`;
+            })
+        });
+    </script>
+}

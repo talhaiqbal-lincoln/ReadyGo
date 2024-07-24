@@ -1,0 +1,999 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ReadyGo.Web</name>
+    </assembly>
+    <members>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.Login(System.String)">
+            <summary>
+            GET: /Account/Login
+            </summary>
+            <param name="returnUrl"></param>
+            <returns>Login View</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.Login(ReadyGo.Domain.Entities.ViewModels.LoginViewModel,System.String)">
+            <summary>
+            Handle login request
+            </summary>
+            <param name="model"></param>
+            <param name="returnUrl"></param>
+            <returns>Redirect to home page if user is valid</returns>
+            <returns>Display error message if user is invalid</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.SetPassword(System.String,System.String)">
+            <summary>
+            GET: /Account/SetPassword
+            </summary>
+            <param name="email"></param>
+            <param name="code"></param>
+            <returns>SetPassword View</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.SetPassword(ReadyGo.Domain.Entities.ViewModels.SetPasswordViewModel)">
+            <summary>
+            POST: /Account/SetPassword
+            </summary>
+            <param name="model"></param>
+            <returns>Redirect to home page if user is valid</returns>
+            <returns>Display error message if user is invalid</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.ForgotPassword">
+            <summary>
+            GET: /Account/ForgotPassword
+            </summary>
+            <returns>Forget Password View</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.ForgotPassword(ReadyGo.Domain.Entities.ViewModels.ForgotPasswordViewModel)">
+            <summary>
+            POST: /Account/ForgotPassword Handle post request and send reset password email to user
+            </summary>
+            <param name="model"></param>
+            <returns>Reset password link to user</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.ForgotPasswordConfirmation">
+            <summary>
+            GET: /Account/ForgotPasswordConfirmation
+            </summary>
+            <returns>Confirmation view</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.ResetPassword(System.String,System.String)">
+            <summary>
+            GET: /Account/ResetPassword
+            </summary>
+            <param name="email"></param>
+            <param name="code"></param>
+            <returns>Password reset view where user will enter new password</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.ResetPassword(ReadyGo.Domain.Entities.ViewModels.ResetPasswordViewModel)">
+            <summary>
+            POST: /Account/ResetPassword Handle reset password request
+            </summary>
+            <param name="model"></param>
+            <returns>Reset password confirmation</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.ResetPasswordConfirmation">
+            <summary>
+            GET: /Account/ResetPasswordConfirmation
+            </summary>
+            <param name="model"></param>
+            <returns>Reset password confirmation view</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.ManageProfile">
+            <summary>
+            GET: /Account/ManageProfile
+            </summary>
+            <returns>Manage user profile view</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.ManageProfileAsync(ReadyGo.Domain.Entities.ViewModels.UserViewModel)">
+            <summary>
+            POST: /Account/ManageProfile Handle requestto update profile infoe
+            </summary>
+            <param name="user"></param>
+            <returns>Confirmation message</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.ChangePasswordFields">
+            <summary>
+            GET: /Account/ChangePassword
+            </summary>
+            <returns>return changepassword partial view</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.ChangePasswordAsync(ReadyGo.Domain.Entities.ViewModels.ChangePasswordViewModel)">
+            <summary>
+            POST: /Account/ChangePasssword Handle request to change password
+            </summary>
+            <param name="model"></param>
+            <returns>Confirmation message</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.AccountController.CheckMail(System.String)">
+            <summary>
+            POST:/Account/CheckEmail Check whether email exist in db or not
+            </summary>
+            <param name="email"></param>
+            <returns>bool true is exist and false if not</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.AccountApiController.Login(ReadyGo.Domain.Entities.ViewModels.LoginViewModel)">
+            <summary>
+            Method for User Login
+            </summary>
+            <param name="model"></param>
+            <returns>Token if the user is authenticated</returns>
+            <response code="200">Returns the JWT token</response>
+            <response code="500">If user enters wrong Credentials </response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.AccountApiController.ForgotPassword(ReadyGo.Domain.Entities.ViewModels.ForgotPasswordViewModel)">
+             <summary>
+             Method for Forget Password
+             </summary>
+             <param name="model"></param>
+             <remarks>
+             Sample request:
+            
+                 POST /Todo
+                 {
+                    "Email : "string@string.com",
+                 }
+            
+             </remarks>
+             <returns> Message based on valid user</returns>
+             <response code="200">Returns verification code</response>
+             <response code="500">If the user not found </response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.AccountApiController.ResetPassword(ReadyGo.Domain.Entities.ViewModels.ResetPasswordViewModel)">
+             <summary>
+             Method for Reset Password
+             </summary>
+             <param name="model"></param>
+             <remarks>
+             Sample request:
+            
+                 POST /Todo
+                 {
+                    "Email : "string@string.com",
+                    "Password":"string",
+                    "ConfirmPassword":"string",
+                    "Code":"string"
+                 }
+            
+             </remarks>
+             <returns> Message based on password reset</returns>
+             <response code="200">Returns success if password reset</response>
+             <response code="500">If error occur in reseting password </response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.AccountApiController.ChangePasswordAsync(ReadyGo.Domain.Entities.ViewModels.ChangePasswordViewModel)">
+             <summary>
+             Method for Change Password
+             </summary>
+             <param name="model"></param>
+             <remarks>
+             Sample request:
+            
+                 POST /Todo
+                 {
+                    "OldPassword":"string",
+                    "NewPassword":"string",
+                    "ConfirmPassword":"string"
+                 }
+            
+             </remarks>
+             <returns> Message based on password updation</returns>
+             <response code="200">Returns success if password updation</response>
+             <response code="500">If error occur in updating password </response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CategoryApiController.GetAll">
+            <summary>
+            Get all Categories
+            </summary>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CategoryApiController.Get(System.Guid)">
+            <summary>
+            Get Category based on Category Id.
+            </summary>
+            <param name="id"></param>
+            <response code="200">Category found against id provided.</response>
+            <response code="400">Category not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CategoryApiController.GetByAxCode(System.String)">
+            <summary>
+            Get Category based on Category AxCode.
+            </summary>
+            <param name="code"></param>
+            <response code="200">Category found against id provided.</response>
+            <response code="400">Category not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CategoryApiController.Post(ReadyGo.Domain.Entities.ViewModels.CategoryViewModel)">
+            <summary>
+            Add a new category
+            </summary>
+            <param name="categoryVM"></param>
+            <response code="200">If new category added successfully</response>
+            <response code="400">If  category exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CategoryApiController.InsertMultipleCategories(System.Collections.Generic.IEnumerable{ReadyGo.Domain.Entities.ViewModels.CategoryViewModel})">
+            <summary>
+            Insert multiple categories
+            </summary>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CategoryApiController.Put(System.Guid,ReadyGo.Domain.Entities.ViewModels.CategoryViewModel)">
+            <summary>
+            Update a category based on Id.
+            </summary>
+            <param name="id"></param>
+            <param name="categoryVM"></param>
+            <response code="200">If category updated successfully</response>
+            <response code="400">If category already exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CategoryApiController.PutByAxCode(System.String,ReadyGo.Domain.Entities.ViewModels.CategoryViewModel)">
+            <summary>
+            Update a category based on AxCode.
+            </summary>
+            <param name="code"></param>
+            <param name="categoryVM"></param>
+            <response code="200">If category updated successfully</response>
+            <response code="400">If category already exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CategoryApiController.Delete(System.Guid)">
+            <summary>
+              Delete category based on category Id.
+            </summary>
+            <param name="id"></param>
+            <response code="200">If category deleted successfully</response>
+            <response code="400">If category not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CategoryApiController.DeleteByAxCode(System.String)">
+            <summary>
+              Delete category based on category Ax Code.
+            </summary>
+            <param name="code"></param>
+            <response code="200">If category deleted successfully</response>
+            <response code="400">If category not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CustomersClientApiController.GetAll(System.Boolean,System.Nullable{System.DateTime})">
+            <summary>
+            Get all Customers
+            </summary>
+            <param name="synced" Example="false">Customer Synced Status</param>
+            <param name="dateCreated" Example="12/15/2020">Customer Created Date Format (Month/Day/Year)</param>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CustomersClientApiController.Get(System.Guid)">
+            <summary>
+            Get Customer based on Customer Id.
+            </summary>
+            <param name="id">Customer Id</param>
+            <response code="200">Customer found against id provided.</response>
+            <response code="400">Customer not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CustomersClientApiController.GetByAxCode(System.String)">
+            <summary>
+            Get Customer based on Customer Ax Code.
+            </summary>
+            <param name="code"></param>
+            <response code="200">Customer found against Ax Code provided.</response>
+            <response code="400">Customer not found against Ax Code provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CustomersClientApiController.Delete(System.Guid)">
+            <summary>
+              Delete customer based on customer Id.
+            </summary>
+            <param name="id"></param>
+            <response code="200">If customer deleted successfully</response>
+            <response code="400">If customer not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CustomersClientApiController.DeleteByAxCode(System.String)">
+            <summary>
+              Delete customer based on customer Ax Code.
+            </summary>
+            <param name="code"></param>
+            <response code="200">If customer deleted successfully</response>
+            <response code="400">If customer not found against Ax Code provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CustomersClientApiController.Post(ReadyGo.Domain.Entities.ViewModels.CustomerViewModel)">
+            <summary>
+            Add a new Customer
+            </summary>
+            <param name="customerVM"></param>
+            <response code="200">If new customer added successfully</response>
+            <response code="400">If phone number already exist</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CustomersClientApiController.InsertMultipleCustomers(System.Collections.Generic.IEnumerable{ReadyGo.Domain.Entities.ViewModels.CustomerViewModel})">
+            <summary>
+            Insert multiple categories
+            </summary>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CustomersClientApiController.Put(System.Guid,ReadyGo.Domain.Entities.ViewModels.CustomerViewModel)">
+            <summary>
+            Update a customer.
+            </summary>
+            <param name="id"></param>
+            <param name="customerVM"></param>
+            <response code="200">If customer updated successfully</response>
+            <response code="400">If customer already exist with same phone number</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CustomersClientApiController.PutByAxCode(System.String,ReadyGo.Domain.Entities.ViewModels.CustomerViewModel)">
+            <summary>
+            Update a customer By Ax Code.
+            </summary>
+            <param name="code"></param>
+            <param name="customerVM"></param>
+            <response code="200">If customer updated successfully</response>
+            <response code="400">If customer already exist with same phone number</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CustomersClientApiController.SyncCustomers(System.Collections.Generic.IEnumerable{System.Guid})">
+            <summary>
+              Sync customers based on ids provided.
+            </summary>
+            <param name="Ids"></param>
+            <response code="200">All customer found against ids provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.CustomersClientApiController.UploadProfilePicture(ReadyGo.Domain.Entities.ViewModels.ImageViewModel)">
+            <summary>
+            Upload profile photo of customer.
+            </summary>
+            <remarks>
+            Sample Code:
+            
+                byte[] imageArray = System.IO.File.ReadAllBytes(@"image file path");
+                string ImageString = Convert.ToBase64String(imageArray);
+                
+            </remarks>
+            <param name="imgVM"></param>
+            <response code="200">Profie photo updated for a customer</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PaymentApiController.GetAll(System.Nullable{System.DateTime})">
+            <summary>
+            Get all payments
+            </summary>
+            <param name="recieveDate" Example="12/15/2020">Payment Date Format (Month/Day/Year)</param>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PaymentApiController.UpdatePaymentAxCode(System.Collections.Generic.List{ReadyGo.Domain.Entities.ViewModels.UpdateViewModel})">
+            <summary>
+            Update payment AxCodes based on Payment Id
+            </summary>
+            <param name="paymentViewModel"></param>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PriceHistoryApiController.GetAll">
+            <summary>
+            Get All Product's Price Histories
+            </summary>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PriceHistoryApiController.Get(System.Guid)">
+            <summary>
+            Get PriceHistory based on Product Id.
+            </summary>
+            <param name="id"></param>
+            <response code="200">Price history found against id provided.</response>
+            <response code="400">Price history not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PriceHistoryApiController.GetByAxCode(System.String)">
+            <summary>
+            Get PriceHistory based on Product AxCode.
+            </summary>
+            <param name="code"></param>
+            <response code="200">Price history found against AxCode provided.</response>
+            <response code="400">Price history not found against AxCode provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PriceHistoryApiController.Post(ReadyGo.Domain.Entities.ViewModels.PriceHistoryViewModel)">
+            <summary>
+            Add a new price history against a specific product.
+            </summary>
+            <param name="priceHistoryVM"></param>
+            <response code="200">If new price history added successfully</response>
+            <response code="400">If pricehistory FromDate is less than today's date</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PriceHistoryApiController.InsertMultiplePriceHistories(System.Collections.Generic.List{ReadyGo.Domain.Entities.ViewModels.PriceHistoryViewModel})">
+            <summary>
+            Add multiple price histories against products.
+            </summary>
+            <param name="priceHistories"></param>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PriceHistoryApiController.Put(System.Guid,System.DateTime,ReadyGo.Domain.Entities.ViewModels.PriceHistoryViewModel)">
+            <summary>
+            Update a price history based on productId and price history applied date.
+            </summary>
+            <param name="productId"></param>
+            <param name="fromDate"></param>
+            <param name="priceHistoryVM"></param>
+            <response code="200">If route updated successfully</response>
+            <response code="500">If route already exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PriceHistoryApiController.PutByAxCode(System.String,System.DateTime,ReadyGo.Domain.Entities.ViewModels.PriceHistoryViewModel)">
+            <summary>
+            Update a price history based on productId and price history applied date.
+            </summary>
+            <param name="code"></param>
+            <param name="fromDate"></param>
+            <param name="priceHistoryVM"></param>
+            <response code="200">If route updated successfully</response>
+            <response code="500">If route already exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.ProductApiController.GetAll">
+            <summary>
+            Get all Registered products
+            </summary>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.ProductApiController.Get(System.Guid)">
+            <summary>
+            Get product based on product Id.
+            </summary>
+            <param name="id"></param>
+            <response code="200">Product found against id provided.</response>
+            <response code="400">Product not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.ProductApiController.GetByAx(System.String)">
+            <summary>
+            Get product based on product AxCode.
+            </summary>
+            <param name="code"></param>
+            <response code="200">Product found against AxCode provided.</response>
+            <response code="500">Product not found against AxCode provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.ProductApiController.Post(ReadyGo.Domain.Entities.ViewModels.ProductViewModel)">
+            <summary>
+            Add a new product
+            </summary>
+            <param name="productVM"></param>
+            <response code="200">If new product added successfully</response>
+            <response code="400">If  product exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.ProductApiController.InsertMultipleProducts(System.Collections.Generic.List{ReadyGo.Domain.Entities.ViewModels.ProductViewModel})">
+            <summary>
+            Add multiple new products
+            </summary>
+            <param name="products"></param>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.ProductApiController.Put(System.Guid,ReadyGo.Domain.Entities.ViewModels.ProductViewModel)">
+            <summary>
+            Update a product.
+            </summary>
+            <param name="id"></param>
+            <param name="productVM"></param>
+            <response code="200">If product updated successfully</response>
+            <response code="400">If product already exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.ProductApiController.PutByAxCode(System.String,ReadyGo.Domain.Entities.ViewModels.ProductViewModel)">
+            <summary>
+            Update a product based on AxCode.
+            </summary>
+            <param name="code"></param>
+            <param name="productVM"></param>
+            <response code="200">If product updated successfully</response>
+            <response code="400">If product already exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.ProductApiController.Delete(System.Guid)">
+            <summary>
+             Delete product based on product Id.
+            </summary>
+            <param name="id"></param>
+            <response code="200">If product deleted successfully</response>
+            <response code="400">If product not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.ProductApiController.DeleteByAx(System.String)">
+            <summary>
+            Delete product based on product AxCode.
+            </summary>
+            <param name="code"></param>
+            <response code="200">If product deleted successfully</response>
+            <response code="400">If product not found against AxCode provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.ProductApiController.UploadProductImage(ReadyGo.Domain.Entities.ViewModels.ImageViewModel)">
+            <summary>
+            Insert product in Base64 String format.
+            </summary>
+            <remarks>
+            Sample Code:
+            
+                byte[] imageArray = System.IO.File.ReadAllBytes(@"image file path");
+                string ImageString = Convert.ToBase64String(imageArray);
+                
+            </remarks>
+            <param name="viewModel"></param>
+            <response code="200">If product deleted successfully</response>
+            <response code="400">If product not found against AxCode provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PromoApiController.GetAll">
+            <summary>
+            Get all the Registered promos
+            </summary>
+            <returns>Routes</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PromoApiController.Get(System.Guid)">
+            <summary>
+            Get a registered promo based on promo id
+            </summary>
+            <returns>Promo if id is valid </returns>
+            <response code="200">Promo found against id provided.</response>
+            <response code="400">Promo not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PromoApiController.GetByAx(System.String)">
+            <summary>
+            Get a registered promo based on promo AxCode
+            </summary>
+            <returns>Promo if AxCode is valid </returns>
+            <response code="200">Promo found against code provided.</response>
+            <response code="400">Promo not found against code provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PromoApiController.Post(ReadyGo.Domain.Entities.ViewModels.PromotionViewModel)">
+            <summary>
+            Register a new Promo.
+            </summary>
+            <param name="promoVM"></param>
+            <returns> Message based on valid promo</returns>
+            <response code="200">Promo created successfully</response>
+            <response code="400">Error occured while saving a new promo</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PromoApiController.InsertMultiplePromos(System.Collections.Generic.IEnumerable{ReadyGo.Domain.Entities.ViewModels.PromotionViewModel})">
+            <summary>
+            Register multiple promos at a time
+            </summary>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PromoApiController.Delete(System.Guid)">
+            <summary>
+            Delete a promo.
+            </summary>
+            <returns> Message based on deleted promo</returns>
+            <response code="200">If promo deleted successfully</response>
+            <response code="400">If promo not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.PromoApiController.Delete(System.String)">
+            <summary>
+            Delete a promo based on AxCode
+            </summary>
+            <returns> Message based on deleted promo</returns>
+            <response code="200">If promo deleted successfully</response>
+            <response code="400">If promo not found against AxCode provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.RoutesApiController.GetAll">
+            <summary>
+            Get all the Registered routes
+            </summary>
+            <remarks>
+            Will return a list of all the valid registered routes
+            </remarks>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.RoutesApiController.Get(System.Guid)">
+            <summary>
+            Get a particular registered route based on Route-Id.
+            </summary>
+            <param name="id" example="c7be1d28-2b81-42e9-90e9-5396492a90e0">Registered Route Id</param>
+            <remarks>
+            Will return a valid registered route in case if it matches the Route ID.
+            </remarks>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.RoutesApiController.GetByAx(System.String)">
+            <summary>
+            Get a particular registered route based on Route AxCode.
+            </summary>
+            <param name="code" example="AX-CODE123">AutoGenerated Route Ax Code</param>
+            <remarks>
+            Will return a valid registered route in case if it matches the Route Ax Code.
+            </remarks>
+            <response code="200">Route found against RxCode provided.</response>
+            <response code="400">Route not found against RxCode provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.RoutesApiController.Post(ReadyGo.Domain.Entities.ApiModels.RouteApiViewModel)">
+            <summary>
+            Add a new route.
+            </summary>
+            <param name="routeViewModel"></param>
+            <response code="200">If new route added successfully</response>
+            <response code="400">If route already exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.RoutesApiController.InsertMultipleRoutes(System.Collections.Generic.IEnumerable{ReadyGo.Domain.Entities.ApiModels.RouteApiViewModel})">
+            <summary>
+            Insert multiple routes
+            </summary>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.RoutesApiController.Put(System.Guid,ReadyGo.Domain.Entities.ApiModels.RouteApiViewModel)">
+            <summary>
+            Update a route.
+            </summary>
+            <param name="id"></param>
+            <param name="routeViewModel"></param>
+            <returns> Message based on valid updated route</returns>
+            <response code="200">If route updated successfully</response>
+            <response code="400">If route already exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.RoutesApiController.Delete(System.Guid)">
+            <summary>
+            Delete a route.
+            </summary>
+            <returns> Message based on deleted route</returns>
+            <response code="200">If route deleted successfully</response>
+            <response code="400">If route not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.RoutesApiController.DeleteByAxCode(System.String)">
+            <summary>
+              Delete a route.
+            </summary>
+            <returns> Message based on deleted route</returns>
+            <response code="200">If route deleted successfully</response>
+            <response code="400">If route not found against code provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.SalesOrderApiController.GetAll(System.Nullable{System.DateTime})">
+            <summary>
+            Get all the sales orders based on created Date
+            </summary>
+            <param name="createdDate" Example="12/15/2020">Date Format (Month/Day/Year)</param>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.SalesOrderApiController.UpdateOrderAxCode(System.Collections.Generic.List{ReadyGo.Domain.Entities.ViewModels.UpdateViewModel})">
+            <summary>
+            Update Sales Orders AxCodes
+            </summary>
+            <param name="orderViewModel"></param>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.StockClientApiController.GetAll">
+            <summary>
+            Get all Transfer Stocks
+            </summary>
+            <returns>Transfer Stocks</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.StockClientApiController.Get(System.Guid)">
+            <summary>
+              Get Tranfer Stock based on Id.
+            </summary>
+            <param name="id"></param>
+            <returns>Transfer stock if id is valid </returns>
+            <response code="200">Transfer stock against id provided.</response>
+            <response code="400">Transfer stock not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.StockClientApiController.GetBySpId(System.String)">
+            <summary>
+              Get Tranfer Stock based on sale person Id.
+            </summary>
+            <param name="id"></param>
+            <returns>Transfer stock if id is valid </returns>
+            <response code="200">Transfer stock found against id provided.</response>
+            <response code="400">Transfer stock not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.StockClientApiController.GetBySpAxCode(System.String)">
+            <summary>
+              Get Tranfer Stock based on sale person AxCode.
+            </summary>
+            <param name="axCode"></param>
+            <returns>Transfer stock if AxCode is valid </returns>
+            <response code="200">Transfer stock found against AxCode provided.</response>
+            <response code="400">Transfer stock not found against AxCode provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.StockClientApiController.Post(ReadyGo.Domain.Entities.ViewModels.AssignStockApiViewModel)">
+            <summary>
+            Post: Add a new transfer stock
+            </summary>
+            <param name="transferStockVM"></param>
+            <returns> Message based on valid Transfer Stock</returns>
+            <response code="200">If new Transfer stock added successfully</response>
+            <response code="400">If Transfer stock exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.StockClientApiController.InsertMultipleStocks(System.Collections.Generic.IEnumerable{ReadyGo.Domain.Entities.ViewModels.AssignStockApiViewModel})">
+            <summary>
+            Insert multiple Transfer stocks
+            </summary>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.StockClientApiController.Put(System.Guid,ReadyGo.Domain.Entities.ViewModels.AssignStockApiViewModel)">
+            <summary>
+            Update a transfer stock.
+            </summary>
+            <param name="id"></param>
+            <param name="transferStockVm"></param>
+            <returns> Message based on valid updated transfer stock</returns>
+            <response code="200">If transfer stock updated successfully</response>
+            <response code="400">If transfer stock already exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.StockClientApiController.Delete(System.Guid)">
+            <summary>
+              Delete Transfer Stock based on Id.
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+            <response code="200">If Transfer stock deleted successfully</response>
+            <response code="400">If Transfer stock not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.VehicleApiController.GetAll">
+            <summary>
+            Get all Registered Vehicles
+            </summary>
+            <returns>Vehicles</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.VehicleApiController.Get(System.Guid)">
+            <summary>
+              Get Registered Vehicle based on Vehicle Id.
+            </summary>
+            <param name="id"></param>
+            <returns>Vehicle if id is valid </returns>
+            <response code="200">Vehicle found against id provided.</response>
+            <response code="400">Vehicle not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.VehicleApiController.GetByAxCode(System.String)">
+            <summary>
+              Get Registered Vehicle based on Vehicle AxCode.
+            </summary>
+            <param name="axCode"></param>
+            <returns>Vehicle if AxCode is valid </returns>
+            <response code="200">Vehicle found against AxCode provided.</response>
+            <response code="400">Vehicle not found against AxCode provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.VehicleApiController.Post(ReadyGo.Domain.Entities.ViewModels.VehicleViewModel)">
+            <summary>
+             Register a new Vehicle
+            </summary>
+            <param name="vehicleVM"></param>
+            <response code="200">If new Vehicle added successfully</response>
+            <response code="400">If  Vehicle exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.VehicleApiController.InsertMultipleVehicles(System.Collections.Generic.IEnumerable{ReadyGo.Domain.Entities.ViewModels.VehicleViewModel})">
+            <summary>
+            Register multiple vehicles at a time
+            </summary>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.VehicleApiController.Put(System.Guid,ReadyGo.Domain.Entities.ViewModels.VehicleViewModel)">
+            <summary>
+            Update existing Registered Vehicle.
+            </summary>
+            <param name="id"></param>
+            <param name="vehicleVM"></param>
+            <response code="200">If Vehicle updated successfully</response>
+            <response code="400">If Vehicle already exist with same name</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.VehicleApiController.Delete(System.Guid)">
+            <summary>
+              Delete Vehicle based on Vehicle Id.
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+            <response code="200">If Vehicle deleted successfully</response>
+            <response code="400">If Vehicle not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ClientApi.VehicleApiController.DeleteByAx(System.String)">
+            <summary>
+              Delete Vehicle based on Vehicle AxCode.
+            </summary>
+            <param name="code"></param>
+            <response code="200">If Vehicle deleted successfully</response>
+            <response code="400">If Vehicle not found against id provided.</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.CustomerApiController.AddCustomer(ReadyGo.Domain.Entities.ApiModels.CustomerApiViewModel)">
+            <summary>
+            Post method for user addition
+            </summary>
+            <param name="customerModel">User to be added</param>
+            <returns></returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.CustomerApiController.GetCustomers(System.Int32,System.Int32)">
+            <summary>
+            Post method for user addition
+            </summary>
+            <returns>Lisof customer wrt page num and page size</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.CustomerApiController.GetFileExtension(System.String)">
+            <summary>
+            To demonstrate extraction of file extension from base64 string.
+            </summary>
+            <param name="base64String">base64 string.</param>
+            <returns>Henceforth file extension from string.</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.NotificationApiController.UserNotifications(System.Nullable{System.DateTime})">
+            <summary>
+              Get notifications.
+            </summary>
+            <param name="id"></param>
+            <returns>List of notificaitons</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.OrderApiController.GetOrders">
+            <summary>
+            Api to get all orders against a sales person
+            </summary>
+            <returns>Return a list of all availble orders </returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.OrderApiController.CreateOrder(ReadyGo.Domain.Entities.ApiModels.OrderDataModel)">
+            <summary>
+            Post method for create orders
+            </summary>
+            <param name="orderApiViewModel">Order Detail to be added</param>
+            <returns></returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.PaymentApiController.GetPayment">
+            <summary>
+            Api to get all payments for a against a sales person
+            </summary>
+            <returns>Return a list of all availble payments </returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.PaymentApiController.CreatePayment(ReadyGo.Domain.Entities.ApiModels.PaymentApiViewModel)">
+            <summary>
+            Post method for create payment
+            </summary>
+            <param name="paymentApiViewModel">Order Detail to be added</param>
+            <returns></returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.PromotionApiController.GetPromotions">
+            <summary>
+            Get method for get Promos
+            </summary>
+            <returns>Return a list of active promotions</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ReportApiController.CreateDailyReport(ReadyGo.Domain.Entities.ApiModels.DeliveryReportApiViewModel)">
+            <summary>
+            Post method for create Delivery Report
+            </summary>
+            <param name="deliveryReportApiViewModel">Report Detail to be added</param>
+            <returns></returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.ReportApiController.MonthlyReport(System.DateTime,System.DateTime)">
+            <summary>
+              Get monthly report.
+            </summary>
+            <returns>List of order deatils between spcified ranbge</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.SpInfoController.GetSpInfo">
+            <summary>
+            Get method for Saleperson data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.SpInfoController.UpdateSpPicture(ReadyGo.Domain.Entities.ApiModels.SalePersonInfoApiViewModel)">
+            <summary>
+            Post method for update sale person profile pic
+            </summary>
+            <param name="apiViewModel">User's profile picture</param>
+            <returns></returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.StockApiController.GetSpStock">
+            <summary>
+            Api to get Stock Assigned to a sales-person
+            </summary>
+            <returns>Return a list of stock assigned to a sales person</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.API.StockApiController.GetAllStock">
+            <summary>
+            Api to get all Stock
+            </summary>
+            <returns>Return a list of all availble stock </returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.CustomerController.AddCustomer">
+            <summary>
+            Get method for adding user
+            Same page is used for editing the user therefore the action of the form is specified in ViewBag
+            </summary>
+            <returns>Specifies addition to the form that the action will be to add the user</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.CustomerController.AddCustomers(ReadyGo.Domain.Entities.ViewModels.CustomerViewModel,Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>
+            Post method for user addition
+            </summary>
+            <param name="customerModel">User to be added</param>
+            <param name="file">User's profile picture</param>
+            <returns></returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.CustomerController.EditCustomerAsync(ReadyGo.Domain.Entities.ViewModels.CustomerViewModel,Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>
+            Method for editing customer
+            </summary>
+            <param name="customerModel">Customer with updated properties</param>
+            <param name="file">User's new profile picture</param>
+            <returns>Back to customer's home page</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.CustomerController.DeleteCustomerAsync(System.String)">
+            <summary>
+            Method to delete customer
+            </summary>
+            <param name="id">id of the customer to be deleted</param>
+            <returns>Status codes based on success/failure</returns>
+            <response code="200">Returns success message</response>
+            <response code="500">Returns exception in message</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.CustomerController.SeedCustomersAsync">
+            <summary>
+            Method to read csv file and add errors on individual records before adding in db
+            </summary>
+            <returns>List with valid invalid status appended in each row to display to the user</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.CustomerController.CheckforErrors(System.Collections.Generic.IEnumerable{ReadyGo.Domain.Entities.ViewModels.CustomerViewModel})">
+            <summary>
+            Method to check errors in the uploaded csv file
+            </summary>
+            <param name="list">List of customers in the file</param>
+            <returns>Same list with appended column specifying if the record is valid or invalid to add</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.CustomerController.CheckDupEmail(System.String,System.String)">
+            <summary>
+            Checks if the email being entered while adding or editing in the form is valid or duplicated
+            </summary>
+            <returns>Status codes with message</returns>
+            <response code="200">Returns success message</response>
+            <response code="409">Returns user duplication message if the user is already deleted</response>
+            <response code="500">Returns either the user is already added or the email is invalid in message</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.CustomerController.ChangeStatusAsync(System.String)">
+            <summary>
+            Method to deactivate or activate user
+            </summary>
+            <param name="id">Id of the user to be activated/deactivated</param>
+            <returns>Status codes based on success/failure</returns>
+            <response code="200">Returns success message</response>
+            <response code="500">Returns exception in message</response>
+        </member>
+        <member name="T:ReadyGo.Web.Controllers.UserController">
+            <summary>
+            Class related to User Management including User listing, addition, editing, and details
+            </summary>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.UserController.AllUsers">
+            <summary>
+            Method to retrieve users list for datatable
+            </summary>
+            <returns>Users in the form of Json</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.UserController.DeleteUserAsync(System.String)">
+            <summary>
+            Method to delete user
+            </summary>
+            <param name="id">Id of the user to be deleted</param>
+            <returns>Status code based on deletion success or failure</returns>
+            <response code="200">Returns success message</response>
+            <response code="500">Returns exception in message</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.UserController.UpdateUser(System.String,System.String)">
+            <summary>
+            Get method to fetch user to be updated
+            </summary>
+            <param name="id">id of the user</param>
+            <returns>Object of the user</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.UserController.UpdateUserAsync(ReadyGo.Domain.Entities.ViewModels.UserViewModel,Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>
+            Post method for user updation
+            </summary>
+            <param name="user">Updated user info</param>
+            <returns>Status codes based on updation success/failure</returns>
+            <response code="200">Returns success message</response>
+            <response code="500">Returns exception in message</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.UserController.AddUser">
+            <summary>
+            Get method that specifies the view about add action
+            </summary>
+            <returns>partial view to be added in modal</returns>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.UserController.AddUser(ReadyGo.Domain.Entities.ViewModels.UserViewModel,Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>
+            post method to add user
+            </summary>
+            <param name="model">User to be added</param>
+            <returns>Status codes based on addition's success or failure</returns>
+            <response code="200">Returns success message</response>
+            <response code="500">Returns exception in message</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.UserController.SendInvite(System.String)">
+            <summary>
+            For resending invite to the user that has already been added
+            </summary>
+            <param name="id">Id of the user to be invited</param>
+            <returns>Status Codes</returns>
+            <response code="200">Returns success message</response>
+            <response code="500">Returns exception in message</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.UserController.ChangeStatus(System.String)">
+            <summary>
+            Method to deactivate or activate user
+            </summary>
+            <param name="id">Id of the user to be activated/deactivated</param>
+            <returns>Status codes based on success/failure</returns>
+            <response code="200">Returns success message</response>
+            <response code="500">Returns exception in message</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.UserController.UndoDelete(System.String)">
+            <summary>
+            To undo a delete
+            </summary>
+            <param name="id">id of the user to re-add</param>
+            <returns>Status codes based on success/failure</returns>
+            <response code="200">Returns success message</response>
+            <response code="500">Returns exception in message</response>
+        </member>
+        <member name="M:ReadyGo.Web.Controllers.UserController.SendResetLink(System.String)">
+            <summary>
+            Reset Password Link
+            </summary>
+            <param name="id">id of the user to send reset password link</param>
+            <returns>Status codes based on success/failure</returns>
+            <response code="200">Returns success message</response>
+            <response code="500">Returns exception in message</response>
+        </member>
+    </members>
+</doc>

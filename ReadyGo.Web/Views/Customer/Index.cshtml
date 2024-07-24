@@ -1,0 +1,549 @@
+﻿@{
+    ViewData["Title"] = "Customer Management";
+}
+
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+}
+<div class="clearfix"></div>
+<div class="row importUser">
+    <button onclick="ImportFile()" class="btn btn-default">
+        <i class="fa fa-cloud-upload"></i> Import
+    </button>
+    <button onclick="window.location.href = '/Customer/AddCustomer'" class="btn btn-default">
+        <i class="fa fa-users"></i> Add New
+    </button>
+</div>
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Customer Management</h2>
+                <div class="nav navbar-right panel_toolbox">
+                    <input class='form-control custom-search' placeholder='Type and press enter to search' type="search" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content table-responsive">
+                <table id="CustomerTable" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>AxCode</th>
+                            <th>Business Name</th>
+                            <th>Customer Name</th>
+                            <th>Email</th>
+                            <th>Route</th>
+                            <th>Assigned SP</th>
+                            <th>
+                                <div class='dropdown'>
+                                    <a class='dropdown-toggle' data-toggle='dropdown'><span>Sync Status</span><i style="float:right;opacity:.5;margin-top:3px" class='fa fa-filter'></i></a>
+                                    <ul class='dropdown-menu'>
+                                        <li class='dropdown-item' onclick="FilterUser('All Customers', 0)"><a>All Customers</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Synced', 0)"><a>Synced</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('UnSynced', 0)"><a>UnSynced</a></li>
+                                    </ul>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='dropdown'>
+                                    <a class='dropdown-toggle' data-toggle='dropdown'><span>Active</span><i style="float:right;opacity:.5;margin-top:3px" class='fa fa-filter'></i></a>
+                                    <ul class='dropdown-menu'>
+                                        <li class='dropdown-item' onclick="FilterUser('All Customers', 1)"><a>All Customers</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Active', 1)"><a>Active</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('InActive', 1)"><a>InActive</a></li>
+                                    </ul>
+                                </div>
+                            </th>
+                            <th style="width:40px">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Customer Modal-->
+<div class="modal fade bs-example-modal-lg" id="customer_Modal" tabindex="-1" data-backdrop="static" data-keyboard="false" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg customerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="customer_ModalLabel"></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="customerModalBody" style="padding:2%">
+            </div>
+        </div>
+    </div>
+</div>
+<!--Customer Modal-->
+<!--Large Modal (Users Detail)-->
+<div class="modal fade bs-example-modal-xl" id="customersDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title" id="user_ModalLabel">Customers Detail</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="usersDetailModalBody">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th colspan="14" style="text-align:center;font-size:15px" id="customerDetailTitle">Customers Details</th>
+                        </tr>
+                        <tr>
+                            <th>AxCode</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th class="required">Business Name</th>
+                            <th class="required">Mobile Number</th>
+                            <th class="required">CNIC</th>
+                            <th>City</th>
+                            <th>Province</th>
+                            <th class="required">Address Line 1</th>
+                            <th>Address Line 2</th>
+                            <th class="required">Route Name</th>
+                            <th>Error Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersDetailBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" onclick="UploadCustomerInBulk(2)">
+                    <i class="fa fa-spinner fa-spin fa-fw" style="display:none"></i>Proceed
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/Large Modal (Users Detail)-->
+<!--Small Modal-->
+<div class="modal fade bs-example-modal-sm" id="importCustomerModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel2">Import Customers</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:2%">
+                <div class="row" style="display:flex;">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p><span style="font-size:17px">Import File</span><br />Add csv file with customer information to add customer in bulk.</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6" style="display:flex;flex-direction:column">
+                                <a class="btn btn-success" onclick="$('#import_Customers').click()"><i class="fa fa-upload" style="color:inherit;margin-left:3px;"></i> Upload file</a>
+                                <span id="filename"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div>
+                            <span style="font-size:17px">Instruction</span>
+                            <br />
+                            <ul>
+                                <li>
+                                    Required Field
+                                    <ul>
+                                        <li>Business Name</li>
+                                        <li>Phone Number  (must start with 92 and contain atleast 12 digits)</li>
+                                        <li>Address Line 1 (Length: 7 to 100)</li>
+                                        <li>Route Name</li>
+                                        <li>CNIC (Format: 'XXXXX-XXXXXXX-X')</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    Non Required Field/Optional
+                                    <ul>
+                                        <li>Email (Format:'abc@xyz.com')</li>
+                                    </ul>
+                                </li>
+                                <li>Total records should not be more than 1000.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <label>Download Sample File</label>
+                            <a class="btn btn-outline-dark" href="~/resource_files/CustomerSample.csv"><i class="fa fa-cloud-download"></i> CustomerSample.csv</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" onclick="UploadCustomerInBulk(1)" class="btn btn-primary">Add Customers</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/Small Modal-->
+<input type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="visibility:hidden" id="import_Customers" onchange="ChangeSrc(this)" />
+
+<form id="ViewCustomer" asp-action="ViewCustomer" asp-controller="Customer" method="post">
+    <input type="hidden" id="cust_id" name="cust_id" />
+    <input type="hidden" id="purpose" name="purpose" />
+    <button type="submit" style="display:none;">Submit</button>
+</form>
+
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script src="~/js/ValidationScript.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            window.onpageshow = function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            };
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+                title: `<b>Search by</b>
+                        <ul class='tooltip-ul'>
+                            <li>AxCode</li>
+                            <li>Customer location</li>
+                            <li>Route name</li>
+                            <li>Business Name</li>
+                            <li>Email</li>
+                            <li>Assigned Sp</li>
+                        </ul>`,
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            var status = "All Customers"; var userDetailFlag = ''; var activeStatus = '';
+            var customerDataTable = $('#CustomerTable').DataTable({
+                dom: "frt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                stateSave: true,
+                responsive: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No matching results found'
+                },
+                order: [1, "asc"],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '../Customer/AllCustomers',
+                    type: "POST",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.status = status;
+                        d.activeStatus = activeStatus;
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: 'profileImage',
+                        sortable:false,
+                        render: function (data) {
+                            //var name = data.axCode == null ? 'N/A' : data.axCode;
+                            return `<div class="User-Image img-circle"><img src=${data} height="30" class="inner-img"></div>`
+                            //return `<img src=${data} width="30" class="img-circle">`
+                        }
+                    },
+                    {
+                        data: 'axCode',
+                        render: function (data) {
+                            return data == null ? '---' : data;
+                        }
+                    },
+                    {
+                        data: 'businessName',
+                        render: function (data) {
+                            return data == null ? '---' : data;
+                        }
+                    },
+                    {
+                        data: 'name',
+                        render: function (data) {
+                            return data == " " ? '---' : data;
+                        }
+                    },
+                    {
+                        data: 'email',
+                        render: function (data) {
+                            return data != "---" ? `<a href="mailto:${data}">${data}</a>` : data;
+                        }
+                    },
+                    {
+                        data: 'routeName',
+                        sortable:false,
+                    },
+                    {
+                        data: 'assignedSP',
+                        sortable:false,
+                    },
+                    {
+                        data: 'syncStatus',
+                        sortable: false,
+                        searchable: false,
+                        render: function (data) {
+                            return data == "Synced" ? `<b class="activeStatus"><i class="fa fa-check-circle"></i></b>` : `<b class="inActiveStatus"><i class="fa fa-times-circle"></b>`
+                        }
+                    },
+                    {
+                        data: 'isActive',
+                        sortable: false,
+                        render: function (data) {
+                            return data == true ? `<b class="activeStatus"><i class="fa fa-check-circle"></i></b>` : `<b class="inActiveStatus"><i class="fa fa-times-circle"></b>`
+                        }
+                    },
+                    {
+                        data: { id: 'id', isActive: 'isActive', syncStatus: 'syncedStatus' },
+                        sortable: false,
+                        searchable: false,
+                        render: function (data) {
+                            var statusText = "Disable"
+                            let deleteUserLi = data.syncStatus != "Synced" ?
+                                            `<li onclick='DeleteCustomer("${data.id}")' class='dropdown-item'>
+                                                <a>Delete</a>
+                                            </li>`: ``;
+                            if (data.isActive == false) {
+                                statusText = "Enable"
+                            }
+                            return `<div class='dropdown'>
+                                        <a class='dropdown-toggle actionBtn' data-toggle='dropdown'>
+                                            <i class='fa fa-ellipsis-v icons' aria-hidden='true'></i>
+                                        </a>
+                                        <ul class='dropdown-menu' id='ActionLink'>
+                                            <li onclick='EditCustomer("${data.id}","Edit")' class='dropdown-item'>
+                                                <a>Edit</a>
+                                            </li>
+                                            ${deleteUserLi}
+                                            <li onclick='ChangeStatus("${data.id}","${statusText}")' class='dropdown-item'>
+                                                <a>${statusText}</a>
+                                            </li>
+                                        </ul>
+                                    </div>`;
+                        }
+                    },
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    row.title = "Click to view details."
+                    $('[data-toggle="tooltip"]', row).tooltip();
+                }
+
+            });
+
+            searchQuery = $(".dataTables_filter input").val();
+            $(".custom-search").val(searchQuery);
+
+            $(".custom-search").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    customerDataTable.search(this.value).draw();
+                }
+            });
+            $('input[type=search]').on('search', function () {
+                customerDataTable.search("").draw();
+            });
+
+            $('#CustomerTable tbody').on('click', 'tr td:not(:last-child)', function () {
+                var data = customerDataTable.row($(this).parent()).data();
+                window.location.href = `../Customer/ViewCustomer?cust_id=${data.id}`;
+            });
+
+            FilterUser = (option, flag) => {
+                if (flag == 0)
+                    status = option;
+                else
+                    activeStatus = option;
+                customerDataTable.ajax.reload();
+            }
+            EditCustomer = (param, purpose) => {
+                window.location.href = `@Url.Action("EditCustomer","Customer" , new {id = "ID"})`.replace("ID", param);
+            }
+            DeleteCustomer = (param) => {
+                swal({
+                    title: "Are you sure?",
+                    text: `You want to delete this customer?`,
+                    icon: "error",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                    .then((willDelete) => {
+                        if (willDelete) {
+                            $.ajax({
+                                url: '../Customer/DeleteCustomer',
+                                type: "GET",
+                                method: 'get',
+                                data: { id: param },
+                                success: function (response) {
+                                    SuccessNotification(response.message);
+                                    customerDataTable.ajax.reload();
+                                },
+                                error: function (err) {
+                                    ErrorNotification(err.responseJSON.message)
+                                }
+
+                            })
+                        }
+                    });
+            }
+            ChangeStatus = (param, status) => {
+                swal({
+                    text: `Are you sure you want to ${status} this customer?`,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                    .then((willDelete) => {
+                        if (willDelete) {
+                            $.ajax({
+                                url: '../Customer/ChangeStatus',
+                                type: "GET",
+                                method: 'get',
+                                data: { id: param },
+                                success: function (response) {
+                                    SuccessNotification(response.message);
+                                    customerDataTable.ajax.reload();
+                                },
+                                error: function (err) {
+                                    console.log(err)
+                                    ErrorNotification(err.responseJSON.message)
+                                }
+
+                            })
+                        }
+                    });
+            }
+            ChangeSrc = (obj) => {
+                let file = obj.value;
+                let fileName = file.split("\\");
+                let span = document.getElementById("filename");
+                let fileTitle = fileName[fileName.length - 1];
+                let fileExtension = fileTitle.replace(/^.*\./, '');
+                if (fileExtension != 'csv') {
+                    swal({
+                        title: "Wrong file selection",
+                        text: 'Please Select the csv file',
+                        icon: "error",
+                        dangerMode: true,
+                    })
+                    span.innerHTML = '';
+                }
+                else {
+                    span.innerHTML = fileTitle;
+                }
+            }
+
+            ImportFile = () => {
+                $("#importCustomerModal").modal("show");
+                $('#filename').html('');
+                $('#import_Customers').val('');
+            }
+            UploadCustomerInBulk = (flag) => {
+                var fd = new FormData();
+
+                var files = $('#import_Customers')[0].files;
+
+                // Check file selected or not
+                if (files.length > 0) {
+
+                    fd.append('File', files[0]);
+                    fd.append('flag', flag);
+                    $.ajax({
+                        url: '@Url.Action("SeedCustomers","Customer")',
+                        type: 'post',
+                        data: fd,
+                        contentType: false,
+                        beforeSend: LoadingSpinner(),
+                        processData: false,
+                        success: function (response) {
+                            swal.close();
+                            $("#importCustomerModal").modal("hide");
+                            $("#customersDetailModal").modal("show");
+                            $('#customerDetailTitle').html(`<div class="row">
+                                                                <div class="col-md-3" style="text-align:center">
+                                                                    <span>Total Record: ${response.invaliduser + response.validUsers}</span>
+                                                                </div>
+                                                                <div class="col-md-3" style="text-align:center;color:green">
+                                                                    <span>Valid Records: ${response.validUsers}</span>
+                                                                </div>
+                                                                <div class="col-md-3" style="text-align:center;color:red">
+                                                                    <span>Invalid Records: ${response.invaliduser}</span>
+                                                                </div>
+                                                                <div class="col-md-3" style="text-align:center;color:#d17813">
+                                                                    <span>Deleted Records: ${response.deletedCustomer}</span>
+                                                                </div>
+                                                            </div>`);
+                            if (response.message == "Submitted") {
+                                $('#import_Customers').val('');
+                                $("#filename").html("");
+                                $("#customersDetailModal").modal("hide");
+                                response.flag ? SuccessNotification("All valid customers added successfully rest of them are invalid") : SuccessNotification("All customers added successfully");
+                                customerDataTable.ajax.reload();
+                            }
+                            else {
+                                $('#customersDetailBody').empty()
+                                for (let i = 0; i < response.data.length; i++) {
+                                    let error = response.data[i].errorStatus;
+                                    let errorMsg = GetErrorMsg(error);
+                                    let phone = response.data[i].phoneNumber == "+" ? "" : response.data[i].phoneNumber;
+                                    let color = error == "" ? "#d4edda" : error == "Deleted" ? "#fcf8e3" : "#f8d7da";
+                                    $('#customersDetailBody').append(`<tr style="background-color:${color}">
+                                                                <td>${response.data[i].axCode}</td>
+                                                                <td>${response.data[i].firstName}</td>
+                                                                <td>${response.data[i].lastName == null ? "" : response.data[i].lastName}</td>
+                                                                <td>${response.data[i].email}</td>
+                                                                <td>${response.data[i].businessName}</td>
+                                                                <td>${phone}</td>
+                                                                <td>${response.data[i].cnic}</td>
+                                                                <td>${response.data[i].city}</td>
+                                                                <td>${response.data[i].province}</td>
+                                                                <td>${response.data[i].address1}</td>
+                                                                <td>${response.data[i].address2 == null ? "" : response.data[i].address2}</td>
+                                                                <td>${response.data[i].routeName}</td>
+                                                                <td class="errorMessageTooltip" style="cursor: pointer;" title="${errorMsg}">${error == "" ? "---" : error.length > 10 ? error.substring(0, 10) + "..." : error}</td>
+                                                               </tr>`)
+                                }
+                                $(".errorMessageTooltip").tooltip({
+                                    placement: 'right',
+                                    html: true,
+                                    template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+                                });
+                            }
+                        },
+                        error: function (err) {
+                            swal.close();
+                            $('#import_Customers').val('');
+                            $("#filename").html("");
+                            $("#customersDetailModal").modal("hide");
+                            ErrorNotification(err.responseJSON.message);
+                        }
+                    });
+                } else {
+                    ErrorNotification("Please select a file.");
+                }
+                $("body").css({ 'padding-right': '0px' });
+            }
+            submitCustomerForm = () => {
+                $('#Customerform').submit();
+            }
+        });
+    </script>
+}

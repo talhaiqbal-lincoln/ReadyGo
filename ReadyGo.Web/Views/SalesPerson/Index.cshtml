@@ -1,0 +1,185 @@
+﻿@{
+    ViewData["Title"] = "Salesperson Listing";
+}
+
+@section Styles{
+    <link href="~/css/DataTableStyle.min.css" rel="stylesheet" />
+}
+<div id="exportCsv">
+</div>
+
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Salesperson Listing</h2>
+                <div class="nav navbar-right panel_toolbox">
+                    <input class='form-control custom-search' placeholder='Type and press enter to search' type="search" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content table-responsive">
+                <table id="SPTable" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Salesperson</th>
+                            <th>Employee Code</th>
+                            <th>Email</th>
+                            <th>Permanent Route</th>
+                            <th>Temporary Route</th>
+                            <th>
+                                <div class='dropdown'>
+                                    <a class='dropdown-toggle' data-toggle='dropdown'><span>Status</span><i style="float:right;opacity:.5;margin-top:3px" class='fa fa-filter'></i></a>
+                                    <ul class='dropdown-menu'>
+                                        <li class='dropdown-item' onclick="FilterUser('All Users')"><a>All Users</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Active')"><a>Active</a></li>
+                                        <li class='dropdown-item' onclick="FilterUser('Not Active')"><a>Not Active</a></li>
+                                    </ul>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/js/DataTableScript.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            localStorage.removeItem("activeTabSpOrder");
+            $('.custom-search').tooltip({
+                trigger: 'hover',
+                html: true,
+                title: '<b>Search with</b><ul class="tooltip-ul"><li>Salesperson</li><li>Email</li><li>Permanent Route</li><li>Employee Code</li></ul>',
+                placement: 'left',
+                fallbackPlacement: 'flip',
+                boundary: 'window',
+                template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner text-left"></div></div>'
+            });
+            var searchQuery = ''; var status = "All Users";
+            var userDataTable = $('#SPTable').DataTable({
+                dom: "frt<'row'<'col-md-4 col-xs-12'i><'col-md-4 col-xs-12'l><'col-md-4 col-xs-12'p>>",
+                serverSide: true,
+                pagingType: "simple_numbers",
+                processing: true,
+                stateSave: true,
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>Loading...',
+                    emptyTable: 'No data available'
+                },
+                order: [1, "asc"],
+                lengthMenu: [10, 25, 50, 100, 250, 500],
+                filter: true,
+                ajax: {
+                    url: '../SalesPerson/SalesPersons',
+                    type: "POST",
+                    datatype: "json",
+                    method: 'post',
+                    data: function (d) {
+                        d.status = status;
+                    },
+                    dataSrc: function (data) {
+                        return data.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: 'image',
+                        sortable: false,
+                        render: function (data) {
+                            return `<div class="User-Image img-circle"><img src=${data} height="30" class="inner-img"></div>`
+                        }
+                    },
+                    {
+                        data: 'salesPersonName'
+                    },
+                    {
+                        data: 'employeeCode'
+                    },
+                    {
+                        data: 'email',
+                        render: function (data) {
+                            return `<a href="mailto:${data}">${data}</a>`;
+                        }
+                    },
+                  {
+                        data: { routeName: 'routeName', routeTempSp:'routeTempSp'},
+                        render: function (data) {
+                            if (data.routeName != null) {
+                                var output = data.routeName;
+                                if (data.routeTempSp != null) {
+                                    output = output + " " + "(Temp. assigned to " + data.routeTempSp + ")";
+                                }
+                                return output
+                            }
+                            return "";
+                        }
+                    },
+                    {
+                        data: { tempRouteName: 'tempRouteName', tempRouteTime : 'tempRouteTime'},
+                        render: function (data) {
+                            if (data.tempRouteName != null) {
+                                var today = new Date();
+                                var date = new Date(Date.parse(data.tempRouteTime));
+                                var diff = Math.floor((date - today) / 86400000);
+                                var daysLeft = "";
+                                if (diff==0) {
+                                    daysLeft = "For today";
+                                }
+                                else {
+                                    diff = diff + 1;
+                                    daysLeft = "For " + diff + " days";
+                                }
+                                return data.tempRouteName +" (" + daysLeft + ")";
+                            }
+                            return "";
+                        }
+                    },
+                    {
+                        data: 'isActive',
+                        sortable: false,
+                        searchable: false,
+                        render: function (data) {
+                            return data == true ? `<b class="activeStatus"><i class="fa fa-check-circle"></i></b>` : `<b class="inActiveStatus"><i class="fa fa-times-circle"></b>`
+                        }
+                    },
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    row.title = "Click to view details."
+                    $('[data-toggle="tooltip"]', row).tooltip();
+                }
+
+            });
+            searchQuery = $(".dataTables_filter input").val();
+            $(".custom-search").val(searchQuery);
+
+            $(".custom-search").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    userDataTable.search(this.value).draw();
+                }
+            });
+            $('input[type=search]').on('search', function () {
+                userDataTable.search("").draw();
+            });
+
+            FilterUser = (option) => {
+                status = option;
+                $('#status').html(status)
+                userDataTable.ajax.reload();
+            }
+            $('#SPTable tbody').on('click', 'tr td:not(:last-child)', function () {
+                var data = userDataTable.row($(this).parent()).data();
+                window.location.href = '@Url.Action("Details", "SalesPerson" , new {id = "ID"})'.replace("ID", data.salesPersonId);
+            });
+        })
+    </script>
+
+}

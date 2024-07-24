@@ -1,0 +1,69 @@
+[
+  {
+    "outputFileName": "wwwroot/css/site.min.css",
+    "inputFiles": [
+      "wwwroot/css/custom.css",
+      "wwwroot/css/site.css"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": false
+  },
+  {
+    "outputFileName": "wwwroot/js/site.min.js",
+    "inputFiles": [
+      "wwwroot/js/custom.js",
+      "wwwroot/js/site.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": false
+  },
+  {
+    "outputFileName": "wwwroot/css/DataTableStyle.min.css",
+    "inputFiles": [
+      "wwwroot/lib/datatables.net-bs/dataTables.bootstrap.min.css",
+      "wwwroot/lib/datatables.net-responsive-bs/css/responsive.bootstrap.min.css"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": false
+    },
+    "sourceMap": false
+  },
+  {
+    "outputFileName": "wwwroot/js/DataTableScript.min.js",
+    "inputFiles": [
+      "wwwroot/lib/datatables.net/jquery.dataTables.min.js",
+      "wwwroot/lib/datatables.net-bs/js/dataTables.bootstrap.min.js",
+      "wwwroot/lib/datatables.net-buttons/js/dataTables.buttons.min.js",
+      "wwwroot/lib/datatables.net-buttons-bs/js/buttons.bootstrap.min.js",
+      "wwwroot/lib/datatables.net-buttons/js/buttons.flash.min.js",
+      "wwwroot/lib/datatables.net-buttons/js/buttons.html5.min.js",
+      "wwwroot/lib/datatables.net-buttons/js/buttons.print.min.js",
+      "wwwroot/lib/datatables.net-responsive/js/dataTables.responsive.min.js",
+      "wwwroot/lib/datatables.net-responsive-bs/js/responsive.bootstrap.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": false
+    },
+    "sourceMap": false
+  },
+  {
+    "outputFileName": "wwwroot/js/ValidationScript.min.js",
+    "inputFiles": [
+      "wwwroot/lib/jquery-validation/dist/jquery.validate.min.js",
+      "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": false
+    },
+    "sourceMap": false
+  }
+]

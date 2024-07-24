@@ -1,0 +1,94 @@
+﻿@{
+    ViewData["Title"] = "Route Rule";
+}
+@section Styles{
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <style>
+        div.scroll {
+            margin: 4px, 4px;
+            padding: 4px;
+            height: 200px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            text-align: justify;
+        }
+
+        .dropdown-menu.menu-scroll {
+            max-height: 200px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        label.error {
+            color: #dc3545 !important;
+        }
+    </style>
+}
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h2><a onclick="history.back()"><i class="fa fa-angle-left font-weight-bold" style="font-size:22px"></i></a> @ViewData["Title"]</h2>
+                    </div>
+                    <div class="col-md-6 submit-btn" style="padding:0px">
+                        <button class="btn btn-default" style="margin:0px" onclick="ApplyDiscount()">Apply Discount</button>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row col-md-12" style="padding:2%;border:1px solid #ddd; border-radius:3px">
+                    <form id="ApplyDiscountForm" style="width:100%" class="form-horizontal">
+                        <div class="col-md-6">
+                            <div class="row form-group">
+                                <div class="col-md-10 col-sm-10">
+                                    <label class="required">Route: </label>
+                                    <select required id="route" name="route" asp-items="@(new SelectList(ViewBag.Routes,"Id","Name"))" onchange="GetSalesPerson();RemoveValidation('routeError');" class="form-control">
+                                        <option value="" disabled hidden selected>Select Route</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-10 col-sm-10" id="routeError"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row form-group">
+                                <div class="col-md-10 col-sm-10">
+                                    <label class="required">SalesPerson: </label>
+                                    <input required id="salesperson" disabled="disabled" name="salesperson" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" value="RouteRule" name="rule" />
+                        <br />
+                        <div class="clearfix"></div>
+                        <hr style="width:100%" />
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row form-group">
+                                    <div class="col-md-10 col-sm-10">
+                                        <label class="required">Discount: </label><span style="float:right"><input type="checkbox" name="percentage" id="IsPercentage" /> IsPercentage</span>
+                                        <input type="number" dir="rtl" required name="discount" id="discount" min="0" class="discount form-control text-right" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="~/js/ValidationScript.min.js"></script>
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script src="~/js/DiscountScript.js"></script>
+}
+
+
+
+
+
